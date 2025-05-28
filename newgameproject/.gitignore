@@ -17,3 +17,15 @@ Thumbs.db
 
 # IDE関連
 .vscode/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE settings
+.vscode/
+
+# Ignore Godot build outputs
+export.cfg
+export_presets.cfg
+*.pck
