@@ -1,0 +1,19 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Godot関連
+.godot/
+.import/
+*.import
+mono/
+.editor_settings-3.tres
+icon.svg
+icon.svg.import
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# IDE関連
+.vscode/
