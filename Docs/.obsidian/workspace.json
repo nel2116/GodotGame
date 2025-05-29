@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "596c5c2fd63cfbe9",
+        "id": "e002e147184132c2",
         "type": "tabs",
         "children": [
           {
-            "id": "5811fa9a0a35a87b",
+            "id": "2aab51aa584fb242",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "99_Reference/ProjectRules.md",
+                "mode": "preview",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新規タブ"
+              "title": "ProjectRules"
             }
           }
         ]
@@ -71,7 +75,7 @@
             }
           },
           {
-            "id": "6746a8b5739dab3c",
+            "id": "105c4760b6661c88",
             "type": "leaf",
             "state": {
               "type": "oblogger-view",
@@ -183,43 +187,44 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "5811fa9a0a35a87b",
+  "active": "2aab51aa584fb242",
   "lastOpenFiles": [
-    "__templates/frontmatter.md",
-    "__templates",
+    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
     "README.md",
     "99_Reference/ProjectRules.md",
-    "99_Reference",
-    "01_CoreDocs/03_MVP.md",
-    "01_CoreDocs/02_DesignPillar.md",
-    "01_CoreDocs/01_Plan.md",
-    "01_CoreDocs",
-    "2025-05-29.md",
-    "10_Inbox/11_Shader/【Unity】アニメ調の髪のハイライトを実現する案【Shader】.md",
-    "10_Inbox/11_Shader/【Unity】セルシェーディングを１から作ってみるメモ その２ アウトライン編【Shader】.md",
-    "20_Stock/24_Techs/24.1_Shader/ステンシル応用例.md",
-    "20_Stock/24_Techs/24.1_Shader/ステンシル.md",
-    "20_Stock/24_Techs/24.1_Shader/Unity_アウトラインシェーダー実装手法.md",
-    "10_Inbox/14_memo/2025_05_27_FX.md",
-    "10_Inbox/14_memo/2025_05_27_FX",
-    "10_Inbox/14_memo/無題のファイル.md",
-    "10_Inbox/14_memo",
-    "10_Inbox/13_Godot/13.1_Summary/Godot Game Engine を使う10の理由.md",
-    "20_Stock/24_Techs/Unity_アウトラインシェーダー実装手法.md",
-    "10_Inbox/13_Godot/13.1_Summary/About Godot 4, Vulkan, GLES3 and GLES2.md",
-    "10_Inbox/13_Godot/13.2_Tips/【Godot4.3】LimboAI タスク一覧メモ.md",
-    "10_Inbox/13_Godot/13.2_Tips/【Godot4】Gitでのバージョン管理：準備編②　Sourcetree導入 1.md",
-    "Untitled.md",
-    "Untitled 1.md",
-    "Untitled 2.md",
-    "未読記事リスト.md",
-    "00_Rules/02_Stock_Rules.md",
-    "00_Rules/01_Inbox_Rules.md",
-    "10_Inbox/13_Godot/13.2_Tips",
-    "10_Inbox/13_Godot/13.1_Summary",
-    "10_Inbox/13_Godot",
-    "10_Inbox/12_AI",
-    "10_Inbox/11_Shader",
+    "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
+    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
+    "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
+    "10_CoreDocs/14_TechDocs/ModuleDiagram.md",
+    "10_CoreDocs/14_TechDocs/SequenceDiagram.md",
+    "10_CoreDocs/14_TechDocs/ActivityDiagram.md",
+    "10_CoreDocs/14_TechDocs/ClassDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.2_Architecture.md",
+    "10_CoreDocs/14_TechDocs/14.1_TDD.md",
+    "10_CoreDocs/14_TechDocs/14.1_Definition of Elements.md",
+    "10_CoreDocs/11_PlanDocs/11.2_DesignPillar.md",
+    "10_CoreDocs/11_PlanDocs/11.3_MVP.md",
+    "10_CoreDocs/11_PlanDocs/11.4_KPI.md",
+    "10_CoreDocs/11_PlanDocs/11.5_CoreLoop.md",
+    "10_CoreDocs/11_PlanDocs/11.6_FeatureList.md",
+    "10_CoreDocs/11_PlanDocs/11.7_ContentMap.md",
+    "10_CoreDocs/11_PlanDocs/11.8_RiskMatrix.md",
+    "10_CoreDocs/11_PlanDocs/11.9_CoreExperienceSpec.md",
+    "10_CoreDocs/12_Job/12.1_Shadowbinder.md",
+    "10_CoreDocs/14_TechDocs",
+    "10_CoreDocs/13_Skils/SkilData.csv.import",
+    "10_CoreDocs/13_Skils/SkilData.sfx.translation",
+    "10_CoreDocs/13_Skils/SkilData.vfx.translation",
+    "10_CoreDocs/13_Skils/SkilData.tags.translation",
+    "10_CoreDocs/13_Skils/SkilData.unlock.translation",
+    "10_CoreDocs/13_Skils/SkilData.duration.translation",
+    "10_CoreDocs/13_Skils/SkilData.range.translation",
+    "10_CoreDocs/13_Skils/SkilData.hitbox.translation",
+    "10_CoreDocs/13_Skils/SkilData.cost.translation11152960909.tmp",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
