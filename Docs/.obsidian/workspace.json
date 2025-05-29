@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "README.md",
+                "file": "99_Reference/ProjectRules.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "README"
+              "title": "ProjectRules"
             }
           }
         ]
@@ -75,7 +75,7 @@
             }
           },
           {
-            "id": "6746a8b5739dab3c",
+            "id": "105c4760b6661c88",
             "type": "leaf",
             "state": {
               "type": "oblogger-view",
@@ -184,13 +184,14 @@
       "templates:テンプレートを挿入": false,
       "command-palette:コマンドパレットを開く": false,
       "float-search:Search obsidian in modal view": false,
-      "templater-obsidian:Templater": false,
-      "obsidian-import-json:JSON/CSV Importer": false,
-      "markdown-table-editor:Open Markdown Table Editor": false
+      "templater-obsidian:Templater": false
     }
   },
   "active": "2aab51aa584fb242",
   "lastOpenFiles": [
+    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
+    "README.md",
+    "99_Reference/ProjectRules.md",
     "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
     "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
     "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
@@ -206,7 +207,6 @@
     "10_CoreDocs/14_TechDocs/14.1_TDD.md",
     "10_CoreDocs/14_TechDocs/14.1_Definition of Elements.md",
     "10_CoreDocs/11_PlanDocs/11.2_DesignPillar.md",
-    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
     "10_CoreDocs/11_PlanDocs/11.3_MVP.md",
     "10_CoreDocs/11_PlanDocs/11.4_KPI.md",
     "10_CoreDocs/11_PlanDocs/11.5_CoreLoop.md",
@@ -215,7 +215,6 @@
     "10_CoreDocs/11_PlanDocs/11.8_RiskMatrix.md",
     "10_CoreDocs/11_PlanDocs/11.9_CoreExperienceSpec.md",
     "10_CoreDocs/12_Job/12.1_Shadowbinder.md",
-    "10_CoreDocs/13_Skils/13.1_SkilData.md",
     "10_CoreDocs/14_TechDocs",
     "10_CoreDocs/13_Skils/SkilData.csv.import",
     "10_CoreDocs/13_Skils/SkilData.sfx.translation",
@@ -226,7 +225,6 @@
     "10_CoreDocs/13_Skils/SkilData.range.translation",
     "10_CoreDocs/13_Skils/SkilData.hitbox.translation",
     "10_CoreDocs/13_Skils/SkilData.cost.translation11152960909.tmp",
-    "__templates/frontmatter.md",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
