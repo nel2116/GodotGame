@@ -29,3 +29,8 @@ Thumbs.db
 export.cfg
 export_presets.cfg
 *.pck
+
+Build/
+*.exe
+*.x86_64
+*.pck
