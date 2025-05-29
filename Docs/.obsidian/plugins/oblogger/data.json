@@ -1,0 +1,66 @@
+{
+  "version": 7,
+  "avatarVisible": true,
+  "vaultVisible": true,
+  "clockVisible": false,
+  "rxSeparatorVisible": true,
+  "otcSeparatorVisible": true,
+  "recentsCount": 10,
+  "postLogAction": "quietly",
+  "tagGroups": [],
+  "loggingPath": "",
+  "avatarPath": "",
+  "rxGroups": [
+    {
+      "groupName": "",
+      "collapsedFolders": [],
+      "isVisible": true,
+      "sortMethod": "alphabetical",
+      "sortAscending": true,
+      "logsFolderVisible": true,
+      "templatesFolderVisible": false,
+      "excludedFolders": [],
+      "isPinned": false,
+      "groupType": "dailies"
+    },
+    {
+      "groupName": "",
+      "collapsedFolders": [],
+      "isVisible": true,
+      "sortMethod": "type",
+      "sortAscending": true,
+      "logsFolderVisible": true,
+      "templatesFolderVisible": true,
+      "excludedFolders": [],
+      "isPinned": false,
+      "groupType": "files",
+      "openFolders": []
+    },
+    {
+      "groupName": "",
+      "collapsedFolders": [],
+      "isVisible": true,
+      "sortMethod": "alphabetical",
+      "sortAscending": true,
+      "logsFolderVisible": true,
+      "templatesFolderVisible": true,
+      "excludedFolders": [],
+      "isPinned": false,
+      "groupType": "recents"
+    },
+    {
+      "groupName": "",
+      "collapsedFolders": [],
+      "isVisible": true,
+      "sortMethod": "alphabetical",
+      "sortAscending": true,
+      "logsFolderVisible": false,
+      "templatesFolderVisible": false,
+      "excludedFolders": [],
+      "isPinned": false,
+      "groupType": "untagged"
+    }
+  ],
+  "dailiesTag": "daily",
+  "otcGroups": []
+}
