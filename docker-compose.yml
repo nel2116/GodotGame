@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+    godot-dev:
+        build: .
+        volumes:
+            - .:/workspace
+            - ~/.config/godot:/root/.config/godot
+            - ~/.config/Cursor:/root/.config/Cursor
+            - ~/.config/obsidian:/root/.config/obsidian
+        ports:
+            - "6006:6006" # Godot Editor
+            - "3000:3000" # Cursor IDE
+        environment:
+            - DISPLAY=${DISPLAY}
+            - XAUTHORITY=/root/.Xauthority
+        network_mode: host
+        privileged: true # X11 forwarding用
