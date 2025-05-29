@@ -11,14 +11,10 @@
             "id": "5811fa9a0a35a87b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "01_CoreDocs/03_MVP.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "03_MVP"
+              "title": "新規タブ"
             }
           }
         ]
@@ -189,14 +185,16 @@
   },
   "active": "5811fa9a0a35a87b",
   "lastOpenFiles": [
-    "01_CoreDocs/01_Plan.md",
-    "01_CoreDocs/03_MVP.md",
-    "01_CoreDocs/02_DesignPillar.md",
     "__templates/frontmatter.md",
-    "2025-05-29.md",
     "__templates",
     "README.md",
     "99_Reference/ProjectRules.md",
+    "99_Reference",
+    "01_CoreDocs/03_MVP.md",
+    "01_CoreDocs/02_DesignPillar.md",
+    "01_CoreDocs/01_Plan.md",
+    "01_CoreDocs",
+    "2025-05-29.md",
     "10_Inbox/11_Shader/【Unity】アニメ調の髪のハイライトを実現する案【Shader】.md",
     "10_Inbox/11_Shader/【Unity】セルシェーディングを１から作ってみるメモ その２ アウトライン編【Shader】.md",
     "20_Stock/24_Techs/24.1_Shader/ステンシル応用例.md",
@@ -217,14 +215,11 @@
     "未読記事リスト.md",
     "00_Rules/02_Stock_Rules.md",
     "00_Rules/01_Inbox_Rules.md",
-    "10_Inbox/13_Godot/13.2_Tips/【Godot Engine】GDScript：@export の使いかた.md",
     "10_Inbox/13_Godot/13.2_Tips",
     "10_Inbox/13_Godot/13.1_Summary",
     "10_Inbox/13_Godot",
     "10_Inbox/12_AI",
     "10_Inbox/11_Shader",
-    "40_Workflow/01_StockWorkflow",
-    "40_Workflow",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
