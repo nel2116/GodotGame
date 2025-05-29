@@ -1,0 +1,231 @@
+{
+  "main": {
+    "id": "7110b99fabe01094",
+    "type": "split",
+    "children": [
+      {
+        "id": "596c5c2fd63cfbe9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5811fa9a0a35a87b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "01_CoreDocs/03_MVP.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "03_MVP"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1f1aaffd74c73093",
+    "type": "split",
+    "children": [
+      {
+        "id": "4bc091169fab7a8c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "be73776d4068c53c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "ファイルエクスプローラ"
+            }
+          },
+          {
+            "id": "685f872cf8a98ed0",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "検索"
+            }
+          },
+          {
+            "id": "62382e1d66a9efed",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "ブックマーク"
+            }
+          },
+          {
+            "id": "6746a8b5739dab3c",
+            "type": "leaf",
+            "state": {
+              "type": "oblogger-view",
+              "state": {},
+              "icon": "orbit",
+              "title": "Oblogger"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "419fec4c83b1a0ca",
+    "type": "split",
+    "children": [
+      {
+        "id": "63c75420c73687f4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "db89cd85ff124628",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "バックリンク"
+            }
+          },
+          {
+            "id": "27d4ac0cb998af6a",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "アウトゴーイングリンク"
+            }
+          },
+          {
+            "id": "35dbcc9e4e5044be",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "タグ"
+            }
+          },
+          {
+            "id": "b9f3c0fa8f7ca6d5",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Clippings/Obsidianに記事メモをためる Web Clipper（ブラウザのタブを全部閉じたい）.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Obsidianに記事メモをためる Web Clipper（ブラウザのタブを全部閉じたい）のアウトライン"
+            }
+          },
+          {
+            "id": "88f1381e58d0b66d",
+            "type": "leaf",
+            "state": {
+              "type": "calendar",
+              "state": {},
+              "icon": "calendar-with-checkmark",
+              "title": "Calendar"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
+      "switcher:クイックスイッチャーを開く": false,
+      "daily-notes:今日のデイリーノートを開く": false,
+      "templates:テンプレートを挿入": false,
+      "command-palette:コマンドパレットを開く": false,
+      "float-search:Search obsidian in modal view": false,
+      "templater-obsidian:Templater": false
+    }
+  },
+  "active": "5811fa9a0a35a87b",
+  "lastOpenFiles": [
+    "01_CoreDocs/01_Plan.md",
+    "01_CoreDocs/03_MVP.md",
+    "01_CoreDocs/02_DesignPillar.md",
+    "__templates/frontmatter.md",
+    "2025-05-29.md",
+    "__templates",
+    "README.md",
+    "99_Reference/ProjectRules.md",
+    "10_Inbox/11_Shader/【Unity】アニメ調の髪のハイライトを実現する案【Shader】.md",
+    "10_Inbox/11_Shader/【Unity】セルシェーディングを１から作ってみるメモ その２ アウトライン編【Shader】.md",
+    "20_Stock/24_Techs/24.1_Shader/ステンシル応用例.md",
+    "20_Stock/24_Techs/24.1_Shader/ステンシル.md",
+    "20_Stock/24_Techs/24.1_Shader/Unity_アウトラインシェーダー実装手法.md",
+    "10_Inbox/14_memo/2025_05_27_FX.md",
+    "10_Inbox/14_memo/2025_05_27_FX",
+    "10_Inbox/14_memo/無題のファイル.md",
+    "10_Inbox/14_memo",
+    "10_Inbox/13_Godot/13.1_Summary/Godot Game Engine を使う10の理由.md",
+    "20_Stock/24_Techs/Unity_アウトラインシェーダー実装手法.md",
+    "10_Inbox/13_Godot/13.1_Summary/About Godot 4, Vulkan, GLES3 and GLES2.md",
+    "10_Inbox/13_Godot/13.2_Tips/【Godot4.3】LimboAI タスク一覧メモ.md",
+    "10_Inbox/13_Godot/13.2_Tips/【Godot4】Gitでのバージョン管理：準備編②　Sourcetree導入 1.md",
+    "Untitled.md",
+    "Untitled 1.md",
+    "Untitled 2.md",
+    "未読記事リスト.md",
+    "00_Rules/02_Stock_Rules.md",
+    "00_Rules/01_Inbox_Rules.md",
+    "10_Inbox/13_Godot/13.2_Tips/【Godot Engine】GDScript：@export の使いかた.md",
+    "10_Inbox/13_Godot/13.2_Tips",
+    "10_Inbox/13_Godot/13.1_Summary",
+    "10_Inbox/13_Godot",
+    "10_Inbox/12_AI",
+    "10_Inbox/11_Shader",
+    "40_Workflow/01_StockWorkflow",
+    "40_Workflow",
+    "無題のファイル.canvas",
+    "20_Stock/無題のファイル.canvas"
+  ]
+}
