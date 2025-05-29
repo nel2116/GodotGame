@@ -1,0 +1,35 @@
+name: Godot CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Export Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: firebelley/setup-godot@v1.3
+        with:
+          version: 4.4.1  # ←使っているGodotのバージョンに合わせてください
+
+      - name: Run headless Godot build
+        run: godot --headless --editor --quit
+
+      - name: Export game (Linux/X11)
+        run: |
+          mkdir -p Build/linux
+          godot --headless --export-release "Linux/X11" Build/linux/Game.x86_64
+
+      - name: Upload export as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: build/linux
