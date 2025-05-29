@@ -2,47 +2,34 @@ name: Godot Export
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
   export:
-    name: Export ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [windows, linux]
-        include:
-          - target: windows
-            os: windows-latest
-            preset: Windows
-            ext: .exe
-          - target: linux
-            os: ubuntu-latest
-            preset: Linux
-            ext: .x86_64
+        preset: [Windows, Linux]
+        ext: [exe, x86_64]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Godot
-      uses: firebelley/setup-godot@v2
-      with:
-        version: 4.2.1      # プロジェクト Godot バージョンに合わせて!
-        use-godot: true      # `godot` コマンドを PATH に追加
+      - name: Setup Godot
+        uses: sharkwouter/setup-godot@v1
+        with:
+          godot-version: 4.2.1
+          use-dotnet: false
 
-    - name: Export (headless)
-      run: |
-        mkdir -p build/${{ matrix.target }}
-        godot -q --headless \
-          --export-release "${{ matrix.preset }}" \
-          "build/${{ matrix.target }}/Shrine${{ matrix.ext }}"
+      - name: Export game
+        run: |
+          mkdir -p build/${{ matrix.preset }}
+          godot --headless --export-release "${{ matrix.preset }}" "build/${{ matrix.preset }}/Shrine.${{ matrix.ext }}"
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-${{ matrix.target }}
-        path: build/${{ matrix.target }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.preset }}
+          path: build/${{ matrix.preset }}
