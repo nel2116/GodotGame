@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "99_Reference/ProjectRules.md",
+                "file": "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "ProjectRules"
+              "title": "14.6_ImplementationTasks"
             }
           }
         ]
@@ -75,7 +75,7 @@
             }
           },
           {
-            "id": "105c4760b6661c88",
+            "id": "51989fd84260ea06",
             "type": "leaf",
             "state": {
               "type": "oblogger-view",
@@ -165,8 +165,8 @@
             "state": {
               "type": "calendar",
               "state": {},
-              "icon": "calendar-with-checkmark",
-              "title": "Calendar"
+              "icon": "lucide-file",
+              "title": "アクティブでなくなったプラグイン"
             }
           }
         ]
@@ -178,43 +178,44 @@
   },
   "left-ribbon": {
     "hiddenItems": {
-      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "switcher:クイックスイッチャーを開く": false,
       "daily-notes:今日のデイリーノートを開く": false,
       "templates:テンプレートを挿入": false,
       "command-palette:コマンドパレットを開く": false,
       "float-search:Search obsidian in modal view": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "templater-obsidian:Templater": false
     }
   },
   "active": "2aab51aa584fb242",
   "lastOpenFiles": [
-    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
-    "README.md",
-    "99_Reference/ProjectRules.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.4_Telemetry.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.3_EffectBus.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.2_EventBus.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.1_GameSystems.md",
+    "99_Reference/GithubIssueEditingWorkflow.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.5_Testing.md",
+    "99_Reference/PullRequestProcedure.md",
     "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
-    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
     "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
     "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
     "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
     "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
     "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
+    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
+    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
+    "10_CoreDocs/11_PlanDocs/11.9_CoreExperienceSpec.md",
+    "10_CoreDocs/11_PlanDocs/11.8_RiskMatrix.md",
+    "10_CoreDocs/11_PlanDocs/11.2_DesignPillar.md",
+    "10_CoreDocs/15_ImplementationSpecs",
+    "99_Reference/ProjectRules.md",
+    "README.md",
     "10_CoreDocs/14_TechDocs/ModuleDiagram.md",
     "10_CoreDocs/14_TechDocs/SequenceDiagram.md",
     "10_CoreDocs/14_TechDocs/ActivityDiagram.md",
     "10_CoreDocs/14_TechDocs/ClassDiagram.md",
     "10_CoreDocs/14_TechDocs/14.2_Architecture.md",
     "10_CoreDocs/14_TechDocs/14.1_TDD.md",
-    "10_CoreDocs/14_TechDocs/14.1_Definition of Elements.md",
-    "10_CoreDocs/11_PlanDocs/11.2_DesignPillar.md",
-    "10_CoreDocs/11_PlanDocs/11.3_MVP.md",
-    "10_CoreDocs/11_PlanDocs/11.4_KPI.md",
-    "10_CoreDocs/11_PlanDocs/11.5_CoreLoop.md",
-    "10_CoreDocs/11_PlanDocs/11.6_FeatureList.md",
-    "10_CoreDocs/11_PlanDocs/11.7_ContentMap.md",
-    "10_CoreDocs/11_PlanDocs/11.8_RiskMatrix.md",
-    "10_CoreDocs/11_PlanDocs/11.9_CoreExperienceSpec.md",
-    "10_CoreDocs/12_Job/12.1_Shadowbinder.md",
     "10_CoreDocs/14_TechDocs",
     "10_CoreDocs/13_Skils/SkilData.csv.import",
     "10_CoreDocs/13_Skils/SkilData.sfx.translation",
@@ -224,7 +225,6 @@
     "10_CoreDocs/13_Skils/SkilData.duration.translation",
     "10_CoreDocs/13_Skils/SkilData.range.translation",
     "10_CoreDocs/13_Skils/SkilData.hitbox.translation",
-    "10_CoreDocs/13_Skils/SkilData.cost.translation11152960909.tmp",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
