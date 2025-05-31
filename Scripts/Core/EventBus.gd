@@ -116,15 +116,23 @@ func add_listener(event_name: String, listener: Callable, priority: Priority = P
 	}
 
 	# 優先順位に基づいて適切な位置に挿入（二分探索による最適化）
+	# Binary search is used to find the correct insertion point for the new listener based on priority.
+	# Invariant: `listeners_list` is sorted by priority in descending order (higher priority comes first).
+	# `left` and `right` represent the bounds of the search range.
 	var left = 0
 	var right = listener_count
 	while left < right:
+		# Calculate the midpoint of the current search range.
 		var mid = (left + right) >> 1
+		# Compare the priority of the listener at the midpoint with the new listener's priority.
+		# If the midpoint listener's priority is less than the new listener's priority, narrow the search to the left half.
 		if listeners_list[mid].priority < priority:
 			right = mid
 		else:
+			# Otherwise, narrow the search to the right half.
 			left = mid + 1
 
+	# Insert the new listener at the determined position to maintain the sorted order.
 	listeners_list.insert(left, new_listener)
 
 # イベントリスナーの解除
