@@ -36,6 +36,25 @@ func after_each() -> void:
 	# Force garbage collection
 	await get_tree().process_frame
 
+# イベントタイプの検証テスト
+func test_event_type_validation() -> void:
+	# デバッグ出力：登録されているイベントタイプを確認
+	# EventTypes.debug_event_types()
+	
+	# 有効なイベントタイプのテスト
+	assert_true(EventTypes.validate_event_type("test_event", []), "test_event should be valid")
+	
+	# 無効なイベントタイプのテスト
+	assert_false(EventTypes.validate_event_type("invalid_event", []), "invalid_event should be invalid")
+	
+	# パラメータ付きイベントのテスト
+	var test_node = Node.new()
+	add_child(test_node)
+	assert_true(EventTypes.validate_event_type("player_damaged", [10.0, test_node]), "player_damaged with valid parameters should be valid")
+	assert_false(EventTypes.validate_event_type("player_damaged", ["invalid", test_node]), "player_damaged with invalid parameter type should be invalid")
+	assert_false(EventTypes.validate_event_type("player_damaged", [10.0]), "player_damaged with missing parameters should be invalid")
+	test_node.queue_free()
+
 # 優先順位付きリスナーのテスト
 func test_priority_based_listener_execution() -> void:
 	# 異なる優先順位でリスナーを登録
@@ -47,7 +66,15 @@ func test_priority_based_listener_execution() -> void:
 	event_bus.emit_event("test_event")
 	
 	# 優先順位の高い順に実行されることを確認
-	assert_eq(execution_order, ["high", "normal", "low"], "Listeners should execute in priority order")
+	var expected_order = ["high", "normal", "low"]
+	assert_eq_deep(execution_order, expected_order)
+	
+	# 実行順序をリセット
+	execution_order.clear()
+	
+	# 再度イベントを発火して、同じ順序で実行されることを確認
+	event_bus.emit_event("test_event")
+	assert_eq_deep(execution_order, expected_order)
 
 # 非同期イベント処理のテスト
 func test_async_event_processing() -> void:
@@ -74,9 +101,6 @@ func test_event_queue_status() -> void:
 	
 	# 非同期でイベントを発火
 	event_bus.emit_event_async("test_event")
-	
-	# 短時間待機してキューへの追加を待つ
-	# await get_tree().create_timer(0.01).timeout # This might not be necessary with signal waiting
 	
 	# キューの状態を確認 (発火直後)
 	var status = event_bus.get_queue_status()
@@ -110,3 +134,37 @@ func test_remove_listener_with_priority() -> void:
 	# 再度イベントを発火
 	event_bus.emit_event("test_event")
 	assert_eq(execution_count, 0, "Listener should not be executed after removal")
+
+# 無効なイベント名のテスト
+func test_invalid_event_name() -> void:
+	var listener_callable = Callable(self, "_on_test_event_async")
+	
+	# 無効なイベント名でリスナーを登録
+	event_bus.add_listener("invalid_event", listener_callable)
+	
+	# リスナーが登録されていないことを確認
+	assert_false(event_bus.has_listener("invalid_event", listener_callable))
+	
+	# 無効なイベント名でイベントを発火
+	event_bus.emit_event("invalid_event")
+	
+	# 実行カウントが増えていないことを確認
+	assert_eq(execution_count, 0, "Invalid event should not be processed")
+
+# 無効なパラメータのテスト
+func test_invalid_event_parameters() -> void:
+	var listener_callable = Callable(self, "_on_test_event_async")
+	
+	# リスナーを登録
+	event_bus.add_listener("player_damaged", listener_callable)
+	
+	# 無効なパラメータでイベントを発火
+	# テスト用に作成したNodeインスタンスを保持し、テストの最後に解放します
+	var invalid_node_param = Node.new()
+	event_bus.emit_event("player_damaged", ["invalid", invalid_node_param])
+	
+	# 実行カウントが増えていないことを確認
+	assert_eq(execution_count, 0, "Event with invalid parameters should not be processed")
+	
+	# 作成したNodeインスタンスを解放
+	invalid_node_param.queue_free()
