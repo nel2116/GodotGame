@@ -6,11 +6,22 @@ var event_bus: EventBus
 var execution_order: Array = []
 var execution_count: int = 0
 
+# テスト用の一時的なリスナーNodeクラス
+class _TestListenerNode extends Node:
+	var called_count = 0
+	var listener_id = -1
+
+	func _init(id: int):
+		listener_id = id
+
+	func _on_test_event_async(_args = null):
+		called_count += 1
+
 func _on_test_event_high() -> void: execution_order.append("high")
 func _on_test_event_normal() -> void: execution_order.append("normal")
 func _on_test_event_low() -> void: execution_order.append("low")
 
-func _on_test_event_async() -> void: execution_count += 1
+func _on_test_event_async(_listener_id = null) -> void: execution_count += 1
 
 func before_each() -> void:
 	event_bus = EventBus.new()
@@ -168,3 +179,105 @@ func test_invalid_event_parameters() -> void:
 	
 	# 作成したNodeインスタンスを解放
 	invalid_node_param.queue_free()
+
+# 優先順位付きイベントキューのテスト
+func test_priority_based_event_queue() -> void:
+	# 異なる優先順位でイベントを発火
+	event_bus.emit_event_async("test_event", [], EventBus.Priority.LOW)
+	event_bus.emit_event_async("test_event", [], EventBus.Priority.HIGH)
+	event_bus.emit_event_async("test_event", [], EventBus.Priority.NORMAL)
+	
+	# キューの状態を確認
+	var status = event_bus.get_queue_status()
+	assert_eq(status.queue_size, 3, "Queue should contain three events")
+	assert_true(status.events_by_priority.has("HIGH"), "Should have HIGH priority events")
+	assert_true(status.events_by_priority.has("NORMAL"), "Should have NORMAL priority events")
+	assert_true(status.events_by_priority.has("LOW"), "Should have LOW priority events")
+	
+	# 非同期キュー処理完了シグナルを待つ
+	await event_bus.async_queue_processed
+	
+	# キューが空になったことを確認
+	status = event_bus.get_queue_status()
+	assert_eq(status.queue_size, 0, "Queue should be empty after processing")
+
+# リスナー数制限のテスト
+func test_listener_limit() -> void:
+	var event_name = "test_event"
+	var listener_nodes = [] # ダミーリスナーNodeを保持する配列
+
+	# 最大数のリスナーを登録
+	for i in range(EventBus.MAX_LISTENERS_PER_EVENT):
+		# ユニークなNodeインスタンスを作成し、そのメソッドをリスナーとして登録
+		var listener_node = _TestListenerNode.new(i)
+		add_child(listener_node) # シーントゥリーに追加して有効にする
+		listener_nodes.append(listener_node)
+		var listener = Callable(listener_node, "_on_test_event_async")
+		event_bus.add_listener(event_name, listener)
+
+	# リスナー数が制限に達していることを確認
+	assert_eq(event_bus.get_listener_count(event_name), EventBus.MAX_LISTENERS_PER_EVENT)
+
+	# 追加のリスナー登録を試みる
+	var extra_listener_node = _TestListenerNode.new(EventBus.MAX_LISTENERS_PER_EVENT + 1)
+	add_child(extra_listener_node)
+	var extra_listener = Callable(extra_listener_node, "_on_test_event_async")
+	event_bus.add_listener(event_name, extra_listener)
+
+	# リスナー数が増えていないことを確認
+	assert_eq(event_bus.get_listener_count(event_name), EventBus.MAX_LISTENERS_PER_EVENT)
+
+	# テスト後クリーンアップ
+	for node in listener_nodes:
+		if is_instance_valid(node):
+			node.queue_free()
+	if is_instance_valid(extra_listener_node):
+		extra_listener_node.queue_free()
+
+# エラーハンドリングのテスト
+func test_error_handling() -> void:
+	var event_name = "test_event"
+	
+	# 無効なリスナーを登録
+	var invalid_listener = Callable(null, "non_existent_method")
+	event_bus.add_listener(event_name, invalid_listener)
+	
+	# イベントを発火
+	event_bus.emit_event(event_name)
+	
+	# 無効なリスナーが自動的に削除されていることを確認
+	assert_false(event_bus.has_listener(event_name, invalid_listener))
+
+# パフォーマンスメトリクスのテスト
+func test_performance_metrics() -> void:
+	var event_name = "test_event"
+	
+	# リスナーを登録
+	event_bus.add_listener(event_name, Callable(self, "_on_test_event_async"))
+	
+	# イベントを発火
+	event_bus.emit_event(event_name)
+	
+	# パフォーマンスメトリクスを取得
+	var metrics = event_bus.get_performance_metrics()
+	
+	# メトリクスの存在を確認
+	assert_true(metrics.has("total_events_processed"), "Should have total_events_processed")
+	assert_true(metrics.has("total_processing_time"), "Should have total_processing_time")
+	assert_true(metrics.has("max_processing_time"), "Should have max_processing_time")
+	assert_true(metrics.has("event_counts"), "Should have event_counts")
+	
+	# イベントが処理されたことを確認
+	assert_eq(metrics.total_events_processed, 1, "Should have processed one event")
+	assert_true(metrics.event_counts.has(event_name), "Should have event count for test_event")
+	assert_eq(metrics.event_counts[event_name], 1, "Should have processed test_event once")
+	
+	# メトリクスをリセット
+	event_bus.reset_performance_metrics()
+	
+	# リセット後のメトリクスを確認
+	metrics = event_bus.get_performance_metrics()
+	assert_eq(metrics.total_events_processed, 0, "Metrics should be reset")
+	assert_eq(metrics.total_processing_time, 0.0, "Processing time should be reset")
+	assert_eq(metrics.max_processing_time, 0.0, "Max processing time should be reset")
+	assert_true(metrics.event_counts.is_empty(), "Event counts should be empty")
