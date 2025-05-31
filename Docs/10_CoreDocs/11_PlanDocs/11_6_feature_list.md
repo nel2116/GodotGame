@@ -1,11 +1,16 @@
 ---
-title: 06_FeatureList
-version: 0.1
+title: 機能リスト
+version: 0.1.0
 status: draft
-updated: 2025-05-30
+updated: 2025-06-01
+tags:
+    - FeatureList
+    - Document
+    - Core
 linked_docs:
-  - 11.2_DesignPillar
-  - 11.3_MVP
+    - "[[11_2_design_pillar|デザインピラー]]"
+    - "[[11_3_mvp|MVP]]"
+    - "[[00_index|計画ドキュメント]]"
 ---
 
 ## 機能テーブル
