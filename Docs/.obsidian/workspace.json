@@ -11,14 +11,10 @@
             "id": "2aab51aa584fb242",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "14.6_ImplementationTasks"
+              "title": "新規タブ"
             }
           }
         ]
@@ -75,7 +71,7 @@
             }
           },
           {
-            "id": "51989fd84260ea06",
+            "id": "2c8d878757dd5b4f",
             "type": "leaf",
             "state": {
               "type": "oblogger-view",
@@ -165,8 +161,8 @@
             "state": {
               "type": "calendar",
               "state": {},
-              "icon": "lucide-file",
-              "title": "アクティブでなくなったプラグイン"
+              "icon": "calendar-with-checkmark",
+              "title": "Calendar"
             }
           }
         ]
@@ -178,53 +174,53 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "switcher:クイックスイッチャーを開く": false,
       "daily-notes:今日のデイリーノートを開く": false,
       "templates:テンプレートを挿入": false,
       "command-palette:コマンドパレットを開く": false,
       "float-search:Search obsidian in modal view": false,
-      "table-editor-obsidian:Advanced Tables Toolbar": false,
       "templater-obsidian:Templater": false
     }
   },
   "active": "2aab51aa584fb242",
   "lastOpenFiles": [
+    "10_CoreDocs/15_ImplementationSpecs/15.6_Testing.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.5_Telemetry.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.4_EffectBus.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.3_EventBusPerformance.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.5_Testing.md",
     "10_CoreDocs/15_ImplementationSpecs/15.4_Telemetry.md",
     "10_CoreDocs/15_ImplementationSpecs/15.3_EffectBus.md",
     "10_CoreDocs/15_ImplementationSpecs/15.2_EventBus.md",
-    "10_CoreDocs/15_ImplementationSpecs/15.1_GameSystems.md",
-    "99_Reference/GithubIssueEditingWorkflow.md",
-    "10_CoreDocs/15_ImplementationSpecs/15.5_Testing.md",
     "99_Reference/PullRequestProcedure.md",
     "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
+    "99_Reference/GithubIssueEditingWorkflow.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.1_GameSystems.md",
+    "10_CoreDocs/15_ImplementationSpecs",
+    "10_CoreDocs/13_Skils/SkilData.vfx.translation",
+    "10_CoreDocs/13_Skils/SkilData.unlock.translation",
+    "10_CoreDocs/13_Skils/SkilData.tier.translation",
+    "10_CoreDocs/13_Skils/SkilData.tags.translation",
+    "10_CoreDocs/13_Skils/SkilData.skill.translation",
+    "10_CoreDocs/13_Skils/SkilData.sfx.translation",
+    "10_CoreDocs/13_Skils/SkilData.scaling.translation",
+    "10_CoreDocs/13_Skils/SkilData.range.translation",
+    "10_CoreDocs/13_Skils/SkilData.hitbox.translation",
+    "99_Reference/ProjectRules.md",
+    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
+    "README.md",
+    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
     "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
     "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
     "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
     "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
     "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
-    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
-    "10_CoreDocs/11_PlanDocs/11.1_Plan.md",
-    "10_CoreDocs/11_PlanDocs/11.9_CoreExperienceSpec.md",
-    "10_CoreDocs/11_PlanDocs/11.8_RiskMatrix.md",
-    "10_CoreDocs/11_PlanDocs/11.2_DesignPillar.md",
-    "10_CoreDocs/15_ImplementationSpecs",
-    "99_Reference/ProjectRules.md",
-    "README.md",
     "10_CoreDocs/14_TechDocs/ModuleDiagram.md",
     "10_CoreDocs/14_TechDocs/SequenceDiagram.md",
     "10_CoreDocs/14_TechDocs/ActivityDiagram.md",
     "10_CoreDocs/14_TechDocs/ClassDiagram.md",
     "10_CoreDocs/14_TechDocs/14.2_Architecture.md",
-    "10_CoreDocs/14_TechDocs/14.1_TDD.md",
-    "10_CoreDocs/14_TechDocs",
-    "10_CoreDocs/13_Skils/SkilData.csv.import",
-    "10_CoreDocs/13_Skils/SkilData.sfx.translation",
-    "10_CoreDocs/13_Skils/SkilData.vfx.translation",
-    "10_CoreDocs/13_Skils/SkilData.tags.translation",
-    "10_CoreDocs/13_Skils/SkilData.unlock.translation",
-    "10_CoreDocs/13_Skils/SkilData.duration.translation",
-    "10_CoreDocs/13_Skils/SkilData.range.translation",
-    "10_CoreDocs/13_Skils/SkilData.hitbox.translation",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
