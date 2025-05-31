@@ -1,3 +1,4 @@
+class_name GameSystems
 extends Node
 
 # シングルトンインスタンス
