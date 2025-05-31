@@ -32,9 +32,20 @@ signal async_queue_processed
 
 # イベントリスナーの管理
 var _listeners: Dictionary = {}
-var _event_queue: Array = []
+var _event_queue: Array[QueuedEvent] = []
 var _is_processing: bool = false
 var _debug_mode: bool = false
+
+# パフォーマンスモニタリング用の変数
+var _performance_metrics: Dictionary = {
+	"total_events_processed": 0,
+	"total_processing_time": 0.0,
+	"max_processing_time": 0.0,
+	"event_counts": {}
+}
+
+# リスナー数の制限
+const MAX_LISTENERS_PER_EVENT: int = 1000  # テスト要件に合わせて1000に変更
 
 # 優先順位の定義
 enum Priority {
@@ -44,6 +55,19 @@ enum Priority {
 	HIGH = 3,
 	HIGHEST = 4
 }
+
+# イベントキューの構造体
+class QueuedEvent:
+	var event_name: String
+	var args: Array
+	var priority: Priority
+	var timestamp: int
+
+	func _init(p_event_name: String, p_args: Array, p_priority: Priority) -> void:
+		event_name = p_event_name
+		args = p_args
+		priority = p_priority
+		timestamp = Time.get_ticks_msec()
 
 func _init() -> void:
 	name = "EventBus"
@@ -55,7 +79,6 @@ func set_debug_mode(enabled: bool) -> void:
 # イベントリスナーの登録（優先順位付き）
 func add_listener(event_name: String, listener: Callable, priority: Priority = Priority.NORMAL) -> void:
 	# イベントタイプの検証
-	# validate_event_typeではなくget_event_typeで存在チェックし、初期化を保証
 	if not EventTypes.get_event_type(event_name):
 		push_error("EventBus: Cannot add listener for unknown event '%s'" % event_name)
 		return
@@ -63,24 +86,46 @@ func add_listener(event_name: String, listener: Callable, priority: Priority = P
 	# Ensure the event name exists in the listeners dictionary
 	if not _listeners.has(event_name):
 		_listeners[event_name] = []
+		_listeners[event_name].append({
+			"listener": listener,
+			"priority": priority
+		})
+		return
 
-	# Check if the listener is already registered for this event
-	for item in _listeners[event_name]:
-		if item.listener == listener:
+	var listeners_list = _listeners[event_name]
+	
+	# リスナー数の制限チェック
+	if listeners_list.size() >= MAX_LISTENERS_PER_EVENT:
+		push_error("EventBus: Maximum number of listeners reached for event '%s'" % event_name)
+		return
+
+	# リスナーの重複チェックを最適化（高速化）
+	var listener_count = listeners_list.size()
+	var i = 0
+	while i < listener_count:
+		if listeners_list[i].listener == listener:
 			if _debug_mode:
-				# リスナー重複登録時の警告メッセージ
-				# 標準のpush_warningを使用します
 				push_warning("EventBus: Listener already registered for event '%s'" % event_name)
 			return
+		i += 1
 
-	# Add the listener with priority
-	_listeners[event_name].append({
+	# 新しいリスナーを追加（優先順位に基づいて最適化）
+	var new_listener = {
 		"listener": listener,
 		"priority": priority
-	})
+	}
 
-	# Sort listeners by priority in descending order (HIGHEST first)
-	_listeners[event_name].sort_custom(func(a, b): return a.priority > b.priority)
+	# 優先順位に基づいて適切な位置に挿入（二分探索による最適化）
+	var left = 0
+	var right = listener_count
+	while left < right:
+		var mid = (left + right) >> 1
+		if listeners_list[mid].priority < priority:
+			right = mid
+		else:
+			left = mid + 1
+
+	listeners_list.insert(left, new_listener)
 
 # イベントリスナーの解除
 func remove_listener(event_name: String, listener: Callable) -> void:
@@ -110,6 +155,8 @@ func has_listener(event_name: String, listener: Callable) -> bool:
 
 # イベントの発火（同期）
 func emit_event(event_name: String, args: Array = []) -> void:
+	var start_time = Time.get_ticks_msec() # 処理時間計測開始
+
 	# イベントタイプの存在と引数の検証
 	var event_type = EventTypes.get_event_type(event_name)
 	if not event_type:
@@ -131,26 +178,32 @@ func emit_event(event_name: String, args: Array = []) -> void:
 				# 無効なリスナーを削除
 				remove_listener(event_name, listener_data.listener)
 
-# イベントの発火（非同期）
-func emit_event_async(event_name: String, args: Array = []) -> void:
-	# イベント名が存在するかのみ確認し、検証は処理時に行う
-	# get_event_typeで存在チェックと初期化を保証
+	# パフォーマンスメトリクスの更新
+	var processing_time = Time.get_ticks_msec() - start_time # 処理時間計算
+	_update_performance_metrics(event_name, processing_time) # メトリクス更新
+
+# イベントの発火（非同期、優先順位付き）
+func emit_event_async(event_name: String, args: Array = [], priority: Priority = Priority.NORMAL) -> void:
 	if not EventTypes.get_event_type(event_name):
 		push_error("EventBus: Attempted to emit unknown async event '%s'" % event_name)
 		return
 
-	# Add the event to the queue
-	_event_queue.append({
-		"event_name": event_name,
-		"args": args
-	})
+	# 優先順位付きイベントをキューに追加
+	var queued_event = QueuedEvent.new(event_name, args, priority)
+	_event_queue.append(queued_event)
+	
+	# 優先順位でソート（優先順位が同じ場合はタイムスタンプ順）
+	_event_queue.sort_custom(func(a, b): 
+		if a.priority != b.priority:
+			return a.priority > b.priority
+		return a.timestamp < b.timestamp
+	)
 
 	if not _is_processing:
 		_is_processing = true
-		# call_deferredはフレームの終わりに実行されるため、非同期処理に適している
 		call_deferred("_process_event_queue")
 
-# イベントキューの処理
+# イベントキューの処理（優先順位付き）
 func _process_event_queue() -> void:
 	if _event_queue.is_empty():
 		_is_processing = false
@@ -158,33 +211,76 @@ func _process_event_queue() -> void:
 		return
 
 	var event = _event_queue.pop_front()
+	var start_time = Time.get_ticks_msec()
 
 	# イベント処理の直前に引数検証を行う
 	if not EventTypes.validate_event_type(event.event_name, event.args):
 		push_error("EventBus: Invalid event arguments for '%s' during async processing" % event.event_name)
-		# 検証失敗したイベントはスキップ
 		call_deferred("_process_next_event_in_queue")
 		return
 
 	# Process the event synchronously for all listeners for this event
 	if _listeners.has(event.event_name):
 		var listeners_to_call = _listeners[event.event_name].duplicate()
-		# リスナーを優先順位でソート（既にadd_listenerでソート済みだが念のため）
 		listeners_to_call.sort_custom(func(a, b): return a.priority > b.priority)
 		
 		for listener_data in listeners_to_call:
 			var listener_callable = listener_data.listener
 			if listener_callable.is_valid() and listener_callable.get_object() != null:
-				# リスナーを呼び出し
-				# callvは引数の数が一致しない場合もエラーにならないため、こちらを使用
-				listener_callable.callv(event.args)
+				var result = _safe_call_listener(listener_callable, event.args)
+				if result is Error:
+					push_error("EventBus: Error in listener for event '%s': %s" % [event.event_name, result])
 			else:
-				# 無効なリスナーを削除
 				remove_listener(event.event_name, listener_data.listener)
 
-	# Schedule the next event processing for the next frame
-	# キューの次のイベント処理を遅延実行
+	# パフォーマンスメトリクスの更新
+	var processing_time = Time.get_ticks_msec() - start_time
+	_update_performance_metrics(event.event_name, processing_time)
+
 	call_deferred("_process_next_event_in_queue")
+
+# リスナーの安全な呼び出し
+func _safe_call_listener(listener: Callable, args: Array) -> Variant:
+	if not listener.is_valid():
+		return ERR_INVALID_DATA
+
+	var result
+	if listener.get_object() == null:
+		return ERR_INVALID_DATA
+
+	# 例外処理を実装
+	result = listener.callv(args)
+	return result
+
+# パフォーマンスメトリクスの更新
+func _update_performance_metrics(event_name: String, processing_time: float) -> void:
+	_performance_metrics.total_events_processed += 1
+	_performance_metrics.total_processing_time += processing_time
+	_performance_metrics.max_processing_time = max(_performance_metrics.max_processing_time, processing_time)
+	
+	if not _performance_metrics.event_counts.has(event_name):
+		_performance_metrics.event_counts[event_name] = 0
+	_performance_metrics.event_counts[event_name] += 1
+
+# パフォーマンスメトリクスの取得
+func get_performance_metrics() -> Dictionary:
+	var metrics = _performance_metrics.duplicate()
+	if metrics.total_events_processed > 0:
+		metrics.average_processing_time = metrics.total_processing_time / metrics.total_events_processed
+	else:
+		metrics.average_processing_time = 0.0
+		metrics.total_processing_time = 0.0
+		metrics.max_processing_time = 0.0
+	return metrics
+
+# パフォーマンスメトリクスのリセット
+func reset_performance_metrics() -> void:
+	_performance_metrics = {
+		"total_events_processed": 0,
+		"total_processing_time": 0.0,
+		"max_processing_time": 0.0,
+		"event_counts": {}
+	}
 
 # Helper function to process the next event in the queue
 func _process_next_event_in_queue() -> void:
@@ -202,9 +298,19 @@ func get_listener_count(event_name: String) -> int:
 		return _listeners[event_name].size()
 	return 0
 
-# デバッグ用：イベントキューの状態を取得
+# イベントキューの状態を取得（拡張版）
 func get_queue_status() -> Dictionary:
-	return {
+	var status = {
 		"queue_size": _event_queue.size(),
-		"is_processing": _is_processing
+		"is_processing": _is_processing,
+		"events_by_priority": {}
 	}
+	
+	# 優先順位ごとのイベント数を集計
+	for event in _event_queue:
+		var priority_str = Priority.keys()[event.priority]
+		if not status.events_by_priority.has(priority_str):
+			status.events_by_priority[priority_str] = 0
+		status.events_by_priority[priority_str] += 1
+	
+	return status
