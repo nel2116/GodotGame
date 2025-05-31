@@ -34,6 +34,7 @@ signal async_queue_processed # Add a signal to indicate completion of the async 
 var _listeners: Dictionary = {}
 var _event_queue: Array = []
 var _is_processing: bool = false
+var _debug_mode: bool = false  # デバッグモードフラグ
 
 # 優先順位の定義
 enum Priority {
@@ -47,6 +48,10 @@ enum Priority {
 func _init() -> void:
 	name = "EventBus"
 
+# デバッグモードの設定
+func set_debug_mode(enabled: bool) -> void:
+	_debug_mode = enabled
+
 # イベントリスナーの登録（優先順位付き）
 func add_listener(event_name: String, listener: Callable, priority: Priority = Priority.NORMAL) -> void:
 	# Ensure the event name exists in the listeners dictionary
@@ -56,7 +61,12 @@ func add_listener(event_name: String, listener: Callable, priority: Priority = P
 	# Check if the listener is already registered for this event
 	for item in _listeners[event_name]:
 		if item.listener == listener:
-			push_warning("EventBus: Listener already registered for event '%s'." % event_name)
+			if _debug_mode:
+				# テストクラスの警告抑制メカニズムを使用
+				if get_parent() and get_parent().has_method("_push_warning"):
+					get_parent()._push_warning("EventBus: Listener already registered for event '%s'." % event_name)
+				else:
+					push_warning("EventBus: Listener already registered for event '%s'." % event_name)
 			return
 
 	# Add the listener with priority
@@ -86,6 +96,14 @@ func remove_listener(event_name: String, listener: Callable) -> void:
 		# If no listeners left, clean up the event entry (optional)
 		if listeners_list.is_empty():
 			_listeners.erase(event_name)
+
+# 指定したリスナーが登録されているかを確認
+func has_listener(event_name: String, listener: Callable) -> bool:
+	if _listeners.has(event_name):
+		for item in _listeners[event_name]:
+			if item.listener == listener:
+				return true
+	return false
 
 # イベントの発火（同期）
 func emit_event(event_name: String, args: Array = []) -> void:

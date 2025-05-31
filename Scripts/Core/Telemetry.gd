@@ -1,3 +1,4 @@
+class_name Telemetry
 extends Node
 
 # テレメトリデータの保存先

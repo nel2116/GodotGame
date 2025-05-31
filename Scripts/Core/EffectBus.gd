@@ -1,3 +1,4 @@
+class_name EffectBus
 extends Node
 
 # エフェクトシグナル定義
