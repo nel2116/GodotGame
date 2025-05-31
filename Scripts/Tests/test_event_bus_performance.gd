@@ -15,6 +15,9 @@ func _push_warning(message: String) -> void:
 
 # テスト実行前の準備
 func before_each() -> void:
+	# EventTypesの初期化を確実に行う
+	EventTypes.get_event_type("test_event")
+	
 	event_bus = EventBus.new()
 	add_child(event_bus)
 	test_results = {
@@ -59,20 +62,50 @@ func create_unique_listener() -> Callable:
 	var listener_id = randi()
 	return Callable(self, "_on_test_event").bind(listener_id)
 
+# イベントタイプの検証パフォーマンステスト
+func test_event_type_validation_performance() -> void:
+	var test_count = 1000
+	var total_time = 0.0
+	
+	# 有効なイベントタイプのテスト
+	for i in range(test_count):
+		var execution_time = measure_execution_time(
+			func(): EventTypes.validate_event_type("test_event", [])
+		)
+		total_time += execution_time
+		test_results.listener_add_time.append(execution_time)
+	
+	var average_time = total_time / test_count
+	var max_time = test_results.listener_add_time.max()
+	var min_time = test_results.listener_add_time.min()
+	
+	# パフォーマンス基準の設定（調整版）
+	var max_allowed_time = 2.0  # 2ms
+	var max_allowed_average = 0.05  # 0.05ms
+	
+	# アサーション
+	assert_true(average_time < max_allowed_average, 
+		"イベントタイプ検証の平均実行時間が許容値を超えています: %.2f ms" % average_time)
+	assert_true(max_time < max_allowed_time,
+		"イベントタイプ検証の最大実行時間が許容値を超えています: %.2f ms" % max_time)
+	
+	# 結果の出力
+	print("イベントタイプ検証の平均実行時間: %.2f ms" % average_time)
+	print("最大実行時間: %.2f ms" % max_time)
+	print("最小実行時間: %.2f ms" % min_time)
+
 # リスナー追加のパフォーマンステスト
 func test_listener_add_performance() -> void:
 	var listener_count = 1000
 	var total_time = 0.0
 	
-	# 各テストで異なるイベント名を使用
-	var base_event_name = "test_event_%d" % randi()
+	# テスト用のイベント名を使用
+	var event_name = "test_event"
 	
 	# 既存のリスナーをクリア
 	event_bus._listeners.clear()
 	
 	for i in range(listener_count):
-		# 各リスナーに一意のイベント名を割り当て
-		var event_name = "%s_%d" % [base_event_name, i]
 		var listener = create_unique_listener()
 		var priority = i % 5  # 優先順位をランダムに設定
 		
@@ -103,12 +136,11 @@ func test_listener_add_performance() -> void:
 
 # イベント発火のパフォーマンステスト
 func test_event_emit_performance() -> void:
-	# 各テストで異なるイベント名を使用
-	var base_event_name = "test_event_%d" % randi()
+	# テスト用のイベント名を使用
+	var event_name = "test_event"
 	
 	# 1000個のリスナーを登録
 	for i in range(1000):
-		var event_name = "%s_%d" % [base_event_name, i]
 		var listener = create_unique_listener()
 		event_bus.add_listener(event_name, listener)
 	
@@ -116,7 +148,6 @@ func test_event_emit_performance() -> void:
 	var total_time = 0.0
 	
 	for i in range(emit_count):
-		var event_name = "%s_%d" % [base_event_name, i % 1000]
 		var execution_time = measure_execution_time(
 			func(): event_bus.emit_event(event_name)
 		)
@@ -144,8 +175,8 @@ func test_event_emit_performance() -> void:
 
 # 非同期イベント処理のパフォーマンステスト
 func test_async_event_performance() -> void:
-	# 各テストで異なるイベント名を使用
-	var event_name = "test_event_%d" % randi()
+	# テスト用のイベント名を使用
+	var event_name = "test_event_async"
 	
 	# 1000個のリスナーを登録
 	for i in range(1000):
@@ -191,8 +222,8 @@ func test_memory_usage() -> void:
 	# 警告の抑制を開始
 	_suppress_warnings = true
 	
-	# 各テストで異なるイベント名を使用
-	var event_name = "test_event_%d" % randi()
+	# テスト用のイベント名を使用
+	var event_name = "test_event"
 	
 	var initial_memory = get_memory_usage()
 	test_results.memory_usage.append(initial_memory)
@@ -242,6 +273,7 @@ func test_memory_usage() -> void:
 func run_performance_tests() -> void:
 	print("=== EventBus パフォーマンステスト開始 ===")
 	
+	test_event_type_validation_performance()
 	test_listener_add_performance()
 	test_event_emit_performance()
 	test_async_event_performance()
