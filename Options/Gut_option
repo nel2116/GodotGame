@@ -2,10 +2,12 @@
  "background_color": "262626ff",
  "compact_mode": false,
  "configured_dirs": [
-  "res://Scripts/Tests"
+  "res://Scripts/Tests",
+  "res://Scripts/Tests/Core/Event",
+  "res://Scripts/Tests/Core/Effect"
  ],
  "dirs": [
-  "res://Scripts/Tests"
+  "res://Scripts/Tests/Core/Effect"
  ],
  "disable_colors": false,
  "double_strategy": 1,

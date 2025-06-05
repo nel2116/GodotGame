@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "10_CoreDocs/15_ImplementationSpecs/15.3_EventBusPerformance.md",
-                "mode": "source",
+                "file": "10_CoreDocs/11_PlanDocs/11_5_development_roadmap.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "15.3_EventBusPerformance"
+              "title": "11_5_development_roadmap"
             }
           }
         ]
@@ -75,7 +75,7 @@
             }
           },
           {
-            "id": "2c8d878757dd5b4f",
+            "id": "ce7663a5b65edf9d",
             "type": "leaf",
             "state": {
               "type": "oblogger-view",
@@ -84,7 +84,8 @@
               "title": "Oblogger"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -187,44 +188,44 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "2aab51aa584fb242",
+  "active": "ce7663a5b65edf9d",
   "lastOpenFiles": [
-    "10_CoreDocs/15_ImplementationSpecs/15.2_EventBus.md",
-    "99_Reference/PullRequestProcedure.md",
-    "10_CoreDocs/13_Skills/SkilData.csv.import6700184492.tmp",
-    "10_CoreDocs/13_Skills/SkilData.sfx.translation6700166181.tmp",
-    "10_CoreDocs/13_Skills/SkilData.vfx.translation6700146784.tmp",
-    "10_CoreDocs/13_Skills/SkilData.tags.translation6700126862.tmp",
-    "10_CoreDocs/13_Skills/SkilData.unlock.translation6700109495.tmp",
-    "10_CoreDocs/13_Skills/SkilData.duration.translation6700090127.tmp",
-    "10_CoreDocs/13_Skills/SkilData.range.translation6700069448.tmp",
-    "10_CoreDocs/13_Skills/SkilData.hitbox.translation6700049375.tmp",
-    "10_CoreDocs/13_Skills/SkilData.cost.translation6700035400.tmp",
-    "10_CoreDocs/13_Skills/SkilData.cost.translation6700017955.tmp",
-    "99_Reference/DocumentManagementRules.md",
-    "40_Tutorials/GettingStarted.md",
-    "40_Tutorials/BasicFeatures.md",
-    "40_Tutorials/AdvancedFeatures.md",
-    "40_Tutorials/00_index.md",
-    "30_APIReference/GameplayAPI.md",
-    "30_APIReference/DataManagementAPI.md",
-    "30_APIReference/CoreSystemAPI.md",
-    "30_APIReference/00_index.md",
-    "20_UserGuides/00_index.md",
-    "10_CoreDocs/README.md",
-    "10_CoreDocs/DevelopmentGuidelines.md",
-    "10_CoreDocs/Architecture.md",
     "10_CoreDocs/15_ImplementationSpecs/15.7_EventSystem.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.6_Testing.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.5_Telemetry.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.4_EffectBus.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.3_EventBusPerformance.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.2_EventBus.md",
+    "10_CoreDocs/15_ImplementationSpecs/15.1_GameSystems.md",
     "10_CoreDocs/15_ImplementationSpecs/00_index.md",
+    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
+    "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
+    "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
+    "10_CoreDocs/11_PlanDocs/11_1_plan.md",
+    "10_CoreDocs/11_PlanDocs/11_5_development_roadmap.md",
+    "10_CoreDocs/11_PlanDocs/00_index.md",
     "10_CoreDocs/14_TechDocs/00_index.md",
-    "10_CoreDocs/13_Skills/13_1_skill_data.md",
+    "10_CoreDocs/11_PlanDocs/11_2_design_pillar.md",
+    "10_CoreDocs/12_Job/12.1_Shadowbinder.md",
     "10_CoreDocs/12_Job/00_index.md",
-    "10_CoreDocs/11_PlanDocs/11_9_core_experience_spec.md",
-    "10_CoreDocs/11_PlanDocs/11_8_risk_matrix.md",
-    "10_CoreDocs/11_PlanDocs/11_7_content_map.md",
-    "10_CoreDocs/11_PlanDocs/11_6_feature_list.md",
-    "10_CoreDocs/11_PlanDocs/11_5_core_loop.md",
-    "10_CoreDocs/11_PlanDocs/11_4_kpi.md",
+    "10_CoreDocs/13_Skills/13_1_skill_data.md",
+    "10_CoreDocs/13_Skills/SkilData.csv.import9205193.tmp",
+    "10_CoreDocs/13_Skills/SkilData.sfx.translation9189296.tmp",
+    "10_CoreDocs/13_Skills/SkilData.vfx.translation9173279.tmp",
+    "10_CoreDocs/13_Skills/SkilData.tags.translation9158244.tmp",
+    "10_CoreDocs/13_Skills/SkilData.unlock.translation9141426.tmp",
+    "10_CoreDocs/13_Skills/SkilData.duration.translation9124663.tmp",
+    "10_CoreDocs/13_Skills/SkilData.range.translation9106301.tmp",
+    "10_CoreDocs/13_Skills/SkilData.hitbox.translation9088100.tmp",
+    "10_CoreDocs/13_Skills/SkilData.cost.translation9075727.tmp",
+    "10_CoreDocs/13_Skills/SkilData.cost.translation9058781.tmp",
+    "10_CoreDocs/11_PlanDocs/11_3_mvp.md",
+    "00_index.md",
+    "99_Reference/PullRequestProcedure.md",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
