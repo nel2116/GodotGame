@@ -33,7 +33,7 @@ linked_docs:
 ## 使用技術
 
 -   Godot Engine 4.2
--   GDScript
+ -   C# (Godot .NET)
 -   Git + GitHub
 -   Cursor（AI 補完）
 
