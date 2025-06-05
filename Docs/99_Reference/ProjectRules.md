@@ -31,7 +31,7 @@ linked_docs:
 ## 技術スタック
 
 -   Godot Engine 4.x
--   GDScript
+ -   C# (Godot .NET)
 -   GitHub + Cursor
 
 ## コーディングルール
