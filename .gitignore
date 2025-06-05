@@ -34,3 +34,6 @@ Build/
 *.exe
 *.x86_64
 *.pck
+
+# Obsidian workspace
+.obsidian/workspace.json

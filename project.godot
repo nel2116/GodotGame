@@ -11,9 +11,17 @@ config_version=5
 [application]
 
 config/name="NewGameProject"
-run/main_scene="uid://c5sfw7xwpo32u"
+run/main_scene="uid://d2b2ehk6kx115"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[dotnet]
+
+project/assembly_name="NewGameProject"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [rendering]
 
