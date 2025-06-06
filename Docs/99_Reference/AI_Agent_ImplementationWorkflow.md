@@ -1,6 +1,6 @@
 ---
 title: AIエージェント向け実装ワークフロー
-version: 0.2
+version: 0.3
 status: draft
 updated: 2025-06-06
 tags:
@@ -32,6 +32,7 @@ linked_docs:
 
 1. **環境セットアップ**
     - [[14_TechDocs/14.3_GodotEnvironment.md|Godot環境設定]]に従って必要なソフトウェアを準備します。
+    - `setup_godot_cli.sh` を実行して Godot CLI をインストールし、アセットをインポートします。
     - テスト自動化のために[[14_TechDocs/14.11_TestAutomation.md|テスト自動化システム]]の手順も確認します。
 2. **コアシステム実装**
     - [[15_ImplementationSpecs/15.1_InputManagementSpec.md|入力管理]]、[[15_ImplementationSpecs/15.1_ReactiveSystemImpl.md|リアクティブシステム]]、[[15_ImplementationSpecs/15.2_StateManagementImpl.md|状態管理]]を最優先で実装します。
@@ -68,5 +69,6 @@ linked_docs:
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.3        | 2025-06-06 | Godot CLI セットアップ手順を追記 |
 | 0.2        | 2025-06-06 | 実装ワークフロー詳細を追記 |
 | 0.1        | 2025-06-06 | 初版作成 |
