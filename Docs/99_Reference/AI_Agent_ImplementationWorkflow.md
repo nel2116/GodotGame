@@ -1,6 +1,6 @@
 ---
 title: AIエージェント向け実装ワークフロー
-version: 0.1
+version: 0.2
 status: draft
 updated: 2025-06-06
 tags:
@@ -30,20 +30,27 @@ linked_docs:
 
 # 詳細
 
-1. **コアシステム実装**
+1. **環境セットアップ**
+    - [[14_TechDocs/14.3_GodotEnvironment.md|Godot環境設定]]に従って必要なソフトウェアを準備します。
+    - テスト自動化のために[[14_TechDocs/14.11_TestAutomation.md|テスト自動化システム]]の手順も確認します。
+2. **コアシステム実装**
     - [[15_ImplementationSpecs/15.1_InputManagementSpec.md|入力管理]]、[[15_ImplementationSpecs/15.1_ReactiveSystemImpl.md|リアクティブシステム]]、[[15_ImplementationSpecs/15.2_StateManagementImpl.md|状態管理]]を最優先で実装します。
-    - 入力監視、イベント処理、状態遷移の基盤を固め、各コンポーネントが疎結合で連携できるようにします。
-2. **MVPスプリント計画の実行**
+    - インターフェース設計と単体テストを整備し、各コンポーネントが疎結合で連携できるようにします。
+3. **MVPスプリント計画の実行**
     - [[11_PlanDocs/11_3_mvp.md|MVP定義]]に記載された4週サイクルに従い、以下を順に実装します。
         1. プレイヤー操作と基本敵1種
         2. 残りの敵種とスキルツリー基幹ノード
         3. ボスと条件解放スキル
         4. UIポリッシュとテスト調整
-3. **戦闘・セーブロードシステム**
+4. **戦闘・セーブロードシステム**
     - [[15_ImplementationSpecs/15.4_CombatSystemSpec.md|戦闘システム]]と[[15_ImplementationSpecs/15.6_SaveLoadSpec.md|セーブ・ロード]]を実装し、ゲームループを完成させます。
-4. **拡張とポリッシュ**
+    - 自動テストを用いて戦闘フローとデータ保存の整合性を検証します。
+5. **拡張とポリッシュ**
     - プレイヤー成長、フィードバック、パフォーマンス最適化など、[[15_ImplementationSpecs/00_index.md|実装仕様書一覧]]の後半項目を順次反映します。
-5. **ドキュメント更新**
+6. **コミットとプルリクエスト**
+    - [[PullRequestProcedure.md|プルリクエスト手順]]に従い、作業ブランチの作成からレビュー依頼までを行います。
+    - コード変更は `godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json` でテスト後にコミットします。
+7. **ドキュメント更新**
     - 実装変更があれば[[DocumentManagementRules.md|ドキュメント管理ルール]]に従い、メタデータと変更履歴を記録します。
 
 # 使用方法
@@ -61,4 +68,5 @@ linked_docs:
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2        | 2025-06-06 | 実装ワークフロー詳細を追記 |
 | 0.1        | 2025-06-06 | 初版作成 |
