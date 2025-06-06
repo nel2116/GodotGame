@@ -49,7 +49,6 @@ linked_docs:
 - [15.11 チュートリアル実装仕様](15.11_TutorialRoomSpec.md) - チュートリアルシステムの実装詳細
 - [15.18 フィードバックシステム実装仕様](15.18_FeedbackSystemSpec.md) - フィードバックシステムの実装詳細
 - [15.19 チュートリアルシステム実装仕様](15.19_TutorialSystemSpec.md) - チュートリアルシステムの実装詳細
-- [15.22 アクセシビリティ実装仕様](15.22_AccessibilitySpec.md) - アクセシビリティ機能の実装詳細
 
 ### 4. 品質管理
 - [15.8 テスト・パフォーマンス実装仕様](15.8_TestPerformanceSpec.md) - テストとパフォーマンスの実装詳細（[14.11 テスト自動化](../14_TechDocs/14.11_TestAutomation.md)に対応）
@@ -63,7 +62,6 @@ linked_docs:
 - [15.13 実績実装仕様](15.13_AchievementSpec.md) - 実績システムの実装詳細
 - [15.14 ローカライゼーション実装仕様](15.14_LocalizationSpec.md) - ローカライゼーションの実装詳細
 - [15.23 セーブデータ実装仕様](15.23_SaveDataSpec.md) - セーブデータシステムの実装詳細
-- [15.26 ローカライゼーション実装仕様](15.26_LocalizationSpec.md) - ローカライゼーションの実装詳細
 - [15.27 アセット管理実装仕様](15.27_AssetManagementSpec.md) - アセット管理システムの実装詳細
 
 ## 使用方法
