@@ -9,7 +9,7 @@ func before_each() -> void:
     received = null
 
 func after_each() -> void:
-    bus.queue_free()
+    bus.free()
 
 func _on_event(data: Dictionary) -> void:
     received = data

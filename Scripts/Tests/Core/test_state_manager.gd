@@ -7,7 +7,7 @@ func before_each() -> void:
     add_child(manager)
 
 func after_each() -> void:
-    manager.queue_free()
+    manager.free()
 
 func test_set_get_has_remove() -> void:
     manager.SetState("score", 10)
