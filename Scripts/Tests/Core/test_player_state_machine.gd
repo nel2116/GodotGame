@@ -14,8 +14,8 @@ func before_each() -> void:
     bus.Subscribe("PlayerStateChanged", Callable(self, "_on_state_change"))
 
 func after_each() -> void:
-    fsm.queue_free()
-    bus.queue_free()
+    fsm.free()
+    bus.free()
 
 func _on_state_change(data: Dictionary) -> void:
     received = data

@@ -7,7 +7,7 @@ func before_each() -> void:
     add_child(buffer)
 
 func after_each() -> void:
-    buffer.queue_free()
+    buffer.free()
 
 func test_enqueue_dequeue() -> void:
     var event_a := InputEventKey.new()
