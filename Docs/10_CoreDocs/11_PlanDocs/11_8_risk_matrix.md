@@ -1,8 +1,13 @@
 ---
 title: 08_RiskMatrix
-version: 0.1
+version: 0.1.0
 status: draft
 updated: 2025-05-30
+tags:
+    - Risk
+    - Management
+linked_docs:
+    - "[[11_1_plan]]"
 ---
 
 | リスク                             | 発生確率 | 影響度 | 優先度 | 対策                                 |
