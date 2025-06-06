@@ -51,9 +51,17 @@ public partial class StateManager : Node
     }
 
     // 履歴を取得する
-    public IList<Variant> GetStateHistory(string state_name)
+    public Godot.Collections.Array GetStateHistory(string state_name)
     {
-        return state_history.TryGetValue(state_name, out var history) ? history : new List<Variant>();
+        var result = new Godot.Collections.Array();
+        if (state_history.TryGetValue(state_name, out var history))
+        {
+            foreach (var value in history)
+            {
+                result.Add(value);
+            }
+        }
+        return result;
     }
 }
 
