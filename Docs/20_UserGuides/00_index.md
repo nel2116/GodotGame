@@ -46,6 +46,8 @@ linked_docs:
 
 ### 機能ガイド
 
+-   [[TestExecutionGuide|テスト実行ガイド]]
+
 -   [[BasicFeatures|基本機能]]
 
     -   キャラクター操作
