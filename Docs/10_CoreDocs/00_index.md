@@ -69,6 +69,7 @@ linked_docs:
 -   [[99_Reference/PullRequestProcedure|プルリクエスト手順]]
 -   [[99_Reference/GithubIssueEditingWorkflow|GitHub Issue編集ワークフロー]]
 -   [[99_Reference/ProjectRules|プロジェクトルール]]
+-   [[99_Reference/CommitMessageRules|コミットメッセージルール]]
 
 ## 使用方法
 
