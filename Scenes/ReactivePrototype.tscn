@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://reactiveprototype"]
+
+[ext_resource type="Script" path="res://Scripts/Reactive/ReactiveCounterUI.cs" id="1"]
+[ext_resource type="Script" path="res://Scripts/Reactive/ReactiveCounter.cs" id="2"]
+
+[node name="ReactiveCounterUI" type="Node" script=ExtResource("1")]
+CounterPath = NodePath("ReactiveCounter")
+LabelPath = NodePath("Label")
+ButtonPath = NodePath("Button")
+
+[node name="ReactiveCounter" type="Node" parent="." script=ExtResource("2")]
+
+[node name="Label" type="Label" parent="."]
+text = "Count: 0"
+
+[node name="Button" type="Button" parent="."]
+text = "Increment"
+

@@ -48,6 +48,7 @@ linked_docs:
 7. [[11_7_content_map|コンテンツマップ]] - ゲームコンテンツの構成
 8. [[11_8_risk_matrix|リスクマトリックス]] - プロジェクトリスクの分析
 9. [[11_9_core_experience_spec|コア体験仕様]] - プレイヤー体験の詳細仕様
+10. [[11_10_reactive_programming_design|リアクティブプログラミング設計]] - リアクティブ化方針
 
 ## 使用方法
 
