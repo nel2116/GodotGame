@@ -21,4 +21,4 @@ project/assembly_name="NewGameProject"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray()

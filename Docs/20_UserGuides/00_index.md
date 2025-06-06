@@ -48,6 +48,8 @@ linked_docs:
 
 -   [[TestExecutionGuide|テスト実行ガイド]]
 
+-   [[TestGuidelines|テストガイドライン]]
+
 -   [[BasicFeatures|基本機能]]
 
     -   キャラクター操作

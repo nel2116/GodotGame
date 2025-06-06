@@ -22,6 +22,7 @@
   ```bash
   godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
   ```
+- 詳細な手順は `Docs/20_UserGuides/TestExecutionGuide.md` を参照してください。
 - テスト通過後、`git status` を確認し作業ツリーがクリーンであることを確かめます。
 
 ## 言語
