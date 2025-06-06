@@ -53,13 +53,18 @@ public partial class EventBus : Node
     }
 
     // 指定したイベントの履歴を取得する
-    public IList<Godot.Collections.Dictionary> GetEventHistory(string event_name)
+    public Godot.Collections.Array GetEventHistory(string event_name)
     {
         if (event_history.TryGetValue(event_name, out var history))
         {
-            return history;
+            var result = new Godot.Collections.Array();
+            foreach (var entry in history)
+            {
+                result.Add(entry);
+            }
+            return result;
         }
-        return new List<Godot.Collections.Dictionary>();
+        return new Godot.Collections.Array();
     }
 }
 

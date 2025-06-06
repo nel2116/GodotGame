@@ -1,6 +1,6 @@
 ---
 title: AIエージェント向け実装ワークフロー
-version: 0.5
+version: 0.6
 status: draft
 updated: 2025-06-06
 tags:
@@ -33,7 +33,7 @@ linked_docs:
 
 1. **環境セットアップ**
     - [[14_TechDocs/14.3_GodotEnvironment.md|Godot環境設定]]に従って必要なソフトウェアを準備します。
-    - `.NET SDK` 8.0 以上をインストールした上で `setup_godot_cli.sh` を実行し、C# 対応の Godot CLI を導入します。実行後に `godot --headless --path . --build-solutions --quit` を実行してソリューションをビルドします。
+    - `sudo apt-get update` を実行してから `sudo apt-get install -y dotnet-sdk-8.0` で `.NET SDK` 8.0 以上を導入し、その後 `setup_godot_cli.sh` を実行して C# 対応の Godot CLI をインストールします。インストール後に `godot --headless --path . --build-solutions --quit` を実行してソリューションをビルドします。
     - テスト自動化のために[[14_TechDocs/14.11_TestAutomation.md|テスト自動化システム]]の手順も確認します。
 2. **コアシステム実装**
     - [[15_ImplementationSpecs/15.1_InputManagementSpec.md|入力管理]]、[[15_ImplementationSpecs/15.1_ReactiveSystemImpl.md|リアクティブシステム]]、[[15_ImplementationSpecs/15.2_StateManagementImpl.md|状態管理]]を最優先で実装します。
@@ -72,6 +72,7 @@ linked_docs:
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.6        | 2025-06-06 | apt 更新と .NET インストール手順を追加 |
 | 0.5        | 2025-06-06 | setup スクリプトの前提条件を追記 |
 | 0.4        | 2025-06-06 | ゲーム処理を C# 実装へ変更 |
 | 0.3        | 2025-06-06 | Godot CLI セットアップ手順を追記 |

@@ -1,6 +1,6 @@
 ---
 title: テスト実行ガイド
-version: 0.2.1
+version: 0.2.2
 status: draft
 updated: 2025-06-06
 tags:
@@ -26,7 +26,7 @@ linked_docs:
 
 ## 環境構築
 
-1. `.NET SDK` 8.0 以上をあらかじめインストールします。`sudo apt-get install dotnet-sdk-8.0` を実行してください。
+1. `sudo apt-get update` を実行してパッケージを最新化した後、`sudo apt-get install -y dotnet-sdk-8.0` で `.NET SDK` 8.0 以上をインストールします。
 2. `setup_godot_cli.sh` を実行して C# 対応の Godot CLI をインストールします。スクリプトは .NET ランタイムが無いと失敗します。
 3. インストール後、`godot --headless --path . --build-solutions --quit` を実行してソリューションをビルドし、アセットをインポートします。
 
@@ -52,6 +52,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2.2      | 2025-06-06 | apt 更新と .NET インストール手順を追加 |
 | 0.2.1      | 2025-06-06 | setup スクリプトの前提条件を追記 |
 | 0.2.0      | 2025-06-06 | テスト時の注意点を追記 |
 | 0.1.0      | 2025-06-06 | 初版作成 |
