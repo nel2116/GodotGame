@@ -1,12 +1,25 @@
 ---
 title: 技術ドキュメント
-version: 0.1.0
+version: 0.3.0
 status: draft
-updated: 2025-06-01
+updated: 2025-06-06
 tags:
     - Technical
     - Documentation
     - Core
+linked_docs:
+    - "14.1_Requirement"
+    - "14.2_PrototypeTechnicalDesign"
+    - "14.3_GodotEnvironment"
+    - "14.4_InputStateMachine"
+    - "14.5_DungeonGeneration"
+    - "14.6_EnemyAIFoundation"
+    - "14.7_CombatSystem"
+    - "14.8_SkillCooldown"
+    - "14.9_SaveDataManagement"
+    - "14.10_UILayout"
+    - "14.11_TestAutomation"
+    - "14.12_PerformanceProfiling"
 ---
 
 # 技術ドキュメント
@@ -32,6 +45,7 @@ tags:
 -   ネットワーク設計書
 -   セキュリティ仕様書
 -   パフォーマンス最適化ガイド
+-   プロトタイプ技術設計書
 
 ## 使用方法
 
@@ -48,4 +62,6 @@ tags:
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.3.0      | 2025-06-06 | 各技術要素の設計書を追加 |
+| 0.2.0      | 2025-06-06 | プロトタイプ技術設計書を追加 |
 | 0.1.0      | 2025-06-01 | 初版作成 |
