@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "10_CoreDocs/11_PlanDocs/11_5_development_roadmap.md",
-                "mode": "preview",
+                "file": "10_CoreDocs/README.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "11_5_development_roadmap"
+              "title": "README"
             }
           }
         ]
@@ -84,8 +84,7 @@
               "title": "Oblogger"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -188,8 +187,18 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "ce7663a5b65edf9d",
+  "active": "2aab51aa584fb242",
   "lastOpenFiles": [
+    "10_CoreDocs/DevelopmentGuidelines.md",
+    "10_CoreDocs/Architecture.md",
+    "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
+    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
+    "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
+    "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
+    "10_CoreDocs/11_PlanDocs/11_5_development_roadmap.md",
     "10_CoreDocs/15_ImplementationSpecs/15.7_EventSystem.md",
     "10_CoreDocs/15_ImplementationSpecs/15.6_Testing.md",
     "10_CoreDocs/15_ImplementationSpecs/15.5_Telemetry.md",
@@ -198,15 +207,7 @@
     "10_CoreDocs/15_ImplementationSpecs/15.2_EventBus.md",
     "10_CoreDocs/15_ImplementationSpecs/15.1_GameSystems.md",
     "10_CoreDocs/15_ImplementationSpecs/00_index.md",
-    "10_CoreDocs/14_TechDocs/14_DetailedDesign.md",
-    "10_CoreDocs/14_TechDocs/14.6_ImplementationTasks.md",
-    "10_CoreDocs/14_TechDocs/14.5_ModuleDiagram.md",
-    "10_CoreDocs/14_TechDocs/14.4_SequenceDiagram.md",
-    "10_CoreDocs/14_TechDocs/14.3_ActivityDiagram.md",
-    "10_CoreDocs/14_TechDocs/14.2_ClassDiagram.md",
-    "10_CoreDocs/14_TechDocs/14.1_Requirement.md",
     "10_CoreDocs/11_PlanDocs/11_1_plan.md",
-    "10_CoreDocs/11_PlanDocs/11_5_development_roadmap.md",
     "10_CoreDocs/11_PlanDocs/00_index.md",
     "10_CoreDocs/14_TechDocs/00_index.md",
     "10_CoreDocs/11_PlanDocs/11_2_design_pillar.md",
@@ -224,8 +225,6 @@
     "10_CoreDocs/13_Skills/SkilData.cost.translation9075727.tmp",
     "10_CoreDocs/13_Skills/SkilData.cost.translation9058781.tmp",
     "10_CoreDocs/11_PlanDocs/11_3_mvp.md",
-    "00_index.md",
-    "99_Reference/PullRequestProcedure.md",
     "無題のファイル.canvas",
     "20_Stock/無題のファイル.canvas"
   ]
