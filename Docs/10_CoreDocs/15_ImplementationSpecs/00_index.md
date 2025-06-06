@@ -2,11 +2,14 @@
 title: 実装仕様
 version: 0.4.0
 status: approved
-updated: 2025-06-07
+updated: 2025-06-06
 tags:
     - Implementation
     - Specification
     - Core
+linked_docs:
+    - "[[14_TechDocs/00_index.md]]"
+    - "[[DocumentManagementRules.md]]"
 ---
 
 # 実装仕様
