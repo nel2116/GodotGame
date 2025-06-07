@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-
-[gd_scene format=3 uid="uid://d2b2ehk6kx115"]
-[ext_resource type="Script" path="res://Scripts/Main.gd" id="1"]
-=======
 [gd_scene load_steps=2 format=3 uid="uid://d2b2ehk6kx115"]
 
 [ext_resource type="Script" uid="uid://bajdhg7jonp8p" path="res://Scripts/Main.cs" id="1"]
->>>>>>> develop
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1")

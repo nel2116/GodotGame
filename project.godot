@@ -12,7 +12,7 @@ config_version=5
 
 config/name="NewGameProject"
 run/main_scene="uid://d2b2ehk6kx115"
-config/features=PackedStringArray("4.4", "GL Compatibility")
+config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [dotnet]
