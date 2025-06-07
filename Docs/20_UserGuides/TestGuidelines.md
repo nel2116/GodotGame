@@ -1,8 +1,8 @@
 ---
 title: テストガイドライン
-version: 0.1.2
+version: 0.1.3
 status: draft
-updated: 2025-06-06
+updated: 2025-06-07
 tags:
     - UserGuide
     - Test
@@ -34,12 +34,8 @@ linked_docs:
 ## テスト実行手順
 
 1. `sudo apt-get update` を実行し、パッケージリストを最新化します。
-2. `sudo apt-get install -y dotnet-sdk-8.0` で `.NET SDK 8.0` 以上をインストールします。
-3. `setup_godot_cli.sh` を実行して Godot CLI を導入します。
-4. `godot --headless --path . --import` を一度実行し、アセットをインポートします。
-5. `dotnet build` を実行してソリューションをビルドします。
-6. 生成された DLL を `.godot/mono/assemblies/Debug/` にコピーします。
-7. 下記コマンドでテストを実行します。
+2. `setup_godot_cli.sh` を実行すると `.NET SDK` と Godot CLI がまとめて導入され、アセットインポートとソリューションビルドまで自動で行われます。
+3. 下記コマンドでテストを実行します。
 
 ```bash
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
@@ -55,6 +51,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.1.3      | 2025-06-07 | setup_godot_cli.sh の自動化に伴い手順を簡素化 |
 | 0.1.2      | 2025-06-06 | setup_godot_cli.sh 実行前の apt 更新と .NET インストールを追記 |
 | 0.1.1      | 2025-06-06 | インポート手順を追記 |
 | 0.1.0      | 2025-06-06 | 初版作成 |
