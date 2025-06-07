@@ -10,8 +10,8 @@ namespace Core.Reactive
     public class ReactiveProperty<T> : IReactiveProperty<T>
     {
         private T _value;
-        private readonly Subject<T> _inner_subject = new();
-        private readonly ISubject<T> _subject;
+        private readonly Subject<T> _raw_subject = new();
+        private readonly ISubject<T> _sync_subject;
         private readonly object _sync_lock = new();
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Core.Reactive
                 }
                 if (changed)
                 {
-                    _subject.OnNext(value);
+                    _sync_subject.OnNext(value);
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Core.Reactive
         public ReactiveProperty(T initialValue = default)
         {
             _value = initialValue;
-            _subject = Subject.Synchronize(_inner_subject);
+            _sync_subject = Subject.Synchronize(_raw_subject);
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Core.Reactive
         /// </summary>
         public IDisposable Subscribe(Action<T> onNext)
         {
-            return _subject.Subscribe(onNext);
+            return _sync_subject.Subscribe(onNext);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Core.Reactive
         /// </summary>
         public void Dispose()
         {
-            _inner_subject.Dispose();
+            _raw_subject.Dispose();
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Core.Reactive
             if (ReferenceEquals(disposable, this))
             {
                 // 自身を追加すると無限再帰で破棄されるため無視する
+                System.Diagnostics.Debug.WriteLine("Warning: Attempted to add self to CompositeDisposable. This operation is ignored.");
                 return;
             }
 
