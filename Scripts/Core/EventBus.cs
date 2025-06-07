@@ -6,40 +6,92 @@ using System.Collections.Generic;
 [GlobalClass]
 public partial class EventBus : Node
 {
-    // イベントハンドラーの登録辞書
-    private readonly Dictionary<string, List<Callable>> event_handlers = new();
+    // 履歴の上限
+    private const int HISTORY_LIMIT = 100;
 
-    // イベント履歴を保持する辞書
+    // ハンドラーとフィルターの辞書
+    private readonly Dictionary<string, List<(Callable callback, Callable? filter)>> event_handlers = new();
+
+    // イベント履歴
     private readonly Dictionary<string, List<Godot.Collections.Dictionary>> event_history = new();
 
-    // イベントを発火して購読者へ通知する
+    // 非同期イベントキュー
+    private readonly PriorityQueue<EventEntry, int> event_queue = new();
+
+    private record struct EventEntry(string Name, Godot.Collections.Dictionary Data, int Priority);
+
+    // イベントをキューへ追加する（優先度指定）
+    public void EmitEvent(string event_name, Godot.Collections.Dictionary data, int priority)
+    {
+        event_queue.Enqueue(new EventEntry(event_name, data, priority), priority);
+    }
+
+    // イベントをキューへ追加する（優先度なし）
     public void EmitEvent(string event_name, Godot.Collections.Dictionary data)
+    {
+        EmitEvent(event_name, data, 0);
+    }
+
+    public override void _Process(double delta)
+    {
+        while (event_queue.Count > 0)
+        {
+            var entry = event_queue.Dequeue();
+            AddHistory(entry.Name, entry.Data);
+            if (event_handlers.TryGetValue(entry.Name, out var handlers))
+            {
+                foreach (var (callback, filter) in handlers.ToArray())
+                {
+                    if (filter != null)
+                    {
+                        var result = filter.Value.Call(entry.Data);
+                        if (result.VariantType == Variant.Type.Bool && !result.AsBool())
+                        {
+                            continue;
+                        }
+                    }
+                    callback.Call(entry.Data);
+                }
+            }
+        }
+    }
+
+    private void AddHistory(string event_name, Godot.Collections.Dictionary data)
     {
         if (!event_history.ContainsKey(event_name))
         {
             event_history[event_name] = new List<Godot.Collections.Dictionary>();
         }
-        event_history[event_name].Add(data);
-
-        if (event_handlers.TryGetValue(event_name, out var handlers))
+        var history = event_history[event_name];
+        history.Add(data);
+        if (history.Count > HISTORY_LIMIT)
         {
-            foreach (var callback in handlers)
-            {
-                callback.Call(data);
-            }
+            history.RemoveAt(0);
         }
     }
 
     // イベント購読を登録する
+    public void Subscribe(string event_name, Callable callback, Callable filter)
+    {
+        AddHandler(event_name, callback, filter);
+    }
+
+    // フィルターなし購読
     public void Subscribe(string event_name, Callable callback)
+    {
+        AddHandler(event_name, callback, null);
+    }
+
+    private void AddHandler(string event_name, Callable callback, Callable? filter)
     {
         if (!event_handlers.ContainsKey(event_name))
         {
-            event_handlers[event_name] = new List<Callable>();
+            event_handlers[event_name] = new List<(Callable, Callable?)>();
         }
-        if (!event_handlers[event_name].Contains(callback))
+        var handlers = event_handlers[event_name];
+        if (!handlers.Exists(x => x.callback.Equals(callback)))
         {
-            event_handlers[event_name].Add(callback);
+            handlers.Add((callback, filter));
         }
     }
 
@@ -48,23 +100,22 @@ public partial class EventBus : Node
     {
         if (event_handlers.TryGetValue(event_name, out var handlers))
         {
-            handlers.Remove(callback);
+            handlers.RemoveAll(x => x.callback.Equals(callback));
         }
     }
 
     // 指定したイベントの履歴を取得する
     public Godot.Collections.Array GetEventHistory(string event_name)
     {
+        var result = new Godot.Collections.Array();
         if (event_history.TryGetValue(event_name, out var history))
         {
-            var result = new Godot.Collections.Array();
             foreach (var entry in history)
             {
                 result.Add(entry);
             }
-            return result;
         }
-        return new Godot.Collections.Array();
+        return result;
     }
 }
 
