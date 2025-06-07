@@ -44,9 +44,17 @@ public partial class EventBus : Node
                 {
                     if (filter != null)
                     {
-                        var result = filter.Value.Call(entry.Data);
-                        if (result.VariantType == Variant.Type.Bool && !result.AsBool())
+                        try
                         {
+                            var result = filter.Value.Call(entry.Data);
+                            if (result.VariantType == Variant.Type.Bool && !result.AsBool())
+                            {
+                                continue;
+                            }
+                        }
+                        catch (System.Exception ex)
+                        {
+                            GD.PrintErr($"Error in filter callback for event '{entry.Name}': {ex.Message}");
                             continue;
                         }
                     }

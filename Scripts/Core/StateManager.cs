@@ -30,10 +30,11 @@ public partial class StateManager : Node
     // 状態を設定して履歴に追加する
     public void SetState(string state_name, Variant value)
     {
-        Variant prev = new Variant();
-        if (current_states.TryGetValue(state_name, out prev))
+        Variant? prev = null;
+        if (current_states.TryGetValue(state_name, out var existingState))
         {
-            if (!CanTransition(state_name, prev, value))
+            prev = existingState;
+            if (!CanTransition(state_name, existingState, value))
             {
                 return;
             }
@@ -50,9 +51,12 @@ public partial class StateManager : Node
         {
             var data = new Godot.Collections.Dictionary
             {
-                {"from", prev},
                 {"to", value}
             };
+            if (prev.HasValue)
+            {
+                data["from"] = prev.Value;
+            }
             foreach (var cb in list.ToArray())
             {
                 cb.Call(data);
