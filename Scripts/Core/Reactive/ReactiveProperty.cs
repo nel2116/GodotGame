@@ -23,10 +23,10 @@ namespace Core.Reactive
             get => _value;
             set
             {
-                if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
                 bool changed = false;
                 lock (_sync_lock)
                 {
+                    if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
                     if (!EqualityComparer<T>.Default.Equals(_value, value))
                     {
                         _value = value;
