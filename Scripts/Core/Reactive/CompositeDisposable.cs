@@ -9,8 +9,8 @@ namespace Core.Reactive
     public class CompositeDisposable : IDisposable
     {
         private readonly List<IDisposable> _disposables = new();
-        private bool _is_disposed;
-        private readonly object _lock = new();
+        private bool _isDisposed;
+        private readonly object _syncLock = new();
 
         /// <summary>
         /// 破棄対象を追加
@@ -19,9 +19,9 @@ namespace Core.Reactive
         {
             if (disposable == null) throw new ArgumentNullException(nameof(disposable));
 
-            lock (_lock)
+            lock (_syncLock)
             {
-                if (_is_disposed)
+                if (_isDisposed)
                 {
                     disposable.Dispose();
                     return;
@@ -50,7 +50,7 @@ namespace Core.Reactive
         {
             if (disposable == null) throw new ArgumentNullException(nameof(disposable));
 
-            lock (_lock)
+            lock (_syncLock)
             {
                 return _disposables.Remove(disposable);
             }
@@ -61,7 +61,7 @@ namespace Core.Reactive
         /// </summary>
         public void Clear()
         {
-            lock (_lock)
+            lock (_syncLock)
             {
                 foreach (var disposable in _disposables)
                 {
@@ -76,16 +76,16 @@ namespace Core.Reactive
         /// </summary>
         public void Dispose()
         {
-            lock (_lock)
+            lock (_syncLock)
             {
-                if (_is_disposed) return;
+                if (_isDisposed) return;
 
                 foreach (var disposable in _disposables)
                 {
                     disposable.Dispose();
                 }
                 _disposables.Clear();
-                _is_disposed = true;
+                _isDisposed = true;
             }
         }
     }
