@@ -1,12 +1,39 @@
 ---
 title: 技術ドキュメント
-version: 0.4.0
+version: 0.4.1
 status: draft
-updated: 2025-06-06
+updated: 2025-06-07
 tags:
-    - Technical
-    - Documentation
-    - Core
+- Technical
+- Documentation
+- Core
+linked_docs:
+- "[[14.1_Requirement.md]]"
+- "[[14.2_PrototypeTechnicalDesign.md]]"
+- "[[14.3_GodotEnvironment.md]]"
+- "[[14.4_InputStateMachine.md]]"
+- "[[14.5_DungeonGeneration.md]]"
+- "[[14.6_EnemyAIFoundation.md]]"
+- "[[14.7_CombatSystem.md]]"
+- "[[14.8_SkillCooldown.md]]"
+- "[[14.9_SaveDataManagement.md]]"
+- "[[14.10_UILayout.md]]"
+- "[[14.11_TestAutomation.md]]"
+- "[[14.12_PerformanceProfiling.md]]"
+- "[[14.14_GameManager.md]]"
+- "[[14.15_UIManager.md]]"
+- "[[14.16_SoundManager.md]]"
+- "[[14.17_DebugManager.md]]"
+- "[[14.18_SystemArchitecture.md]]"
+- "[[15.1_ReactiveSystemImpl.md]]"
+- "[[15.2_StateManagementImpl.md]]"
+- "[[15.3_EnemyAISpec.md]]"
+- "[[15.4_CombatSystemSpec.md]]"
+- "[[15.5_SkillSystemSpec.md]]"
+- "[[15.6_SaveLoadSpec.md]]"
+- "[[15.7_UIUXSpec.md]]"
+- "[[15.8_TestPerformanceSpec.md]]"
+- "[[15.12_PerformanceOptimizationSpec.md]]"
 ---
 
 # 技術ドキュメント
@@ -71,6 +98,7 @@ tags:
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.4.1 | 2025-06-07 | リンク整合性修正         |
 | 0.4.0      | 2025-06-06 | ドキュメント構造の再編成とカテゴリ分類の追加 |
 | 0.3.0      | 2025-06-06 | 各技術要素の設計書を追加 |
 | 0.2.0      | 2025-06-06 | プロトタイプ技術設計書を追加 |
