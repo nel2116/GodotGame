@@ -1,8 +1,8 @@
 ---
 title: APIリファレンス
-version: 0.1.0
+version: 0.1.1
 status: draft
-updated: 2025-06-01
+updated: 2025-06-07
 tags:
     - API
     - Reference
@@ -34,6 +34,18 @@ linked_docs:
     -   ゲームエンジン関連
     -   システム管理
     -   ユーティリティ機能
+-   [[MainScriptAPI|Main.cs API]]
+    -   ゲーム開始処理
+-   [[EventBusAPI|EventBus.cs API]]
+    -   イベント通知
+-   [[InputBufferAPI|InputBuffer.cs API]]
+    -   入力バッファ
+-   [[InputObserverAPI|InputObserver.cs API]]
+    -   入力監視
+-   [[PlayerStateMachineAPI|PlayerStateMachine.cs API]]
+    -   プレイヤー状態管理
+-   [[StateManagerAPI|StateManager.cs API]]
+    -   ゲーム状態管理
 
 ### ゲームプレイ
 
@@ -68,4 +80,5 @@ API の使用にあたっては、以下の点に注意してください：
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.1.1      | 2025-06-07 | スクリプトAPIへのリンクを追加 |
 | 0.1.0      | 2025-06-01 | 初版作成 |
