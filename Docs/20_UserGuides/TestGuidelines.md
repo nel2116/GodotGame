@@ -1,7 +1,7 @@
 ---
 title: テストガイドライン
-version: 0.1.4
-status: draft
+version: 1.0.0
+status: active
 updated: 2025-06-07
 tags:
     - UserGuide
@@ -9,43 +9,73 @@ tags:
     - Guideline
 linked_docs:
     - "[[20_UserGuides/TestExecutionGuide|テスト実行ガイド]]"
-    - "[[99_Reference/AI_Agent_ImplementationWorkflow.md]]"
+    - "[[99_Reference/AI_Agent_TestWorkflow|AIエージェント向けテスト実行ワークフロー]]"
 ---
 
 # テストガイドライン
 
 ## 目次
+
 1. [概要](#概要)
-2. [基本方針](#基本方針)
-3. [テスト実行手順](#テスト実行手順)
+2. [テスト戦略](#テスト戦略)
+3. [テストの種類と使い分け](#テストの種類と使い分け)
 4. [テストの書き方](#テストの書き方)
-5. [注意事項](#注意事項)
+5. [推奨アプローチ](#推奨アプローチ)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-このドキュメントでは、プロジェクトでテストを実施する際の基本方針と手順をまとめます。
+このドキュメントでは、プロジェクトのテスト戦略と実装ガイドラインを説明します。
+具体的な実行手順については、[テスト実行ガイド](TestExecutionGuide.md)を参照してください。
 
-## 基本方針
+## テスト戦略
 
-- すべての変更はコミット前にテストを実行して結果を確認します。
-- テストケースは GUT フレームワークを使用して記述します。
-- C# スクリプトを追加・変更した際は `godot --headless --path . --build-solutions --quit` を実行し DLL を生成します。
+1. **基本方針**
 
-## テスト実行手順
+    - すべての変更はコミット前にテストを実行
+    - テストカバレッジを維持・向上
+    - テストの自動化を推進
 
-1. `sudo apt-get update` を実行し、パッケージリストを最新化します。
-2. `setup_godot_cli.sh` を実行すると `.NET SDK` と Godot CLI がまとめて導入され、アセットインポートとソリューションビルドまで自動で行われます。
-3. 下記コマンドでテストを実行します。
+2. **テストの優先順位**
+    - 重要なビジネスロジック
+    - 頻繁に変更されるコード
+    - 複雑なロジック
+    - エッジケース
 
-```bash
-godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
-```
+## テストの種類と使い分け
+
+1. **C#テスト（NUnit）**
+
+    - ビジネスロジックのテスト
+    - ユーティリティクラスのテスト
+    - データ構造のテスト
+    - 非同期処理のテスト
+
+2. **GUT テスト**
+    - Godot エンジン機能のテスト
+    - シーンとノードのテスト
+    - ゲーム特有の機能テスト
+    - 物理演算やアニメーションのテスト
 
 ## テストの書き方
 
-Scripts/Tests/Core 内の `.gd` ファイルは GUT を利用した基本的なテスト例です。
-各テストファイルは `test_*.gd` の名前で保存し、以下の形式で記述します。
+### C#テストの例
+
+```csharp
+[Test]
+public void ValueChange_NotifiesSubscribers()
+{
+    var property = new ReactiveProperty<int>(0);
+    int notifiedValue = -1;
+    using (property.Subscribe(v => notifiedValue = v))
+    {
+        property.Value = 42;
+    }
+    Assert.AreEqual(42, notifiedValue);
+}
+```
+
+### GUT テストの例
 
 ```gdscript
 extends GutTest
@@ -58,11 +88,11 @@ func _on_event(data: Dictionary) -> void:
 
 func before_each() -> void:
     bus = EventBus.new()
-    add_child(bus) # テスト対象をツリーに追加
+    add_child(bus)
     received = null
 
 func after_each() -> void:
-    bus.free() # 生成したノードを解放
+    bus.free()
 
 func test_emit_and_subscribe() -> void:
     bus.Subscribe("TestEvent", Callable(self, "_on_event"))
@@ -71,26 +101,32 @@ func test_emit_and_subscribe() -> void:
     assert_eq(received, data)
 ```
 
-`before_each()` と `after_each()` でテストの準備と後処理を行います。テスト関数は
-`test_` から始まる名前にし、`assert_eq` などのアサーションで期待値を検証します。
+## 推奨アプローチ
 
-`test_input_buffer.gd` では入力イベントのキュー操作を、`test_state_manager.gd`
-では状態管理の履歴検証を行っています。既存ファイルを参考に、1 つのテストでは 1
-つの機能を確認するようにしてください。
+1. **ハイブリッドアプローチ**
 
-## 注意事項
+    - ビジネスロジック → C#テスト
+    - ゲームエンジン機能 → GUT テスト
+    - 統合テスト → 必要に応じて両方を使用
 
-- `gut_cmdln.gd` の設定は `.gutconfig.json` に記述されています。
-- テスト結果は `res://Scripts/Tests/test-results_*.xml` に出力されます。
-- テストが失敗した場合は原因を特定し、再度テストを通過させてからコミットしてください。
+2. **テストの粒度**
+
+    - ユニットテスト: 個々の機能をテスト
+    - インテグレーションテスト: 複数の機能の連携をテスト
+    - エンドツーエンドテスト: 実際の使用シナリオをテスト
+
+3. **テストの命名規則**
+
+    - C#テスト: `[Test]`属性を使用
+    - GUT テスト: `test_`プレフィックスを使用
+
+4. **テストの構造**
+    - 準備（Arrange）
+    - 実行（Act）
+    - 検証（Assert）
 
 ## 変更履歴
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
-| 0.1.4      | 2025-06-07 | テストの書き方セクションを追加 |
-| 0.1.3      | 2025-06-07 | setup_godot_cli.sh の自動化に伴い手順を簡素化 |
-| 0.1.2      | 2025-06-06 | setup_godot_cli.sh 実行前の apt 更新と .NET インストールを追記 |
-| 0.1.1      | 2025-06-06 | インポート手順を追記 |
-| 0.1.0      | 2025-06-06 | 初版作成 |
-
+| 1.0.0      | 2025-06-07 | 初版作成 |
