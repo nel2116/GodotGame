@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -10,7 +10,7 @@ namespace Core.Events
     /// </summary>
     public class GameEventBus : IGameEventBus
     {
-        private readonly Dictionary<Type, Subject<GameEvent>> _subjects = new();
+        private readonly ConcurrentDictionary<Type, Subject<GameEvent>> _subjects = new();
 
         /// <summary>
         /// イベントを発行
@@ -31,12 +31,7 @@ namespace Core.Events
 
         private Subject<GameEvent> GetOrCreateSubject(Type type)
         {
-            if (!_subjects.TryGetValue(type, out var subject))
-            {
-                subject = new Subject<GameEvent>();
-                _subjects[type] = subject;
-            }
-            return subject;
+            return _subjects.GetOrAdd(type, _ => new Subject<GameEvent>());
         }
     }
 }
