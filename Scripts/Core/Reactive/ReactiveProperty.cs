@@ -13,6 +13,7 @@ namespace Core.Reactive
         private readonly Subject<T> _raw_subject = new();
         private readonly ISubject<T> _sync_subject;
         private readonly object _sync_lock = new();
+        private bool _is_disposed;
 
         /// <summary>
         /// プロパティの値
@@ -22,6 +23,7 @@ namespace Core.Reactive
             get => _value;
             set
             {
+                if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
                 bool changed = false;
                 lock (_sync_lock)
                 {
@@ -61,7 +63,9 @@ namespace Core.Reactive
         /// </summary>
         public void Dispose()
         {
+            _sync_subject.OnCompleted();
             _raw_subject.Dispose();
+            _is_disposed = true;
         }
     }
 }

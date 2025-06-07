@@ -2,7 +2,7 @@
 title: ReactiveProperty実装詳細
 version: 0.1.0
 status: draft
-updated: 2024-03-21
+updated: 2025-06-07
 tags:
     - Architecture
     - MVVM
@@ -107,7 +107,7 @@ public class ReactiveProperty<T> : IReactiveProperty<T>
     public ReactiveProperty(T initialValue = default)
     {
         _value = initialValue;
-        // Subject.Synchronize を利用し複数スレッドからの購読を安全に処理する
+        // Use Subject.Synchronize to handle subscriptions safely from multiple threads
     }
 
     public IDisposable Subscribe(Action<T> onNext)

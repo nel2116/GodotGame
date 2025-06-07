@@ -118,10 +118,8 @@ namespace Tests.Core
         {
             var composite = new CompositeDisposable();
             composite.Add(composite);
-            // リフレクションで内部リストを取得し自己追加が無視されたか確認
-            var field = typeof(CompositeDisposable).GetField("_disposables", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var list = (List<IDisposable>)field.GetValue(composite);
-            Assert.AreEqual(0, list.Count);
+            // 公開プロパティで自己追加が無視されたか確認
+            Assert.AreEqual(0, composite.DisposableCount);
 
             composite.Dispose();
         }

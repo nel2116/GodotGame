@@ -2,7 +2,7 @@
 title: CompositeDisposable実装詳細
 version: 0.1.0
 status: draft
-updated: 2024-03-21
+updated: 2025-06-07
 tags:
     - Architecture
     - MVVM
@@ -97,7 +97,7 @@ public class CompositeDisposable : IDisposable
         }
     }
 
-    // 自身を追加すると Dispose 時に無限再帰となるため、呼び出し側でのチェックを推奨
+    // Add メソッドでは自身の追加を検出して無視するため特別なチェックは不要
 
     public void AddRange(IEnumerable<IDisposable> disposables)
     {

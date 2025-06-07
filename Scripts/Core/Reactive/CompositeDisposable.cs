@@ -13,6 +13,20 @@ namespace Core.Reactive
         private readonly object _sync_lock = new();
 
         /// <summary>
+        /// 登録されている破棄対象の数
+        /// </summary>
+        public int DisposableCount
+        {
+            get
+            {
+                lock (_sync_lock)
+                {
+                    return _disposables.Count;
+                }
+            }
+        }
+
+        /// <summary>
         /// 破棄対象を追加
         /// 自身を追加した場合は無限再帰を防ぐため警告を出して無視する
         /// </summary>
