@@ -10,9 +10,9 @@ tags:
     - MVVM
     - Reactive
 linked_docs:
-    - "[[10_CoreDocs/00_index]]"
-    - "[[10_CoreDocs/Architecture]]"
-    - "[[30_APIReference/CoreSystemAPI]]"
+    - "[[10_CoreDocs/00_index|コアドキュメントインデックス]]"
+    - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[30_APIReference/CoreSystemAPI|コアシステムAPI]]"
 ---
 
 # 開発ガイドライン

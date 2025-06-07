@@ -1,3 +1,19 @@
+---
+title: Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
+version: 0.1.0
+status: draft
+updated: 2024-03-21
+tags:
+    - Architecture
+    - MVVM
+    - Reactive
+    - Core
+linked_docs:
+    - "[[12_02_basic_design|MVVM+RX基本設計書]]"
+    - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
+    - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
+---
+
 # Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
 
 ## 1. 設計思想

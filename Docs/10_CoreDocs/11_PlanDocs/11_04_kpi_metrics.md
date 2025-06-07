@@ -8,10 +8,10 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[11_2_design_pillar|デザインピラー]]"
-    - "[[11_3_mvp|MVP]]"
-    - "[[11_1_plan|計画書]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[11_PlanDocs/11_02_design_pillars|デザインピラー]]"
+    - "[[11_PlanDocs/11_03_mvp_definition|MVP定義]]"
+    - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
+    - "[[11_PlanDocs/00_index|計画ドキュメント]]"
 ---
 
 > **目的**：デザインピラー達成度を "数値" で追跡し、開発判断を迷わなくする。  

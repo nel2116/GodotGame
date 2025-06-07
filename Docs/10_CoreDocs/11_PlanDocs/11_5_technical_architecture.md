@@ -9,9 +9,9 @@ tags:
     - Core
     - Project
 linked_docs:
-    - "[[11_1_plan|プロジェクト計画書]]"
-    - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
+    - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[11_PlanDocs/00_index|計画ドキュメント]]"
 ---
 
 # 技術アーキテクチャ設計書

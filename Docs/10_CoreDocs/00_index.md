@@ -10,10 +10,10 @@ tags:
     - Core
     - Project
 linked_docs:
-    - "[[DocumentManagementRules|ドキュメント管理ルール]]"
-    - "[[PullRequestProcedure|プルリクエスト手順]]"
-    - "[[GithubIssueEditingWorkflow|GitHub Issue編集ワークフロー]]"
-    - "[[ProjectRules|プロジェクトルール]]"
+    - "[[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]"
+    - "[[99_Reference/PullRequestProcedure|プルリクエスト手順]]"
+    - "[[99_Reference/GithubIssueEditingWorkflow|GitHub Issue編集ワークフロー]]"
+    - "[[99_Reference/ProjectRules|プロジェクトルール]]"
     - "[[30_APIReference/00_index|APIリファレンス]]"
     - "[[40_Tutorials/00_index|チュートリアル]]"
 ---

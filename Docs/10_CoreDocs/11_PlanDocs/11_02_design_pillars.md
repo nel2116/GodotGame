@@ -9,10 +9,10 @@ tags:
     - Core
     - Project
 linked_docs:
-    - "[[11_1_plan|計画書]]"
-    - "[[11_3_mvp|MVP]]"
-    - "[[11_4_kpi|KPI]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
+    - "[[11_PlanDocs/11_03_mvp_definition|MVP定義]]"
+    - "[[11_PlanDocs/11_04_kpi_metrics|KPI定義]]"
+    - "[[11_PlanDocs/00_index|計画ドキュメント]]"
 ---
 
 > **目的**：開発中に意思決定を迷わない"企画の羅針盤"。

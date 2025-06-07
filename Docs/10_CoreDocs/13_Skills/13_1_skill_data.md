@@ -9,7 +9,7 @@ tags:
     - Specification
     - Core
 linked_docs:
-    - "[[00_index|スキル関連]]"
+    - "[[13_Skills/00_index|スキル関連]]"
 ---
 
 ```dataview

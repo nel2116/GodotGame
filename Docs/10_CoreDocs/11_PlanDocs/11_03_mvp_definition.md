@@ -8,10 +8,10 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[11_1_plan|計画書]]"
-    - "[[11_2_design_pillar|デザインピラー]]"
-    - "[[11_4_kpi|KPI]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
+    - "[[11_PlanDocs/11_02_design_pillars|デザインピラー]]"
+    - "[[11_PlanDocs/11_04_kpi_metrics|KPI定義]]"
+    - "[[11_PlanDocs/00_index|計画ドキュメント]]"
 ---
 
 > **目的**：デザインピラーを検証できる最小構成を明示し、開発スコープを固定する。  
