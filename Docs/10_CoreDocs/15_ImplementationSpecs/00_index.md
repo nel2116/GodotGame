@@ -8,6 +8,7 @@ tags:
     - Specification
     - Core
 linked_docs:
+    - "[[10_CoreDocs/DevelopmentGuidelines.md]]"
     - "[[14_TechDocs/00_index.md]]"
     - "[[DocumentManagementRules.md]]"
 ---
