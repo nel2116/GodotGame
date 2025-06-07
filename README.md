@@ -12,13 +12,13 @@
 
 ```bash
 git clone [リポジトリのURL]
-cd newgameproject
+cd GodotGame
 ```
 
 2. 開発環境の起動
 
 ```bash
-docker-compose up
+docker-compose up --build
 ```
 
 ## 利用可能なツール

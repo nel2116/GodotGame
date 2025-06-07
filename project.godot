@@ -21,9 +21,4 @@ project/assembly_name="NewGameProject"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
-
-[rendering]
-
-renderer/rendering_method="gl_compatibility"
-renderer/rendering_method.mobile="gl_compatibility"
+enabled=PackedStringArray()

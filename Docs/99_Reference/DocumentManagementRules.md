@@ -51,14 +51,10 @@ date +%Y-%m-%d
 
 2. プログラミング言語の日付関数
 
-```gdscript
-# GDScript
-var current_date = Time.get_date_dict_from_system()
-var formatted_date = "%04d-%02d-%02d" % [
-    current_date.year,
-    current_date.month,
-    current_date.day
-]
+```csharp
+// C#
+var currentDate = DateTime.UtcNow;
+var formattedDate = currentDate.ToString("yyyy-MM-dd");
 ```
 
 #### 1.2.2 日付フォーマットの規則

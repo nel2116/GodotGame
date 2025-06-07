@@ -1,12 +1,14 @@
 ---
 title: 開発ガイドライン
-version: 0.2.0
+version: 0.3.0
 status: draft
 updated: 2025-06-01
 tags:
     - Development
     - Guidelines
     - Core
+    - MVVM
+    - Reactive
 linked_docs:
     - "[[10_CoreDocs/00_index]]"
     - "[[10_CoreDocs/Architecture]]"
@@ -18,18 +20,79 @@ linked_docs:
 ## 目次
 
 1. [概要](#概要)
-2. [コーディング規約](#コーディング規約)
-3. [開発フロー](#開発フロー)
-4. [テスト方針](#テスト方針)
-5. [パフォーマンス最適化](#パフォーマンス最適化)
-6. [セキュリティガイドライン](#セキュリティガイドライン)
-7. [制限事項](#制限事項)
-8. [変更履歴](#変更履歴)
+2. [開発方針](#開発方針)
+3. [コーディング規約](#コーディング規約)
+4. [開発フロー](#開発フロー)
+5. [テスト方針](#テスト方針)
+6. [パフォーマンス最適化](#パフォーマンス最適化)
+7. [セキュリティガイドライン](#セキュリティガイドライン)
+8. [制限事項](#制限事項)
+9. [変更履歴](#変更履歴)
 
 ## 概要
 
 このドキュメントでは、プロジェクトの開発に関するガイドラインを説明します。
 コーディング規約、開発フロー、テスト方針などを詳細に記述しています。
+
+## 開発方針
+
+本プロジェクトは「MVVM + リアクティブプログラミング」に基づいて実装されます。
+
+### アーキテクチャ原則
+
+-   **Model**：状態とドメインロジックを保持。副作用なし。
+-   **ViewModel**：Model の状態を購読し、View へ変換・通知。
+-   **View**：Godot Node。ViewModel を購読し、描画・演出を行う。
+-   状態は`ReactiveProperty<T>`で通知可能に。
+-   入力やイベントは`Subject<T>`や`SignalBus`で非同期処理。
+
+### 実装例
+
+```gdscript
+# Model
+class_name PlayerModel
+extends Object
+
+var health: ReactiveProperty[int] = ReactiveProperty.new(100)
+var position: ReactiveProperty[Vector2] = ReactiveProperty.new(Vector2.ZERO)
+
+func take_damage(amount: int) -> void:
+    health.value = max(0, health.value - amount)
+
+# ViewModel
+class_name PlayerViewModel
+extends Object
+
+var model: PlayerModel
+var display_health: ReactiveProperty[String] = ReactiveProperty.new("")
+var is_dead: ReactiveProperty[bool] = ReactiveProperty.new(false)
+
+func _init(p_model: PlayerModel) -> void:
+    model = p_model
+    model.health.subscribe(_on_health_changed).add_to(self)
+
+func _on_health_changed(new_health: int) -> void:
+    display_health.value = str(new_health)
+    is_dead.value = new_health <= 0
+
+# View
+class_name PlayerView
+extends Node2D
+
+@onready var health_label: Label = $HealthLabel
+@onready var view_model: PlayerViewModel
+
+func _ready() -> void:
+    view_model = PlayerViewModel.new(PlayerModel.new())
+    view_model.display_health.subscribe(_on_display_health_changed).add_to(self)
+    view_model.is_dead.subscribe(_on_death_state_changed).add_to(self)
+
+func _on_display_health_changed(new_text: String) -> void:
+    health_label.text = new_text
+
+func _on_death_state_changed(is_dead: bool) -> void:
+    modulate.a = 0.5 if is_dead else 1.0
+```
 
 ## コーディング規約
 
@@ -96,87 +159,44 @@ linked_docs:
 1. クラス構造
 
     ```gdscript
-    class_name ExampleClass
-    extends Node
+    class_name ExampleViewModel
+    extends Object
 
     # シグナル定義
     signal health_changed(new_health: int)
     signal player_died()
     signal level_up(new_level: int)
 
-    # 定数
-    const MAX_HEALTH = 100
-    const MIN_SPEED = 0.0
-    const DEFAULT_SCENE = "res://scenes/main.tscn"
-
-    # エクスポート変数（エディタで設定可能）
-    @export var health: int = MAX_HEALTH
-    @export var speed: float = MIN_SPEED
-    @export var scene_path: String = DEFAULT_SCENE
+    # リアクティブプロパティ
+    var health: ReactiveProperty[int] = ReactiveProperty.new(100)
+    var position: ReactiveProperty[Vector2] = ReactiveProperty.new(Vector2.ZERO)
+    var is_active: ReactiveProperty[bool] = ReactiveProperty.new(false)
 
     # プライベート変数
-    var _internal_state: Dictionary = {}
-    var _cached_data: Array = []
-    var _is_initialized: bool = false
+    var _model: ExampleModel
+    var _disposables: Array[Disposable] = []
 
     # 初期化
-    func _init() -> void:
-        _initialize_state()
-        _setup_connections()
-        _validate_settings()
+    func _init(model: ExampleModel) -> void:
+        _model = model
+        _setup_subscriptions()
 
-    # 準備
-    func _ready() -> void:
-        _load_resources()
-        _setup_ui()
-        _start_game()
+    # 購読の設定
+    func _setup_subscriptions() -> void:
+        _model.health.subscribe(_on_health_changed).add_to(self)
+        _model.position.subscribe(_on_position_changed).add_to(self)
+        _model.is_active.subscribe(_on_active_changed).add_to(self)
 
-    # 更新処理
-    func _process(delta: float) -> void:
-        _update_state(delta)
-        _handle_input()
-        _check_conditions()
+    # 購読ハンドラ
+    func _on_health_changed(new_health: int) -> void:
+        health.value = new_health
+        emit_signal("health_changed", new_health)
 
-    # 物理更新
-    func _physics_process(delta: float) -> void:
-        _update_physics(delta)
-        _check_collisions()
-        _apply_forces()
+    func _on_position_changed(new_position: Vector2) -> void:
+        position.value = new_position
 
-    # 入力処理
-    func _input(event: InputEvent) -> void:
-        _handle_keyboard(event)
-        _handle_mouse(event)
-        _handle_gamepad(event)
-
-    # パブリック関数
-    func initialize() -> void:
-        _internal_state.clear()
-        _cached_data.clear()
-        _is_initialized = true
-        emit_signal("initialized")
-
-    func update_health(value: int) -> void:
-        health = clamp(value, 0, MAX_HEALTH)
-        emit_signal("health_changed", health)
-        if health <= 0:
-            emit_signal("player_died")
-
-    # プライベート関数
-    func _initialize_state() -> void:
-        _internal_state = {
-            "health": health,
-            "speed": speed,
-            "position": Vector2.ZERO
-        }
-
-    func _setup_connections() -> void:
-        # シグナルの接続
-        pass
-
-    func _validate_settings() -> void:
-        # 設定の検証
-        pass
+    func _on_active_changed(new_active: bool) -> void:
+        is_active.value = new_active
     ```
 
 2. 関数の構造
@@ -256,17 +276,17 @@ linked_docs:
 2. 設計
 
     - クラス設計
-        - クラス図の作成
-        - インターフェースの定義
-        - 継承関係の決定
+        - Model / ViewModel / View の分離を考慮する（MVVM）
+        - リアクティブな状態管理の設計
+        - イベントフローの設計
     - インターフェース設計
-        - API の定義
-        - パラメータの設計
-        - 戻り値の設計
+        - リアクティブプロパティの定義
+        - イベントストリームの定義
+        - エラーハンドリングの設計
     - データ構造設計
-        - データモデルの作成
-        - リレーションの定義
-        - インデックスの設計
+        - 状態モデルの設計
+        - イベントモデルの設計
+        - キャッシュ戦略の設計
 
 3. 実装
     - コーディング
@@ -287,84 +307,39 @@ linked_docs:
 1. 単体テスト
 
     ```gdscript
-    # テストクラス
-    class_name TestPlayer
-    extends GutTest
-
-    # テスト対象のインスタンス
-    var player: Player
-
-    # テストの準備
-    func before_each() -> void:
-        player = Player.new()
-        add_child(player)
-
-    # テストの後処理
-    func after_each() -> void:
-        player.queue_free()
-
-    # ヘルス関連のテスト
-    func test_player_health() -> void:
-        # 初期値の確認
-        assert_eq(player.health, 100)
-
-        # ダメージのテスト
-        player.take_damage(10)
-        assert_eq(player.health, 90)
-
-        # 回復のテスト
-        player.heal(20)
-        assert_eq(player.health, 100)
-
-        # 死亡のテスト
-        player.take_damage(100)
-        assert_true(player.is_dead)
+    # Modelのテスト
+    func test_player_model():
+        var model = PlayerModel.new()
+        model.take_damage(10)
+        assert_eq(model.health.value, 90)
     ```
 
-2. 統合テスト
+2. ViewModel の単体テスト
 
     ```gdscript
-    # テストクラス
-    class_name TestCombatSystem
-    extends GutTest
+    # ViewModelのテスト
+    func test_player_view_model():
+        var model = PlayerModel.new()
+        var vm = PlayerViewModel.new(model)
+        vm.take_damage(20)
+        assert_eq(model.health.value, 80)
+        assert_eq(vm.display_health.value, "80")
+        assert_false(vm.is_dead.value)
+    ```
 
-    # テスト対象のインスタンス
-    var combat: CombatSystem
-    var player: Player
-    var enemy: Enemy
+3. 統合テスト
 
-    # テストの準備
-    func before_each() -> void:
-        combat = CombatSystem.new()
-        player = Player.new()
-        enemy = Enemy.new()
-        add_child(combat)
-        add_child(player)
-        add_child(enemy)
+    ```gdscript
+    # MVVM統合テスト
+    func test_mvvm_integration():
+        var model = PlayerModel.new()
+        var vm = PlayerViewModel.new(model)
+        var view = PlayerView.new()
+        view.view_model = vm
 
-    # テストの後処理
-    func after_each() -> void:
-        combat.queue_free()
-        player.queue_free()
-        enemy.queue_free()
-
-    # 戦闘システムのテスト
-    func test_combat_system() -> void:
-        # 戦闘開始のテスト
-        combat.start_combat(player, enemy)
-        assert_true(combat.is_active)
-
-        # 攻撃のテスト
-        combat.attack(player, enemy)
-        assert_lt(enemy.health, enemy.max_health)
-
-        # 防御のテスト
-        combat.defend(player)
-        assert_true(player.is_defending)
-
-        # 戦闘終了のテスト
-        combat.end_combat()
-        assert_false(combat.is_active)
+        vm.take_damage(50)
+        assert_eq(view.health_label.text, "50")
+        assert_eq(view.modulate.a, 1.0)
     ```
 
 ### 3. デプロイ
@@ -405,22 +380,39 @@ linked_docs:
 1. 単体テスト
 
     ```gdscript
-    # プレイヤーのテスト
-    func test_player_health():
-        var player = Player.new()
-        player.take_damage(10)
-        assert(player.health == 90)
+    # Modelのテスト
+    func test_player_model():
+        var model = PlayerModel.new()
+        model.take_damage(10)
+        assert_eq(model.health.value, 90)
     ```
 
-2. 統合テスト
+2. ViewModel の単体テスト
+
     ```gdscript
-    # 戦闘システムのテスト
-    func test_combat_system():
-        var player = Player.new()
-        var enemy = Enemy.new()
-        var combat = CombatSystem.new()
-        combat.start_combat(player, enemy)
-        assert(combat.is_active)
+    # ViewModelのテスト
+    func test_player_view_model():
+        var model = PlayerModel.new()
+        var vm = PlayerViewModel.new(model)
+        vm.take_damage(20)
+        assert_eq(model.health.value, 80)
+        assert_eq(vm.display_health.value, "80")
+        assert_false(vm.is_dead.value)
+    ```
+
+3. 統合テスト
+
+    ```gdscript
+    # MVVM統合テスト
+    func test_mvvm_integration():
+        var model = PlayerModel.new()
+        var vm = PlayerViewModel.new(model)
+        var view = PlayerView.new()
+        view.view_model = vm
+
+        vm.take_damage(50)
+        assert_eq(view.health_label.text, "50")
+        assert_eq(view.modulate.a, 1.0)
     ```
 
 ### テストカバレッジ
@@ -505,7 +497,8 @@ linked_docs:
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容                                         |
-| ---------- | ---------- | ------------------------------------------------ |
-| 0.2.0      | 2025-06-01 | パフォーマンスとセキュリティのガイドラインを追加 |
-| 0.1.0      | 2025-06-01 | 初版作成                                         |
+| バージョン | 更新日     | 変更内容                                              |
+| ---------- | ---------- | ----------------------------------------------------- |
+| 0.3.0      | 2025-06-01 | MVVM とリアクティブプログラミングのガイドラインを追加 |
+| 0.2.0      | 2025-06-01 | パフォーマンスとセキュリティのガイドラインを追加      |
+| 0.1.0      | 2025-06-01 | 初版作成                                              |

@@ -79,7 +79,7 @@ linked_docs:
 3. 開発環境の設定
     - Visual Studio Code の設定
         1. Godot Tools 拡張機能のインストール
-        2. GDScript 拡張機能のインストール
+        2. C# 拡張機能のインストール
         3. 設定ファイルの編集
 
 ## 基本操作
