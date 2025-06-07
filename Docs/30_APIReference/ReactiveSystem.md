@@ -1,6 +1,6 @@
 ---
 title: リアクティブシステム
-version: 0.1
+version: 0.3.0
 status: draft
 updated: 2024-03-21
 tags:
@@ -10,7 +10,10 @@ tags:
     - Core
     - Tests
 linked_docs:
-    - "[[DocumentManagementRules]]"
+    - "[[01_reactive_property]]"
+    - "[[02_composite_disposable]]"
+    - "[[03_event_bus]]"
+    - "[[ReactiveSystemTestResults]]"
 ---
 
 # リアクティブシステム
@@ -55,10 +58,22 @@ public interface IReactiveProperty<T> : IDisposable
 ```csharp
 public class ReactiveProperty<T> : IReactiveProperty<T>
 {
+    private T _value;
+    private readonly Subject<T> _raw_subject = new();
+    private readonly ISubject<T> _sync_subject;
+    private readonly object _sync_lock = new();
+    private bool _is_disposed;
+
     public T Value { get; set; }
     public IDisposable Subscribe(Action<T> onNext);
 }
 ```
+
+主な特徴：
+
+-   スレッドセーフな実装（`Subject.Synchronize`を使用）
+-   同一値設定時の通知制御
+-   リソース解放時の適切な処理
 
 ## イベントシステム
 
@@ -103,10 +118,18 @@ public interface IGameEventBus
 ```csharp
 public class GameEventBus : IGameEventBus
 {
+    private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
+
     public void Publish<T>(T evt) where T : GameEvent;
     public IObservable<T> GetEventStream<T>() where T : GameEvent;
 }
 ```
+
+主な特徴：
+
+-   スレッドセーフな実装（`ConcurrentDictionary`と`Subject.Synchronize`を使用）
+-   型ごとのイベントストリーム管理
+-   効率的なメモリ使用
 
 ## リソース管理
 
@@ -117,6 +140,11 @@ public class GameEventBus : IGameEventBus
 ```csharp
 public class CompositeDisposable : IDisposable
 {
+    private readonly List<IDisposable> _disposables = new();
+    private bool _is_disposed;
+    private readonly object _sync_lock = new();
+
+    public int DisposableCount { get; }
     public void Add(IDisposable disposable);
     public void AddRange(IEnumerable<IDisposable> disposables);
     public bool Remove(IDisposable disposable);
@@ -124,6 +152,13 @@ public class CompositeDisposable : IDisposable
     public void Dispose();
 }
 ```
+
+主な特徴：
+
+-   スレッドセーフな実装
+-   循環参照の防止
+-   効率的なリソース管理
+-   一括操作のサポート
 
 ## 使用例
 
@@ -174,17 +209,20 @@ subscription.Dispose();
 
 1. スレッドセーフ
 
-    - `GameEventBus`はスレッドセーフに実装されています
-    - `ReactiveProperty<T>`はスレッドセーフではありません
+    - `GameEventBus`は`ConcurrentDictionary`と`Subject.Synchronize`でスレッドセーフに実装
+    - `ReactiveProperty<T>`は`Subject.Synchronize`でスレッドセーフに実装
+    - `CompositeDisposable`はロックベースでスレッドセーフに実装
 
 2. メモリ管理
 
     - 購読は明示的に解除する必要があります
-    - `CompositeDisposable`を使用して複数の購読を管理することを推奨します
+    - `CompositeDisposable`を使用して複数の購読を管理することを推奨
+    - イベントバスは型ごとにストリームを管理
 
 3. パフォーマンス
-    - 大量のイベント発行時は注意が必要です
-    - 不要な購読は早期に解除してください
+    - 大量のイベント発行時は注意が必要
+    - 不要な購読は早期に解除
+    - 同一値設定時の通知制御で不要な通知を防止
 
 ## テスト
 
@@ -196,20 +234,29 @@ subscription.Dispose();
 
 1. 値の変更通知
 
-    - 初期値の設定
+    - 初期値の設定と検証
     - 値変更時の購読者への通知
     - 複数回の値変更時の通知順序
+    - 同一値設定時の通知制御
     - リソース解放後の動作
 
-2. エッジケース
-    - 破棄後の操作時の例外発生
-    - 複数回の値変更時の通知順序の保証
+2. スレッドセーフ性
+    - 複数スレッドからの値変更
+    - 複数購読者への同時通知
+    - アトミックな値更新
 
 #### GameEventBus
 
 1. イベント発行・購読
+
     - イベント発行時の購読者への通知
+    - 複数タイプのイベント処理
+    - 未購読タイプのイベント処理
     - イベントストリームの取得と購読
+
+2. パフォーマンス
+    - 大量イベント発行時の処理
+    - 購読者への通知速度
 
 #### CompositeDisposable
 
@@ -220,9 +267,15 @@ subscription.Dispose();
     - 個別リソースの削除
     - 全リソースの一括解放（Clear）
 
-2. エッジケース
+2. スレッドセーフ性
+
+    - 複数スレッドからのリソース追加
+    - 並行処理時の整合性
+
+3. エッジケース
+    - 大量リソースの処理
+    - 循環参照の安全な処理
     - 削除されたリソースの解放状態
-    - 複数回の解放操作
 
 ### テスト実行方法
 
@@ -239,9 +292,13 @@ dotnet test Tests/Core/CoreTests.csproj
 2. テストメソッドには`[Test]`属性を付与
 3. テスト名は`対象_条件_期待結果`の形式で命名
 4. アサーションは NUnit の`Assert`クラスを使用
+5. スレッドセーフ性のテストには`Parallel.For`を使用
+6. パフォーマンステストには`[MaxTime]`属性を付与
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                                                                                                                             |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 0.3.0      | 2024-03-21 | コアシステムの実装詳細を追加<br>- スレッドセーフ性の実装詳細を更新<br>- メモリ管理の説明を改善<br>- パフォーマンス最適化の説明を追加 |
+| 0.2.0      | 2024-03-21 | テストセクションの更新<br>- テストカバレッジの詳細化<br>- スレッドセーフ性のテスト追加<br>- パフォーマンステストの追加               |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                                                             |

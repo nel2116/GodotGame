@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="ef39ad75-e569-431f-9daa-5671d616393f" name="atame@DESKTOP-C1LD7NC 2025-06-08 03:24:54" runUser="DESKTOP-C1LD7NC\atame" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2025-06-08T03:24:54.9994798+09:00" queuing="2025-06-08T03:24:54.9994802+09:00" start="2025-06-08T03:24:54.2622251+09:00" finish="2025-06-08T03:24:55.0280395+09:00" />
+  <TestSettings name="default" id="946ac355-87db-4c77-aa3e-21ebb917c847">
+    <Deployment runDeploymentRoot="atame_DESKTOP-C1LD7NC_2025-06-08_03_24_54" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="4d14a8ab-89fd-46b5-a463-4b8c18d845fc" testId="996d7ef7-9b6e-1617-ce88-33f77cb54d24" testName="Publish_Performance" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0023620" startTime="2025-06-08T03:24:54.9147594+09:00" endTime="2025-06-08T03:24:54.9171210+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d14a8ab-89fd-46b5-a463-4b8c18d845fc" />
+    <UnitTestResult executionId="eb4bde1e-d63d-4616-b7b9-ce0cbac9c074" testId="9a0b4329-706b-e031-c5ba-26051e92a831" testName="ValueChange_NotifiesSubscribers" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0001600" startTime="2025-06-08T03:24:54.9263421+09:00" endTime="2025-06-08T03:24:54.9265023+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eb4bde1e-d63d-4616-b7b9-ce0cbac9c074" />
+    <UnitTestResult executionId="7e440223-34dc-4dde-bac9-a0606daae8c5" testId="09af58d1-34be-adb2-9498-39445a49ae09" testName="Publish_NotifiesSubscribers" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0133770" startTime="2025-06-08T03:24:54.9013465+09:00" endTime="2025-06-08T03:24:54.9147232+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7e440223-34dc-4dde-bac9-a0606daae8c5" />
+    <UnitTestResult executionId="4f8d2287-6bf1-43c4-8dd7-3c147ffeb26b" testId="eb59364a-fce8-722e-cac2-86697fe599fb" testName="Constructor_SetsInitialValue" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0003860" startTime="2025-06-08T03:24:54.9179606+09:00" endTime="2025-06-08T03:24:54.9183467+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f8d2287-6bf1-43c4-8dd7-3c147ffeb26b" />
+    <UnitTestResult executionId="34a7c3fe-2259-4948-ad32-6a1d5dea65f9" testId="89c0f101-0976-4490-2787-f19488bd16c7" testName="MultipleChanges_NotifyInOrder" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0019030" startTime="2025-06-08T03:24:54.9240138+09:00" endTime="2025-06-08T03:24:54.9259162+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="34a7c3fe-2259-4948-ad32-6a1d5dea65f9" />
+    <UnitTestResult executionId="2f09c6c5-1a7f-418c-a54c-1e2452f1d27f" testId="5f218ed1-2db3-0ebc-94c6-6b7b12e1c7bf" testName="SetSameValue_DoesNotNotify" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0001590" startTime="2025-06-08T03:24:54.9259253+09:00" endTime="2025-06-08T03:24:54.9260845+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2f09c6c5-1a7f-418c-a54c-1e2452f1d27f" />
+    <UnitTestResult executionId="059e2010-feaa-42ff-8d66-1beef4211612" testId="d13dc02f-ae30-a46d-dbfe-a44208dfda09" testName="Dispose_LargeNumberOfResources" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0003940" startTime="2025-06-08T03:24:54.8947806+09:00" endTime="2025-06-08T03:24:54.8951747+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="059e2010-feaa-42ff-8d66-1beef4211612" />
+    <UnitTestResult executionId="2ce5a631-6869-4dad-8d67-b10772ce206e" testId="fa164828-c22e-8257-415a-8de3b1a08785" testName="Dispose_StopNotifications" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0050710" startTime="2025-06-08T03:24:54.9183574+09:00" endTime="2025-06-08T03:24:54.9234278+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ce5a631-6869-4dad-8d67-b10772ce206e" />
+    <UnitTestResult executionId="8021d97a-4b7d-47fc-b5a4-ae6e6029020c" testId="b655a9fe-7465-81cd-6aee-0def1a619414" testName="Subscribe_MultipleTypes_NotifyOnlyMatching" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0004630" startTime="2025-06-08T03:24:54.9173758+09:00" endTime="2025-06-08T03:24:54.9178390+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8021d97a-4b7d-47fc-b5a4-ae6e6029020c" />
+    <UnitTestResult executionId="45a69547-e457-444f-a8aa-73890323e7d6" testId="e82ab8aa-526c-23f5-c6a5-aba1c635786a" testName="CircularReference_DisposeSafely" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0042590" startTime="2025-06-08T03:24:54.8902699+09:00" endTime="2025-06-08T03:24:54.8945283+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="45a69547-e457-444f-a8aa-73890323e7d6" />
+    <UnitTestResult executionId="e6433653-3621-4964-aeae-30367d578d57" testId="688e10aa-6ef0-eacf-c65c-399a2fd68baa" testName="AddAndDispose_DisposesAllResources" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0027180" startTime="2025-06-08T03:24:54.8864061+09:00" endTime="2025-06-08T03:24:54.8890708+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6433653-3621-4964-aeae-30367d578d57" />
+    <UnitTestResult executionId="788bccf7-4ed7-4f07-bb19-5c63272dcbb2" testId="7fda1549-79a6-59a6-4181-2a35f23c0312" testName="ThreadSafety_AddFromMultipleThreads" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0043460" startTime="2025-06-08T03:24:54.8955065+09:00" endTime="2025-06-08T03:24:54.8998517+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="788bccf7-4ed7-4f07-bb19-5c63272dcbb2" />
+    <UnitTestResult executionId="4c5db732-9412-42e9-b370-2f8500ed1178" testId="937685c6-a82d-fbca-4d3e-9b438651e2c1" testName="Publish_UnsubscribedType_DoesNotNotify" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0002180" startTime="2025-06-08T03:24:54.9171479+09:00" endTime="2025-06-08T03:24:54.9173659+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4c5db732-9412-42e9-b370-2f8500ed1178" />
+    <UnitTestResult executionId="61934cf3-372f-4253-bf01-1ca8278a1c86" testId="aadf898f-11c8-963c-2912-84d88ebed992" testName="ThreadSafety_SetFromMultipleThreads" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0002420" startTime="2025-06-08T03:24:54.9260935+09:00" endTime="2025-06-08T03:24:54.9263351+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="61934cf3-372f-4253-bf01-1ca8278a1c86" />
+    <UnitTestResult executionId="e87b39f3-caf0-4671-b8f0-a73fa593a4bd" testId="93582ca6-105c-380f-d75c-d08f312136f5" testName="Clear_DisposesAllAndEmpties" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0002270" startTime="2025-06-08T03:24:54.8945403+09:00" endTime="2025-06-08T03:24:54.8947670+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e87b39f3-caf0-4671-b8f0-a73fa593a4bd" />
+    <UnitTestResult executionId="1b041946-37f5-4fd7-977d-340655d08ed7" testId="c4eca265-6d8a-6f00-1a88-25c64c646616" testName="ManySubscribers_AllReceiveUpdates" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0005599" startTime="2025-06-08T03:24:54.9234458+09:00" endTime="2025-06-08T03:24:54.9240053+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1b041946-37f5-4fd7-977d-340655d08ed7" />
+    <UnitTestResult executionId="b5f7312f-49fa-4d2e-b513-f3a4dd4e7b46" testId="326c2024-683f-3d28-c54d-24cfef055939" testName="AddRange_AddsAllItems" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0001960" startTime="2025-06-08T03:24:54.8900637+09:00" endTime="2025-06-08T03:24:54.8902593+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5f7312f-49fa-4d2e-b513-f3a4dd4e7b46" />
+    <UnitTestResult executionId="dd593088-f0be-4542-916c-514ffa0180ab" testId="3e182911-ed8d-e30b-cb34-b8e0ce9122f3" testName="Remove_ReturnsTrueAndDoesNotDispose" computerName="DESKTOP-C1LD7NC" duration="00:00:00.0003100" startTime="2025-06-08T03:24:54.8951829+09:00" endTime="2025-06-08T03:24:54.8954933+09:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dd593088-f0be-4542-916c-514ffa0180ab" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Subscribe_MultipleTypes_NotifyOnlyMatching" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="b655a9fe-7465-81cd-6aee-0def1a619414">
+      <Execution id="8021d97a-4b7d-47fc-b5a4-ae6e6029020c" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.GameEventBusTests" name="Subscribe_MultipleTypes_NotifyOnlyMatching" />
+    </UnitTest>
+    <UnitTest name="ManySubscribers_AllReceiveUpdates" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="c4eca265-6d8a-6f00-1a88-25c64c646616">
+      <Execution id="1b041946-37f5-4fd7-977d-340655d08ed7" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="ManySubscribers_AllReceiveUpdates" />
+    </UnitTest>
+    <UnitTest name="AddAndDispose_DisposesAllResources" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="688e10aa-6ef0-eacf-c65c-399a2fd68baa">
+      <Execution id="e6433653-3621-4964-aeae-30367d578d57" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="AddAndDispose_DisposesAllResources" />
+    </UnitTest>
+    <UnitTest name="Dispose_StopNotifications" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="fa164828-c22e-8257-415a-8de3b1a08785">
+      <Execution id="2ce5a631-6869-4dad-8d67-b10772ce206e" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="Dispose_StopNotifications" />
+    </UnitTest>
+    <UnitTest name="AddRange_AddsAllItems" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="326c2024-683f-3d28-c54d-24cfef055939">
+      <Execution id="b5f7312f-49fa-4d2e-b513-f3a4dd4e7b46" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="AddRange_AddsAllItems" />
+    </UnitTest>
+    <UnitTest name="Remove_ReturnsTrueAndDoesNotDispose" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="3e182911-ed8d-e30b-cb34-b8e0ce9122f3">
+      <Execution id="dd593088-f0be-4542-916c-514ffa0180ab" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="Remove_ReturnsTrueAndDoesNotDispose" />
+    </UnitTest>
+    <UnitTest name="Clear_DisposesAllAndEmpties" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="93582ca6-105c-380f-d75c-d08f312136f5">
+      <Execution id="e87b39f3-caf0-4671-b8f0-a73fa593a4bd" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="Clear_DisposesAllAndEmpties" />
+    </UnitTest>
+    <UnitTest name="MultipleChanges_NotifyInOrder" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="89c0f101-0976-4490-2787-f19488bd16c7">
+      <Execution id="34a7c3fe-2259-4948-ad32-6a1d5dea65f9" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="MultipleChanges_NotifyInOrder" />
+    </UnitTest>
+    <UnitTest name="Publish_Performance" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="996d7ef7-9b6e-1617-ce88-33f77cb54d24">
+      <Execution id="4d14a8ab-89fd-46b5-a463-4b8c18d845fc" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.GameEventBusTests" name="Publish_Performance" />
+    </UnitTest>
+    <UnitTest name="CircularReference_DisposeSafely" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="e82ab8aa-526c-23f5-c6a5-aba1c635786a">
+      <Execution id="45a69547-e457-444f-a8aa-73890323e7d6" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="CircularReference_DisposeSafely" />
+    </UnitTest>
+    <UnitTest name="Publish_NotifiesSubscribers" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="09af58d1-34be-adb2-9498-39445a49ae09">
+      <Execution id="7e440223-34dc-4dde-bac9-a0606daae8c5" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.GameEventBusTests" name="Publish_NotifiesSubscribers" />
+    </UnitTest>
+    <UnitTest name="Publish_UnsubscribedType_DoesNotNotify" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="937685c6-a82d-fbca-4d3e-9b438651e2c1">
+      <Execution id="4c5db732-9412-42e9-b370-2f8500ed1178" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.GameEventBusTests" name="Publish_UnsubscribedType_DoesNotNotify" />
+    </UnitTest>
+    <UnitTest name="SetSameValue_DoesNotNotify" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="5f218ed1-2db3-0ebc-94c6-6b7b12e1c7bf">
+      <Execution id="2f09c6c5-1a7f-418c-a54c-1e2452f1d27f" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="SetSameValue_DoesNotNotify" />
+    </UnitTest>
+    <UnitTest name="ValueChange_NotifiesSubscribers" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="9a0b4329-706b-e031-c5ba-26051e92a831">
+      <Execution id="eb4bde1e-d63d-4616-b7b9-ce0cbac9c074" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="ValueChange_NotifiesSubscribers" />
+    </UnitTest>
+    <UnitTest name="ThreadSafety_SetFromMultipleThreads" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="aadf898f-11c8-963c-2912-84d88ebed992">
+      <Execution id="61934cf3-372f-4253-bf01-1ca8278a1c86" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="ThreadSafety_SetFromMultipleThreads" />
+    </UnitTest>
+    <UnitTest name="ThreadSafety_AddFromMultipleThreads" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="7fda1549-79a6-59a6-4181-2a35f23c0312">
+      <Execution id="788bccf7-4ed7-4f07-bb19-5c63272dcbb2" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="ThreadSafety_AddFromMultipleThreads" />
+    </UnitTest>
+    <UnitTest name="Constructor_SetsInitialValue" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="eb59364a-fce8-722e-cac2-86697fe599fb">
+      <Execution id="4f8d2287-6bf1-43c4-8dd7-3c147ffeb26b" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.ReactivePropertyTests" name="Constructor_SetsInitialValue" />
+    </UnitTest>
+    <UnitTest name="Dispose_LargeNumberOfResources" storage="f:\godot\gamedev\newgameproject\tests\core\bin\debug\net8.0\coretests.dll" id="d13dc02f-ae30-a46d-dbfe-a44208dfda09">
+      <Execution id="059e2010-feaa-42ff-8d66-1beef4211612" />
+      <TestMethod codeBase="F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Tests.Core.CompositeDisposableTests" name="Dispose_LargeNumberOfResources" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="996d7ef7-9b6e-1617-ce88-33f77cb54d24" executionId="4d14a8ab-89fd-46b5-a463-4b8c18d845fc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9a0b4329-706b-e031-c5ba-26051e92a831" executionId="eb4bde1e-d63d-4616-b7b9-ce0cbac9c074" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="09af58d1-34be-adb2-9498-39445a49ae09" executionId="7e440223-34dc-4dde-bac9-a0606daae8c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eb59364a-fce8-722e-cac2-86697fe599fb" executionId="4f8d2287-6bf1-43c4-8dd7-3c147ffeb26b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="89c0f101-0976-4490-2787-f19488bd16c7" executionId="34a7c3fe-2259-4948-ad32-6a1d5dea65f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5f218ed1-2db3-0ebc-94c6-6b7b12e1c7bf" executionId="2f09c6c5-1a7f-418c-a54c-1e2452f1d27f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d13dc02f-ae30-a46d-dbfe-a44208dfda09" executionId="059e2010-feaa-42ff-8d66-1beef4211612" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa164828-c22e-8257-415a-8de3b1a08785" executionId="2ce5a631-6869-4dad-8d67-b10772ce206e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b655a9fe-7465-81cd-6aee-0def1a619414" executionId="8021d97a-4b7d-47fc-b5a4-ae6e6029020c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e82ab8aa-526c-23f5-c6a5-aba1c635786a" executionId="45a69547-e457-444f-a8aa-73890323e7d6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="688e10aa-6ef0-eacf-c65c-399a2fd68baa" executionId="e6433653-3621-4964-aeae-30367d578d57" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fda1549-79a6-59a6-4181-2a35f23c0312" executionId="788bccf7-4ed7-4f07-bb19-5c63272dcbb2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="937685c6-a82d-fbca-4d3e-9b438651e2c1" executionId="4c5db732-9412-42e9-b370-2f8500ed1178" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aadf898f-11c8-963c-2912-84d88ebed992" executionId="61934cf3-372f-4253-bf01-1ca8278a1c86" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="93582ca6-105c-380f-d75c-d08f312136f5" executionId="e87b39f3-caf0-4671-b8f0-a73fa593a4bd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c4eca265-6d8a-6f00-1a88-25c64c646616" executionId="1b041946-37f5-4fd7-977d-340655d08ed7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="326c2024-683f-3d28-c54d-24cfef055939" executionId="b5f7312f-49fa-4d2e-b513-f3a4dd4e7b46" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3e182911-ed8d-e30b-cb34-b8e0ce9122f3" executionId="dd593088-f0be-4542-916c-514ffa0180ab" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="一覧に存在しない結果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="読み込まれたすべての結果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="18" executed="18" passed="18" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 4.4.0.0: Test execution started&#xD;
+Running all tests in F:\Godot\GameDev\newgameproject\Tests\Core\bin\Debug\net8.0\CoreTests.dll&#xD;
+   NUnit3TestExecutor discovered 18 of 18 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 4.4.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

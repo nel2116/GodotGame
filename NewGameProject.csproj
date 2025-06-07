@@ -3,6 +3,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>false</EnableDynamicLoading>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Scripts/**/*.cs" />
