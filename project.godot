@@ -12,7 +12,7 @@ config_version=5
 
 config/name="NewGameProject"
 run/main_scene="uid://d2b2ehk6kx115"
-config/features=PackedStringArray("4.4", "GL Compatibility")
+config/features=PackedStringArray("4.4", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [dotnet]
@@ -22,8 +22,11 @@ project/assembly_name="NewGameProject"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+<<<<<<< HEAD
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+=======
+>>>>>>> 40f099c (競合解消: テストガイドライン移動に伴い15.6_Testing.mdを削除)
