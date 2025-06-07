@@ -11,11 +11,11 @@ namespace Core.Events
         /// <summary>
         /// イベントを発行
         /// </summary>
-        void Publish<T>(T evt) where T : IGameEvent;
+        void Publish<T>(T evt) where T : GameEvent;
 
         /// <summary>
         /// 指定型のイベントストリームを取得
         /// </summary>
-        IObservable<T> GetEventStream<T>() where T : IGameEvent;
+        IObservable<T> GetEventStream<T>() where T : GameEvent;
     }
 }

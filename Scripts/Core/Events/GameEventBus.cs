@@ -10,12 +10,12 @@ namespace Core.Events
     /// </summary>
     public class GameEventBus : IGameEventBus
     {
-        private readonly ConcurrentDictionary<Type, ISubject<IGameEvent>> _subjects = new();
+        private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
 
         /// <summary>
         /// イベントを発行
         /// </summary>
-        public void Publish<T>(T evt) where T : IGameEvent
+        public void Publish<T>(T evt) where T : GameEvent
         {
             var subject = GetOrCreateSubject(typeof(T));
             subject.OnNext(evt);
@@ -24,14 +24,14 @@ namespace Core.Events
         /// <summary>
         /// 指定型のイベントストリームを取得
         /// </summary>
-        public IObservable<T> GetEventStream<T>() where T : IGameEvent
+        public IObservable<T> GetEventStream<T>() where T : GameEvent
         {
             return GetOrCreateSubject(typeof(T)).OfType<T>();
         }
 
-        private ISubject<IGameEvent> GetOrCreateSubject(Type type)
+        private ISubject<GameEvent> GetOrCreateSubject(Type type)
         {
-            return _subjects.GetOrAdd(type, _ => Subject.Synchronize(new Subject<IGameEvent>()));
+            return _subjects.GetOrAdd(type, _ => Subject.Synchronize(new Subject<GameEvent>()));
         }
     }
 }
