@@ -10,7 +10,9 @@ namespace Core.Reactive
     public class ReactiveProperty<T> : IReactiveProperty<T>
     {
         private T _value;
-        private readonly Subject<T> _subject = new();
+        private readonly Subject<T> _inner_subject = new();
+        private readonly ISubject<T> _subject;
+        private readonly object _sync_lock = new();
 
         /// <summary>
         /// プロパティの値
@@ -20,9 +22,17 @@ namespace Core.Reactive
             get => _value;
             set
             {
-                if (!EqualityComparer<T>.Default.Equals(_value, value))
+                bool changed = false;
+                lock (_sync_lock)
                 {
-                    _value = value;
+                    if (!EqualityComparer<T>.Default.Equals(_value, value))
+                    {
+                        _value = value;
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
                     _subject.OnNext(value);
                 }
             }
@@ -34,6 +44,7 @@ namespace Core.Reactive
         public ReactiveProperty(T initialValue = default)
         {
             _value = initialValue;
+            _subject = Subject.Synchronize(_inner_subject);
         }
 
         /// <summary>
@@ -49,7 +60,7 @@ namespace Core.Reactive
         /// </summary>
         public void Dispose()
         {
-            _subject.Dispose();
+            _inner_subject.Dispose();
         }
     }
 }

@@ -18,6 +18,11 @@ namespace Core.Reactive
         public void Add(IDisposable disposable)
         {
             if (disposable == null) throw new ArgumentNullException(nameof(disposable));
+            if (ReferenceEquals(disposable, this))
+            {
+                // 自身を追加すると無限再帰で破棄されるため無視する
+                return;
+            }
 
             lock (_sync_lock)
             {

@@ -2,14 +2,10 @@
   "background_color": "262626ff",
   "compact_mode": false,
   "configured_dirs": [
-    "res://Tests/Core",
-    "res://Tests/Performance",
-    "res://Tests/Integration"
+    "res://Tests/Core"
   ],
   "dirs": [
-    "res://Tests/Core",
-    "res://Tests/Performance",
-    "res://Tests/Integration"
+    "res://Tests/Core"
   ],
   "disable_colors": false,
   "double_strategy": 1,
