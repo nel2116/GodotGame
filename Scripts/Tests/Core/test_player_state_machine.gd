@@ -1,12 +1,15 @@
 extends GutTest
 
+const EventBusClass = preload("res://Scripts/Core/EventBus.cs")
+const PlayerStateMachineClass = preload("res://Scripts/Core/PlayerStateMachine.cs")
+const StateManagerClass = preload("res://Scripts/Core/StateManager.cs")
 var bus
 var fsm
 var received
 
 func before_each() -> void:
-    bus = EventBus.new()
-    fsm = PlayerStateMachine.new()
+    bus = EventBusClass.new()
+    fsm = PlayerStateMachineClass.new()
     add_child(bus)
     add_child(fsm)
     fsm.EventBus = bus
@@ -45,7 +48,7 @@ func test_timeout_cancel() -> void:
     assert_eq(fsm.CurrentState, 0)
 
 func test_state_manager_sync() -> void:
-    var manager = StateManager.new()
+    var manager = StateManagerClass.new()
     add_child(manager)
     fsm.StateManager = manager
     fsm.ChangeState(1)

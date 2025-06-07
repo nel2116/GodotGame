@@ -18,8 +18,6 @@ public partial class PlayerStateMachine : Node
     // 現在のプレイヤー状態
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
-    // 前の状態
-    private PlayerState previous_state = PlayerState.Idle;
 
     // 状態遷移表
     private readonly Dictionary<PlayerState, List<PlayerState>> transitions = new()
@@ -31,7 +29,6 @@ public partial class PlayerStateMachine : Node
         { PlayerState.Dead, new List<PlayerState>() }
     };
 
-    // 各状態のタイムアウト秒
     // 各状態のタイムアウト秒 (キーは int で管理)
     public Godot.Collections.Dictionary Timeouts { get; } = new Godot.Collections.Dictionary
     {
@@ -74,13 +71,13 @@ public partial class PlayerStateMachine : Node
             return;
         }
 
-        previous_state = CurrentState;
+        var prev = CurrentState;
         CurrentState = new_state;
         state_start_time = Time.GetTicksMsec() / 1000.0;
 
         EventBus?.EmitEvent("PlayerStateChanged", new Godot.Collections.Dictionary
         {
-            {"from", (int)previous_state},
+            {"from", (int)prev},
             {"to", (int)new_state}
         });
 

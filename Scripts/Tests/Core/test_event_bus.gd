@@ -1,10 +1,11 @@
 extends GutTest
 
+const EventBusClass = preload("res://Scripts/Core/EventBus.cs")
 var bus
 var received
 
 func before_each() -> void:
-    bus = EventBus.new()
+    bus = EventBusClass.new()
     add_child(bus)
     received = null
 

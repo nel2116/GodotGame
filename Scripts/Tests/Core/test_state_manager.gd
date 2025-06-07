@@ -1,10 +1,11 @@
 extends GutTest
 
+const StateManagerClass = preload("res://Scripts/Core/StateManager.cs")
 var manager
 var received
 
 func before_each() -> void:
-    manager = StateManager.new()
+    manager = StateManagerClass.new()
     add_child(manager)
     received = null
 
@@ -47,8 +48,10 @@ func test_persistence() -> void:
     manager.SetState("save", 123)
     var path := "user://state_test.json"
     manager.SaveAll(path)
-    var other = StateManager.new()
+    var other = StateManagerClass.new()
     add_child(other)
     other.LoadAll(path)
     assert_eq(other.GetState("save"), 123)
     other.free()
+    if FileAccess.file_exists(path):
+        DirAccess.remove_absolute(path)

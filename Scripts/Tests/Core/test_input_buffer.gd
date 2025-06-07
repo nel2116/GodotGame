@@ -1,9 +1,11 @@
 extends GutTest
 
+const InputBufferClass = preload("res://Scripts/Core/InputBuffer.cs")
+const InputObserverClass = preload("res://Scripts/Core/InputObserver.cs")
 var buffer
 
 func before_each() -> void:
-    buffer = InputBuffer.new()
+    buffer = InputBufferClass.new()
     add_child(buffer)
 
 func after_each() -> void:
@@ -44,7 +46,7 @@ func test_retention_time() -> void:
     assert_eq(buffer.Dequeue(), null)
 
 func test_input_observer() -> void:
-    var observer = InputObserver.new()
+    var observer = InputObserverClass.new()
     observer.Buffer = buffer
     add_child(observer)
     var event := InputEventKey.new()
