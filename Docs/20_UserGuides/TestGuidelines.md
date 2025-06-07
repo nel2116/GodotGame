@@ -1,6 +1,6 @@
 ---
 title: テストガイドライン
-version: 0.1.3
+version: 0.1.4
 status: draft
 updated: 2025-06-07
 tags:
@@ -18,8 +18,9 @@ linked_docs:
 1. [概要](#概要)
 2. [基本方針](#基本方針)
 3. [テスト実行手順](#テスト実行手順)
-4. [注意事項](#注意事項)
-5. [変更履歴](#変更履歴)
+4. [テストの書き方](#テストの書き方)
+5. [注意事項](#注意事項)
+6. [変更履歴](#変更履歴)
 
 ## 概要
 
@@ -41,6 +42,42 @@ linked_docs:
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 ```
 
+## テストの書き方
+
+Scripts/Tests/Core 内の `.gd` ファイルは GUT を利用した基本的なテスト例です。
+各テストファイルは `test_*.gd` の名前で保存し、以下の形式で記述します。
+
+```gdscript
+extends GutTest
+
+var bus
+var received
+
+func _on_event(data: Dictionary) -> void:
+    received = data
+
+func before_each() -> void:
+    bus = EventBus.new()
+    add_child(bus) # テスト対象をツリーに追加
+    received = null
+
+func after_each() -> void:
+    bus.free() # 生成したノードを解放
+
+func test_emit_and_subscribe() -> void:
+    bus.Subscribe("TestEvent", Callable(self, "_on_event"))
+    var data := {"value": 42}
+    bus.EmitEvent("TestEvent", data)
+    assert_eq(received, data)
+```
+
+`before_each()` と `after_each()` でテストの準備と後処理を行います。テスト関数は
+`test_` から始まる名前にし、`assert_eq` などのアサーションで期待値を検証します。
+
+`test_input_buffer.gd` では入力イベントのキュー操作を、`test_state_manager.gd`
+では状態管理の履歴検証を行っています。既存ファイルを参考に、1 つのテストでは 1
+つの機能を確認するようにしてください。
+
 ## 注意事項
 
 - `gut_cmdln.gd` の設定は `.gutconfig.json` に記述されています。
@@ -51,6 +88,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.1.4      | 2025-06-07 | テストの書き方セクションを追加 |
 | 0.1.3      | 2025-06-07 | setup_godot_cli.sh の自動化に伴い手順を簡素化 |
 | 0.1.2      | 2025-06-06 | setup_godot_cli.sh 実行前の apt 更新と .NET インストールを追記 |
 | 0.1.1      | 2025-06-06 | インポート手順を追記 |
