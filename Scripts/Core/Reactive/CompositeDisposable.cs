@@ -13,11 +13,32 @@ namespace Core.Reactive
         private readonly object _sync_lock = new();
 
         /// <summary>
+        /// 登録されている破棄対象の数
+        /// </summary>
+        public int DisposableCount
+        {
+            get
+            {
+                lock (_sync_lock)
+                {
+                    return _disposables.Count;
+                }
+            }
+        }
+
+        /// <summary>
         /// 破棄対象を追加
+        /// 自身を追加した場合は無限再帰を防ぐため警告を出して無視する
         /// </summary>
         public void Add(IDisposable disposable)
         {
             if (disposable == null) throw new ArgumentNullException(nameof(disposable));
+            if (ReferenceEquals(disposable, this))
+            {
+                // 自身を追加すると無限再帰で破棄されるため無視する
+                System.Diagnostics.Debug.WriteLine("Warning: Attempted to add self to CompositeDisposable. This operation is ignored.");
+                return;
+            }
 
             lock (_sync_lock)
             {

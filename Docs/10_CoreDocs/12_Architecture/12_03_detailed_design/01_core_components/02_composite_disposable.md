@@ -2,7 +2,7 @@
 title: CompositeDisposable実装詳細
 version: 0.1.0
 status: draft
-updated: 2024-03-21
+updated: 2025-06-07
 tags:
     - Architecture
     - MVVM
@@ -92,9 +92,12 @@ public class CompositeDisposable : IDisposable
                 disposable.Dispose();
                 return;
             }
+
             _disposables.Add(disposable);
         }
     }
+
+    // Add メソッドでは自身の追加を検出して無視するため特別なチェックは不要
 
     public void AddRange(IEnumerable<IDisposable> disposables)
     {

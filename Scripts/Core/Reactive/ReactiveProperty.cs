@@ -10,7 +10,10 @@ namespace Core.Reactive
     public class ReactiveProperty<T> : IReactiveProperty<T>
     {
         private T _value;
-        private readonly Subject<T> _subject = new();
+        private readonly Subject<T> _raw_subject = new();
+        private readonly ISubject<T> _sync_subject;
+        private readonly object _sync_lock = new();
+        private bool _is_disposed;
 
         /// <summary>
         /// プロパティの値
@@ -20,10 +23,19 @@ namespace Core.Reactive
             get => _value;
             set
             {
-                if (!EqualityComparer<T>.Default.Equals(_value, value))
+                bool changed = false;
+                lock (_sync_lock)
                 {
-                    _value = value;
-                    _subject.OnNext(value);
+                    if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
+                    if (!EqualityComparer<T>.Default.Equals(_value, value))
+                    {
+                        _value = value;
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
+                    _sync_subject.OnNext(value);
                 }
             }
         }
@@ -34,6 +46,8 @@ namespace Core.Reactive
         public ReactiveProperty(T initialValue = default)
         {
             _value = initialValue;
+            // Subject.Synchronize で購読処理を同期化し、スレッド安全性を確保
+            _sync_subject = Subject.Synchronize(_raw_subject);
         }
 
         /// <summary>
@@ -41,7 +55,7 @@ namespace Core.Reactive
         /// </summary>
         public IDisposable Subscribe(Action<T> onNext)
         {
-            return _subject.Subscribe(onNext);
+            return _sync_subject.Subscribe(onNext);
         }
 
         /// <summary>
@@ -49,7 +63,9 @@ namespace Core.Reactive
         /// </summary>
         public void Dispose()
         {
-            _subject.Dispose();
+            _sync_subject.OnCompleted();
+            _raw_subject.Dispose();
+            _is_disposed = true;
         }
     }
 }
