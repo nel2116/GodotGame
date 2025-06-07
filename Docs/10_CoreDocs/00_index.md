@@ -1,6 +1,6 @@
 ---
 title: プロジェクトドキュメントインデックス
-version: 0.3.0
+version: 0.3.1
 status: draft
 updated: 2025-06-01
 tags:
@@ -68,6 +68,7 @@ linked_docs:
 -   [[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]
 -   [[99_Reference/PullRequestProcedure|プルリクエスト手順]]
 -   [[99_Reference/GithubIssueEditingWorkflow|GitHub Issue編集ワークフロー]]
+-   [[20_UserGuides/TestingGuidelines|テストガイドライン]]
 -   [[99_Reference/ProjectRules|プロジェクトルール]]
 
 ## 使用方法
@@ -85,6 +86,7 @@ linked_docs:
 
 | バージョン | 更新日     | 変更内容                                                                                 |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------- |
+| 0.3.1      | 2025-06-01 | テストガイドラインへのリンクを追加 |
 | 0.3.0      | 2025-06-01 | 新規ドキュメントへの参照を追加<br>- API リファレンスの更新<br>- チュートリアルの更新     |
 | 0.2.0      | 2025-06-01 | ドキュメント管理ルールに準拠した更新<br>- 制限事項セクションの追加<br>- メタデータの更新 |
 | 0.1.1      | 2025-06-01 | 日付の修正                                                                               |

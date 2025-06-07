@@ -400,6 +400,7 @@ linked_docs:
 
 ## テスト方針
 
+詳細なテストの記述方法は [[20_UserGuides/TestingGuidelines|テストガイドライン]] を参照してください。
 ### テストの種類
 
 1. 単体テスト
