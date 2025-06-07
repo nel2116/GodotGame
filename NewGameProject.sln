@@ -23,8 +23,8 @@ Global
 		{1C6264AD-19AF-416C-BA30-186A45BDF7DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
-		{1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+                {1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+                {1C6264AD-19AF-416C-BA30-186A45BDF7DF}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1C6264AD-19AF-416C-BA30-186A45BDF7DF} = {2A58442A-A147-483E-B3D4-7AFD8AC5EBA6}
