@@ -44,6 +44,7 @@ namespace Core.Reactive
         public ReactiveProperty(T initialValue = default)
         {
             _value = initialValue;
+            // Subject.Synchronize で購読処理を同期化し、スレッド安全性を確保
             _sync_subject = Subject.Synchronize(_raw_subject);
         }
 

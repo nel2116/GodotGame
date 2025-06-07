@@ -12,6 +12,7 @@ namespace Tests.Core
         [Test]
         public void ValueChange_NotifiesSubscribers()
         {
+            // 初期値を -1 として更新が確実に通知されるようにする
             var property = new ReactiveProperty<int>(-1);
             int notifiedValue = -1;
             using (property.Subscribe(v => notifiedValue = v))
@@ -31,6 +32,7 @@ namespace Tests.Core
         [Test]
         public void MultipleChanges_NotifyInOrder()
         {
+            // 初期値を -1 として更新が確実に通知されるようにする
             var property = new ReactiveProperty<int>(-1);
             var list = new System.Collections.Generic.List<int>();
             using (property.Subscribe(v => list.Add(v)))
@@ -44,6 +46,7 @@ namespace Tests.Core
         [Test]
         public void Dispose_StopNotifications()
         {
+            // 初期値を -1 として更新が確実に通知されるようにする
             var property = new ReactiveProperty<int>(-1);
             int notified = 0;
             var subscription = property.Subscribe(v => notified++);
@@ -69,6 +72,7 @@ namespace Tests.Core
         [Test]
         public void ManySubscribers_AllReceiveUpdates()
         {
+            // 初期値を -1 として並列更新時の通知を検証する
             var property = new ReactiveProperty<int>(-1);
             const int subscriber_count = 50;
             var disposables = new List<IDisposable>();

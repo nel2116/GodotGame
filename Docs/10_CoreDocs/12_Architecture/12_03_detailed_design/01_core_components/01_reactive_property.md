@@ -107,6 +107,7 @@ public class ReactiveProperty<T> : IReactiveProperty<T>
     public ReactiveProperty(T initialValue = default)
     {
         _value = initialValue;
+        // Subject.Synchronize を利用し複数スレッドからの購読を安全に処理する
     }
 
     public IDisposable Subscribe(Action<T> onNext)

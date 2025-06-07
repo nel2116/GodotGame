@@ -14,6 +14,7 @@ namespace Core.Reactive
 
         /// <summary>
         /// 破棄対象を追加
+        /// 自身を追加した場合は無限再帰を防ぐため警告を出して無視する
         /// </summary>
         public void Add(IDisposable disposable)
         {

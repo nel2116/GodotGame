@@ -92,9 +92,12 @@ public class CompositeDisposable : IDisposable
                 disposable.Dispose();
                 return;
             }
+
             _disposables.Add(disposable);
         }
     }
+
+    // 自身を追加すると Dispose 時に無限再帰となるため、呼び出し側でのチェックを推奨
 
     public void AddRange(IEnumerable<IDisposable> disposables)
     {
