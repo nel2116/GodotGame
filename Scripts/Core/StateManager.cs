@@ -162,8 +162,7 @@ public partial class StateManager : Node
         {
             dict[kv.Key] = kv.Value;
         }
-        var json = Json.Stringify(dict);
-        file.StoreString(json);
+        file.StoreVar(dict);
     }
 
     public void LoadAll(string path)
@@ -177,8 +176,7 @@ public partial class StateManager : Node
         {
             return;
         }
-        var json = file.GetAsText();
-        var variant = Json.ParseString(json);
+        var variant = file.GetVar();
         if (variant.VariantType != Variant.Type.Dictionary)
         {
             return;
