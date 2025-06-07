@@ -13,6 +13,7 @@
 
 ## コミットと PR
 - コミットメッセージは1行目に要約を書き、必要に応じて `Closes #<番号>` などで関連 Issue を明記します。
+- 詳細なフォーマットや Prefix ルールは `Docs/99_Reference/CommitMessageRules.md` を参照してください。
 - 1コミットでは関連する変更のみをまとめ、無関係な修正を含めないでください。
 - プルリクエストでは変更点、テスト方法、関連 Issue を日本語で説明します。
 - プルリクエストを作成する際は、`Docs/99_Reference/PullRequestProcedure.md` のガイドラインに従ってください。
