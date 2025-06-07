@@ -1,6 +1,6 @@
 ---
 title: 技術ドキュメント
-version: 0.4.1
+version: 0.4.2
 status: draft
 updated: 2025-06-07
 tags:
@@ -25,6 +25,7 @@ linked_docs:
 - "[[14.16_SoundManager.md]]"
 - "[[14.17_DebugManager.md]]"
 - "[[14.18_SystemArchitecture.md]]"
+- "[[14.19_MVVMReactiveDesign.md]]"
 - "[[15.1_ReactiveSystemImpl.md]]"
 - "[[15.2_StateManagementImpl.md]]"
 - "[[15.3_EnemyAISpec.md]]"
@@ -80,6 +81,7 @@ linked_docs:
 
 ### 5. アーキテクチャ
 - [14.18 システムアーキテクチャ](14.18_SystemArchitecture.md) - 全体システムアーキテクチャ
+- [14.19 MVVM + リアクティブ設計ガイド](14.19_MVVMReactiveDesign.md) - MVVMとリアクティブプログラミングの方針
 
 ## 使用方法
 

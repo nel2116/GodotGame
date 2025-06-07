@@ -6,6 +6,9 @@
 - クラス名はパスカルケース、変数名はスネークケース、定数は大文字スネークケースとします。詳細な命名規則は `Docs/10_CoreDocs/DevelopmentGuidelines.md` を参照してください。
 - コードは読みやすさと保守性を重視し、不要な処理や曖昧な表現は避けます。
 
+## 設計
+- 新規機能やシステム設計を行う際は、`Docs/10_CoreDocs/14_TechDocs/14.19_MVVMReactiveDesign.md` を参照し、MVVM + リアクティブプログラミングの方針に沿ってください。
+
 ## ドキュメント
 - `Docs/` 以下の Markdown を更新する際は `Docs/99_Reference/DocumentManagementRules.md` の指針に従います。
     - 冒頭に `title`、`version`、`status`、`updated`、`tags`、`linked_docs` を含む YAML メタデータを記述します。
