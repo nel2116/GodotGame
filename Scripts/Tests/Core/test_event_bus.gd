@@ -49,7 +49,7 @@ func test_filter() -> void:
     bus.EmitEvent("TestEvent", {"ok": false})
     bus.EmitEvent("TestEvent", {"ok": true})
     bus._Process(0)
-    assert_ne(received, null)
+    assert_not_null(received)
     assert_true(received["ok"])
 
 func test_history_cleanup() -> void:

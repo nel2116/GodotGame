@@ -30,7 +30,8 @@ public partial class StateManager : Node
     // 状態を設定して履歴に追加する
     public void SetState(string state_name, Variant value)
     {
-        if (current_states.TryGetValue(state_name, out var prev))
+        Variant prev = new Variant();
+        if (current_states.TryGetValue(state_name, out prev))
         {
             if (!CanTransition(state_name, prev, value))
             {
