@@ -90,6 +90,8 @@ namespace Tests.Core
             }
             col.Clear();
             System.GC.Collect();
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
             long after = System.GC.GetTotalMemory(true);
             Assert.Less(after - before, 1024 * 50);
         }

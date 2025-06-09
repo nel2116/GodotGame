@@ -91,6 +91,8 @@ namespace Tests.Core
             SubscribeTemp();
             Assert.AreEqual(1, dict["temp"].Count);
             System.GC.Collect();
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
             mgr.RaiseEvent("temp", this, EventArgs.Empty);
             Assert.AreEqual(0, dict["temp"].Count);
         }
