@@ -1,29 +1,35 @@
 ---
-title: Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
-version: 0.4.0
+title: MVVM+RXアーキテクチャ
+version: 0.2.0
 status: draft
 updated: 2024-03-23
 tags:
+    - Core
     - Architecture
     - MVVM
     - Reactive
-    - Core
 linked_docs:
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
     - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
-    - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
-    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_04_system_integration|システム間連携]]"
+    - "[[12_05_common_utilities|共通ユーティリティ]]"
 ---
 
-# Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
+# MVVM+RX アーキテクチャ
 
-## 1. 設計思想
+## 目次
+
+1. [概要](#1-概要)
+2. [アーキテクチャ概要](#2-アーキテクチャ概要)
+3. [レイヤー構成](#3-レイヤー構成)
+4. [実装ガイドライン](#4-実装ガイドライン)
+5. [パフォーマンス最適化](#5-パフォーマンス最適化)
+6. [テスト戦略](#6-テスト戦略)
+7. [ベストプラクティス](#7-ベストプラクティス)
+8. [制限事項](#8-制限事項)
+9. [変更履歴](#9-変更履歴)
+
+## 1. 概要
 
 ### 1.1 MVVM とリアクティブプログラミングの統合
 
@@ -87,9 +93,11 @@ linked_docs:
     -   OOP: 状態の変更を明示的に記述
     -   リアクティブ: 状態の変化をストリームとして扱う
 
-## 2. レイヤー構造
+## 2. アーキテクチャ概要
 
-### 2.1 各レイヤーの責務
+## 3. レイヤー構成
+
+### 3.1 各レイヤーの責務
 
 #### Model
 
@@ -118,7 +126,7 @@ linked_docs:
 -   共通機能の提供
 -   依存性の注入
 
-### 2.2 リアクティブ処理の対象
+### 3.2 リアクティブ処理の対象
 
 #### 非同期イベント
 
@@ -138,9 +146,9 @@ linked_docs:
 -   UI のトランジション
 -   エフェクトの制御
 
-## 3. 構成単位と粒度
+## 4. 実装ガイドライン
 
-### 3.1 クラス設計
+### 4.1 クラス設計
 
 #### 命名規則
 
@@ -175,7 +183,7 @@ View → ViewModel → Model
 
 ### 4.1 プロジェクト構造
 
-```
+```plaintext
 Assets/
 ├── Scripts/
 │   ├── Models/
@@ -248,165 +256,51 @@ public partial class PlayerView : Node2D
 
 -   クラス設計書
 -   シーケンス図
--   API 仕様書
+-   API リファレンス
 
-### 5.3 テスト戦略
+## 6. パフォーマンス最適化
 
-#### 単体テスト
+### 6.1 メモリ管理
 
--   Model: ビジネスロジックの検証
--   ViewModel: 状態変換の検証
--   View: UI 表示の検証
-
-#### 統合テスト
-
--   レイヤー間の連携
--   エンドツーエンドの動作確認
-
-#### システム別テスト
-
-##### アニメーションシステム
-
-```csharp
-[Test]
-public void AnimationSystem_StateChange_TriggersCorrectAnimation()
-{
-    var model = new AnimationModel();
-    var viewModel = new AnimationViewModel(model);
-    var view = new AnimationView();
-    bool animationTriggered = false;
-
-    view.SetupBindings(viewModel);
-    view.OnAnimationPlay += (animName) => animationTriggered = true;
-
-    model.State.Value = AnimationState.Attack;
-
-    Assert.IsTrue(animationTriggered);
-}
-```
-
-##### サウンドシステム
-
-```csharp
-[Test]
-public void SoundSystem_PlaySound_TriggersCorrectAudio()
-{
-    var model = new SoundModel();
-    var viewModel = new SoundViewModel(model);
-    var view = new SoundView();
-    bool soundPlayed = false;
-
-    view.SetupBindings(viewModel);
-    view.OnSoundPlay += (soundName) => soundPlayed = true;
-
-    model.PlaySound("attack");
-
-    Assert.IsTrue(soundPlayed);
-}
-```
-
-##### UI システム
-
-```csharp
-[Test]
-public void UISystem_UpdateState_ReflectsInView()
-{
-    var model = new UIModel();
-    var viewModel = new UIViewModel(model);
-    var view = new UIView();
-    bool uiUpdated = false;
-
-    view.SetupBindings(viewModel);
-    view.OnUIUpdate += () => uiUpdated = true;
-
-    model.State.Value = UIState.Menu;
-
-    Assert.IsTrue(uiUpdated);
-}
-```
-
-## 6. 実装例
-
-### 6.1 基本的な実装パターン
-
-```csharp
-// リアクティブプロパティの定義
-public class ReactiveProperty<T>
-{
-    private T _value;
-    private readonly Subject<T> _subject = new();
-
-    public T Value
-    {
-        get => _value;
-        set
-        {
-            _value = value;
-            _subject.OnNext(value);
-        }
-    }
-
-    public IDisposable Subscribe(Action<T> onNext)
-    {
-        return _subject.Subscribe(onNext);
-    }
-}
-
-// ViewModelでの使用例
-public class GameViewModel
-{
-    public ReactiveProperty<int> Score { get; } = new();
-    public ReactiveProperty<bool> IsGameOver { get; } = new();
-
-    public void UpdateScore(int points)
-    {
-        Score.Value += points;
-        if (Score.Value >= 100)
-        {
-            IsGameOver.Value = true;
-        }
-    }
-}
-```
-
-### 6.2 非同期処理の実装
-
-```csharp
-public class GameService
-{
-    public IObservable<GameState> LoadGameState()
-    {
-        return Observable.FromAsync(async () =>
-        {
-            // 非同期でゲーム状態を読み込む
-            var state = await LoadStateFromFile();
-            return state;
-        });
-    }
-}
-```
-
-## 7. ベストプラクティス
-
-### 7.1 パフォーマンス最適化
-
--   不要なサブスクリプションの解除
--   バッチ処理の活用
+-   オブジェクトプーリング
+-   リソースの効率的な使用
 -   メモリリークの防止
 
-### 7.2 エラーハンドリング
+### 6.2 実行速度
 
--   例外の適切な処理
--   エラー状態の伝播
--   リカバリー処理の実装
+-   バッチ処理の活用
+-   非同期処理の最適化
+-   キャッシュの適切な使用
 
-### 7.3 デバッグ
+## 7. テスト戦略
 
--   ログ出力の戦略
--   状態の可視化
--   パフォーマンスプロファイリング
+### 7.1 単体テスト
 
-## 8. 変更履歴
+-   ViewModel のロジックテスト
+-   Model のビジネスロジックテスト
+-   ユーティリティクラスのテスト
+
+### 7.2 統合テスト
+
+-   システム間の連携テスト
+-   エンドツーエンドテスト
+-   パフォーマンステスト
+
+## 8. 今後の展望
+
+### 8.1 機能拡張
+
+-   新しいパターンの導入
+-   既存パターンの改善
+-   ツールの開発
+
+### 8.2 ドキュメント整備
+
+-   チュートリアルの充実
+-   ベストプラクティスの追加
+-   サンプルコードの拡充
+
+## 9. 変更履歴
 
 | バージョン | 更新日     | 変更内容                         |
 | ---------- | ---------- | -------------------------------- |
@@ -414,3 +308,4 @@ public class GameService
 | 0.2.0      | 2024-03-23 | 新しいリンクドキュメントを追加   |
 | 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加 |
 | 0.4.0      | 2024-03-23 | ネットワークシステムの削除       |
+| 0.5.0      | 2024-03-23 | ドキュメントの改善               |

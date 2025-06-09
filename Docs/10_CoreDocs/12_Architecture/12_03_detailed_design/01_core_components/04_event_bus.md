@@ -1,224 +1,288 @@
 ---
-title: イベントバス実装詳細
-version: 0.1.0
+title: EventBus実装詳細
+version: 0.2.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
-    - Architecture
-    - MVVM
-    - Reactive
     - Core
+    - Event
+    - Bus
     - Implementation
 linked_docs:
-    - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_02_basic_design|MVVM+RX基本設計書]]"
+    - "[[12_04_system_integration|システム間連携]]"
 ---
 
-# イベントバス実装詳細
+# EventBus 実装詳細
+
+## 目次
+
+1. [概要](#1-概要)
+2. [基本実装](#2-基本実装)
+3. [拡張機能](#3-拡張機能)
+4. [パフォーマンス最適化](#4-パフォーマンス最適化)
+5. [使用例](#5-使用例)
+6. [ベストプラクティス](#6-ベストプラクティス)
+7. [テスト](#7-テスト)
+8. [制限事項](#8-制限事項)
+9. [変更履歴](#9-変更履歴)
 
 ## 1. 概要
 
-### 1.1 目的
+イベントバスは、システム間の疎結合な通信を実現するためのメッセージングシステムです。Reactive Extensions (Rx) を活用し、イベントの購読と発行を効率的に管理します。
 
-本ドキュメントは、MVVM + リアクティブプログラミングにおけるイベントバスの実装詳細を定義し、以下の目的を達成することを目指します：
+## 2. 基本実装
 
--   イベント駆動アーキテクチャの確立
--   型安全なイベント処理
--   開発チーム間での実装の一貫性確保
-
-### 1.2 適用範囲
-
--   イベントの定義
--   イベントの購読
--   イベントの発行
--   イベントの処理
-
-## 2. クラス図
-
-```mermaid
-classDiagram
-    class IGameEvent {
-        <<interface>>
-    }
-
-    class GameEvent {
-        +DateTime Timestamp
-    }
-
-    class IGameEventBus {
-        <<interface>>
-        +Publish~T~(T) void
-        +GetEventStream~T~() IObservable~T~
-    }
-
-    class GameEventBus {
-        -Dictionary~Type, Subject~GameEvent~~ _subjects
-        +Publish~T~(T) void
-        +GetEventStream~T~() IObservable~T~
-        -GetOrCreateSubject~T~() Subject~T~
-    }
-
-    class PlayerDeathEvent {
-        +PlayerModel Player
-    }
-
-    class SkillUsedEvent {
-        +SkillModel Skill
-    }
-
-    IGameEvent <|.. GameEvent
-    GameEvent <|-- PlayerDeathEvent
-    GameEvent <|-- SkillUsedEvent
-    IGameEventBus <|.. GameEventBus
-    GameEventBus --> Subject : uses
-```
-
-## 3. シーケンス図
-
-```mermaid
-sequenceDiagram
-    participant P as Publisher
-    participant EB as EventBus
-    participant S as Subscriber
-
-    S->>EB: Subscribe to Event
-    P->>EB: Publish Event
-    EB->>S: Notify Subscribers
-    S->>S: Handle Event
-```
-
-## 4. 実装詳細
-
-### 4.1 基本実装
+### 2.1 インターフェース定義
 
 ```csharp
-public interface IGameEvent
+public interface IEventBus
 {
-    DateTime Timestamp { get; }
+    void Publish<T>(T event) where T : IEvent;
+    IObservable<T> GetEventStream<T>() where T : IEvent;
+    void Dispose();
 }
+```
 
-public abstract class GameEvent : IGameEvent
+### 2.2 基本実装
+
+```csharp
+public class EventBus : IEventBus, IDisposable
 {
-    public DateTime Timestamp { get; } = DateTime.UtcNow;
-}
+    private readonly Subject<IEvent> _subject = new();
+    private readonly Dictionary<Type, object> _streams = new();
+    private bool _disposed;
 
-public interface IGameEventBus
-{
-    void Publish<T>(T evt) where T : GameEvent;
-    IObservable<T> GetEventStream<T>() where T : GameEvent;
-}
-
-public class GameEventBus : IGameEventBus
-{
-    private readonly Dictionary<Type, Subject<GameEvent>> _subjects = new();
-
-    public void Publish<T>(T evt) where T : GameEvent
+    public void Publish<T>(T event) where T : IEvent
     {
-        var subject = GetOrCreateSubject<T>();
-        subject.OnNext(evt);
+        if (_disposed) return;
+        _subject.OnNext(event);
     }
 
-    public IObservable<T> GetEventStream<T>() where T : GameEvent
+    public IObservable<T> GetEventStream<T>() where T : IEvent
     {
-        return GetOrCreateSubject<T>().OfType<T>();
-    }
+        if (_disposed) return Observable.Empty<T>();
 
-    private Subject<T> GetOrCreateSubject<T>() where T : GameEvent
-    {
         var type = typeof(T);
-        if (!_subjects.TryGetValue(type, out var subject))
+        if (!_streams.TryGetValue(type, out var stream))
         {
-            subject = new Subject<GameEvent>();
-            _subjects[type] = subject;
+            stream = _subject.OfType<T>().Publish().RefCount();
+            _streams[type] = stream;
         }
-        return subject as Subject<T>;
+
+        return (IObservable<T>)stream;
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _subject.Dispose();
+            _streams.Clear();
+            _disposed = true;
+        }
     }
 }
 ```
 
-### 4.2 イベントの定義
+## 3. 拡張機能
+
+### 3.1 イベントフィルタリング
 
 ```csharp
-public class PlayerDeathEvent : GameEvent
+public class EventBus : IEventBus, IDisposable
 {
-    public PlayerModel Player { get; }
-
-    public PlayerDeathEvent(PlayerModel player)
+    public IObservable<T> GetFilteredEventStream<T>(Func<T, bool> predicate) where T : IEvent
     {
-        Player = player;
-    }
-}
-
-public class SkillUsedEvent : GameEvent
-{
-    public SkillModel Skill { get; }
-
-    public SkillUsedEvent(SkillModel skill)
-    {
-        Skill = skill;
+        return GetEventStream<T>().Where(predicate);
     }
 }
 ```
 
-## 5. パフォーマンス最適化
+### 3.2 イベントバッファリング
 
-### 5.1 メモリ管理
+```csharp
+public class EventBus : IEventBus, IDisposable
+{
+    public IObservable<IList<T>> GetBufferedEventStream<T>(TimeSpan bufferTime) where T : IEvent
+    {
+        return GetEventStream<T>().Buffer(bufferTime);
+    }
+}
+```
 
--   不要なサブスクリプションの解除
--   イベントのフィルタリング
--   リソースの適切な解放
+## 4. パフォーマンス最適化
 
-### 5.2 更新最適化
+### 4.1 メモリ管理
 
--   イベントのバッチ処理
--   更新頻度の制御
--   不要な通知の防止
+```csharp
+public class EventBus : IEventBus, IDisposable
+{
+    private readonly CompositeDisposable _disposables = new();
 
-## 6. テスト戦略
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _disposables.Dispose();
+            _subject.Dispose();
+            _streams.Clear();
+            _disposed = true;
+        }
+    }
+}
+```
 
-### 6.1 単体テスト
+### 4.2 スレッドセーフ
+
+```csharp
+public class EventBus : IEventBus, IDisposable
+{
+    private readonly object _lock = new();
+
+    public void Publish<T>(T event) where T : IEvent
+    {
+        if (_disposed) return;
+        lock (_lock)
+        {
+            _subject.OnNext(event);
+        }
+    }
+}
+```
+
+## 5. 使用例
+
+### 5.1 ゲームイベントの処理
+
+```csharp
+public class GameEventBus
+{
+    private readonly IEventBus _eventBus;
+
+    public GameEventBus(IEventBus eventBus)
+    {
+        _eventBus = eventBus;
+    }
+
+    public void PublishPlayerDamage(float amount)
+    {
+        _eventBus.Publish(new PlayerDamageEvent(amount));
+    }
+
+    public IObservable<PlayerDamageEvent> GetPlayerDamageStream()
+    {
+        return _eventBus.GetEventStream<PlayerDamageEvent>();
+    }
+}
+```
+
+### 5.2 イベントの購読
+
+```csharp
+public class PlayerViewModel : ViewModelBase
+{
+    public PlayerViewModel(IEventBus eventBus)
+    {
+        Disposables.Add(
+            eventBus.GetEventStream<PlayerDamageEvent>()
+                .Subscribe(OnPlayerDamage)
+        );
+    }
+
+    private void OnPlayerDamage(PlayerDamageEvent evt)
+    {
+        Health.Value -= evt.Amount;
+    }
+}
+```
+
+## 6. ベストプラクティス
+
+### 6.1 イベント設計
+
+-   イベントは不変（immutable）にする
+-   イベント名は過去形で命名する
+-   必要な情報のみを含める
+
+### 6.2 パフォーマンス
+
+-   不要なイベント発行を避ける
+-   適切なバッファリングを使用する
+-   メモリリークに注意する
+
+### 6.3 エラーハンドリング
+
+-   イベント処理の例外を適切に処理する
+-   デッドロックを防ぐ
+-   リソースの解放を確実に行う
+
+## 7. テスト
+
+### 7.1 単体テスト
 
 ```csharp
 [Test]
-public void GameEventBus_Publish_NotifiesSubscribers()
+public void EventBus_Publish_NotifiesSubscribers()
 {
-    var eventBus = new GameEventBus();
-    var evt = new PlayerDeathEvent(new PlayerModel());
-    bool notified = false;
+    var eventBus = new EventBus();
+    var received = false;
 
-    using (eventBus.GetEventStream<PlayerDeathEvent>()
-        .Subscribe(_ => notified = true))
-    {
-        eventBus.Publish(evt);
-        Assert.IsTrue(notified);
-    }
+    eventBus.GetEventStream<TestEvent>()
+        .Subscribe(_ => received = true);
+
+    eventBus.Publish(new TestEvent());
+
+    Assert.That(received, Is.True);
 }
 ```
 
-### 6.2 統合テスト
+### 7.2 統合テスト
 
 ```csharp
 [Test]
-public void GameEventBus_PlayerDeath_TriggersGameOver()
+public async Task EventBus_AsyncOperation_ProcessesEventsCorrectly()
 {
-    var eventBus = new GameEventBus();
-    var player = new PlayerModel();
-    bool gameOverTriggered = false;
+    var eventBus = new EventBus();
+    var results = new List<int>();
 
-    eventBus.GetEventStream<PlayerDeathEvent>()
-        .Subscribe(_ => gameOverTriggered = true);
+    eventBus.GetEventStream<TestEvent>()
+        .Select(e => e.Value)
+        .Subscribe(v => results.Add(v));
 
-    player.TakeDamage(player.MaxHealth.Value);
-    eventBus.Publish(new PlayerDeathEvent(player));
+    await Task.WhenAll(
+        Task.Run(() => eventBus.Publish(new TestEvent(1))),
+        Task.Run(() => eventBus.Publish(new TestEvent(2)))
+    );
 
-    Assert.IsTrue(gameOverTriggered);
+    Assert.That(results, Is.EquivalentTo(new[] { 1, 2 }));
 }
 ```
 
-## 7. 変更履歴
+## 8. 制限事項
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+### 8.1 メモリ管理
+
+-   適切なタイミングで Dispose を呼び出す必要がある
+-   循環参照に注意が必要
+-   大量のイベントは避ける
+
+### 8.2 パフォーマンス
+
+-   イベントの頻度に注意
+-   重い処理は非同期で実行する
+-   バッファリングを活用する
+
+### 8.3 スレッドセーフ
+
+-   マルチスレッド環境での使用には注意が必要
+-   適切な同期処理を実装する
+-   イベントの順序保証に注意
+
+## 9. 変更履歴
+
+| バージョン | 更新日     | 変更内容                                                                                                             |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-23 | パフォーマンス最適化の追加<br>- メモリ管理の改善<br>- スレッドセーフティの強化<br>- イベントバッファリング機能の追加 |
+| 0.1.0      | 2024-03-22 | 初版作成<br>- 基本実装の定義<br>- イベントフィルタリング機能の追加<br>- 使用例の追加                                 |

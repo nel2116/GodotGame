@@ -1,28 +1,33 @@
 ---
-title: MVVM + リアクティブプログラミング 基本設計書
-version: 0.4.0
+title: MVVM+RX基本設計書
+version: 0.2.0
 status: draft
 updated: 2024-03-23
 tags:
-    - Architecture
+    - Core
+    - Design
     - MVVM
     - Reactive
-    - Design
-    - Core
 linked_docs:
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
-    - "[[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]"
-    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
+    - "[[12_04_system_integration|システム間連携]]"
+    - "[[12_05_common_utilities|共通ユーティリティ]]"
 ---
 
-# MVVM + リアクティブプログラミング 基本設計書
+# MVVM+RX 基本設計書
+
+## 目次
+
+1. [概要](#1-概要)
+2. [基本設計](#2-基本設計)
+3. [コンポーネント設計](#3-コンポーネント設計)
+4. [インターフェース設計](#4-インターフェース設計)
+5. [データフロー](#5-データフロー)
+6. [エラー処理](#6-エラー処理)
+7. [ベストプラクティス](#7-ベストプラクティス)
+8. [制限事項](#8-制限事項)
+9. [変更履歴](#9-変更履歴)
 
 ## 1. 概要
 
@@ -79,202 +84,206 @@ linked_docs:
 -   フォーム入力などの特定のケースでのみ使用
 -   基本的には一方向データフローを推奨
 
-## 3. 実装ガイドライン
+## 3. コンポーネント設計
 
-### 3.1 命名規則
+### 3.1 基本コンポーネント
 
-#### 3.1.1 クラス命名
+#### 3.1.1 View
 
--   Model: `[機能名]Model`
--   ViewModel: `[機能名]ViewModel`
--   View: `[機能名]View`
--   Service: `[機能名]Service`
+-   Godot の Node を継承
+-   UI の表示とユーザー入力の処理
+-   ViewModel とのバインディング
+-   アニメーションやエフェクトの制御
 
-#### 3.1.2 プロパティ命名
+#### 3.1.2 ViewModel
 
--   リアクティブプロパティ: `[プロパティ名]`
--   通常のプロパティ: `[プロパティ名]`
--   プライベートフィールド: `_[フィールド名]`
+-   ReactiveProperty を継承
+-   状態管理とデータ変換
+-   コマンドの実装
+-   バリデーションロジック
 
-### 3.2 ディレクトリ構造
+#### 3.1.3 Model
 
-```
-Assets/
-├── Scripts/
-│   ├── Models/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── Items/
-│   ├── ViewModels/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   ├── Views/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   └── Services/
-│       ├── Resource/
-│       ├── Save/
-│       └── Event/
-```
+-   ビジネスロジックの実装
+-   データの永続化
+-   ドメインルールの適用
+-   状態の保持
 
-## 4. 実装例
+### 3.2 共通コンポーネント
 
-### 4.1 基本クラス構造
+#### 3.2.1 コマンド
 
-```csharp
-// Model
-public class PlayerModel
-{
-    public ReactiveProperty<float> Health { get; } = new();
-    public ReactiveProperty<float> MaxHealth { get; } = new();
-    public ReactiveProperty<int> ShadowFragments { get; } = new();
-}
+-   ICommand インターフェースの実装
+-   実行可能状態の管理
+-   非同期処理のサポート
+-   エラーハンドリング
 
-// ViewModel
-public class PlayerViewModel
-{
-    private readonly PlayerModel _model;
-    public ReactiveProperty<string> HealthText { get; } = new();
-    public ReactiveProperty<float> HealthPercentage { get; } = new();
+#### 3.2.2 バリデーター
 
-    public PlayerViewModel(PlayerModel model)
-    {
-        _model = model;
-        _model.Health.Subscribe(UpdateHealthDisplay);
-    }
+-   入力値の検証
+-   エラーメッセージの管理
+-   カスタムバリデーションルール
+-   非同期バリデーション
 
-    private void UpdateHealthDisplay(float health)
-    {
-        HealthText.Value = $"HP: {health}/{_model.MaxHealth.Value}";
-        HealthPercentage.Value = health / _model.MaxHealth.Value;
-    }
-}
+## 4. インターフェース設計
 
-// View
-public partial class PlayerView : Node2D
-{
-    private PlayerViewModel _viewModel;
+### 4.1 基本インターフェース
 
-    public override void _Ready()
-    {
-        _viewModel = new PlayerViewModel(new PlayerModel());
-        _viewModel.HealthText.Subscribe(text =>
-            GetNode<Label>("HealthLabel").Text = text);
-    }
-}
+#### 4.1.1 IViewModel
+
+```gdscript
+interface IViewModel:
+    func initialize()
+    func dispose()
+    func update()
 ```
 
-### 4.2 イベント処理
+#### 4.1.2 IModel
 
-```csharp
-public static class GameEventBus
-{
-    public static Subject<GameEvent> Events { get; } = new();
-
-    public static void Publish(GameEvent gameEvent)
-    {
-        Events.OnNext(gameEvent);
-    }
-}
+```gdscript
+interface IModel:
+    func load()
+    func save()
+    func validate()
 ```
 
-## 5. パフォーマンス最適化
+### 4.2 サービスインターフェース
 
-### 5.1 メモリ管理
+#### 4.2.1 IDataService
 
--   不要なサブスクリプションの解除
--   オブジェクトプーリングの活用
+```gdscript
+interface IDataService:
+    func get_data(key: String) -> Dictionary
+    func set_data(key: String, value: Dictionary)
+    func delete_data(key: String)
+```
+
+#### 4.2.2 IEventService
+
+```gdscript
+interface IEventService:
+    func subscribe(event_name: String, callback: Callable)
+    func publish(event_name: String, data: Dictionary)
+    func unsubscribe(event_name: String, callback: Callable)
+```
+
+## 5. データフロー
+
+### 5.1 基本的なデータフロー
+
+#### 5.1.1 一方向データフロー
+
+1. ユーザーアクション
+2. View のイベント発火
+3. ViewModel のコマンド実行
+4. Model の状態更新
+5. ViewModel の状態更新
+6. View の更新
+
+#### 5.1.2 双方向バインディング
+
+-   フォーム入力
+-   リアルタイムプレビュー
+-   インスタントフィードバック
+
+### 5.2 非同期データフロー
+
+#### 5.2.1 非同期処理
+
+-   コルーチンの使用
+-   シグナルの活用
+-   エラーハンドリング
+
+#### 5.2.2 キャッシュ戦略
+
+-   メモリキャッシュ
+-   ディスクキャッシュ
+-   キャッシュの無効化
+
+## 6. エラー処理
+
+### 6.1 エラーハンドリング
+
+#### 6.1.1 例外処理
+
+-   カスタム例外クラス
+-   例外の伝播
+-   グローバルエラーハンドラー
+
+#### 6.1.2 エラー通知
+
+-   エラーメッセージの表示
+-   ログ記録
+-   エラーリカバリー
+
+### 6.2 バリデーション
+
+#### 6.2.1 入力バリデーション
+
+-   必須チェック
+-   型チェック
+-   範囲チェック
+
+#### 6.2.2 ビジネスルール
+
+-   ドメインルールの検証
+-   整合性チェック
+-   依存関係の検証
+
+## 7. ベストプラクティス
+
+### 7.1 コーディング規約
+
+#### 7.1.1 命名規則
+
+-   クラス名: PascalCase
+-   メソッド名: snake_case
+-   変数名: snake_case
+-   定数: UPPER_SNAKE_CASE
+
+#### 7.1.2 ファイル構成
+
+-   1 ファイル 1 クラス
+-   関連ファイルのグループ化
+-   適切なディレクトリ構造
+
+### 7.2 パフォーマンス最適化
+
+#### 7.2.1 メモリ管理
+
+-   適切なリソース解放
+-   オブジェクトプーリング
+-   メモリリークの防止
+
+#### 7.2.2 実行効率
+
+-   不要な更新の防止
+-   バッチ処理の活用
+-   キャッシュの最適化
+
+## 8. 制限事項
+
+### 8.1 メモリ管理
+
+-   適切なタイミングで Dispose を呼び出す必要がある
+-   循環参照に注意が必要
 -   リソースの適切な解放
 
-### 5.2 更新最適化
+### 8.2 パフォーマンス
 
--   バッチ処理の実装
--   更新頻度の制御
--   不要な更新の防止
+-   重い処理は非同期で実行する
+-   更新頻度の最適化
+-   リソース使用量の制御
 
-## 6. テスト戦略
+### 8.3 スレッドセーフ
 
-### 6.1 単体テスト
+-   マルチスレッド環境での使用には注意が必要
+-   適切な同期処理を実装する
+-   UI スレッドとの連携に注意
 
--   Model: ビジネスロジックの検証
--   ViewModel: 状態変換の検証
--   Service: 機能の検証
+## 9. 変更履歴
 
-### 6.2 統合テスト
-
--   レイヤー間の連携
--   イベント処理
--   データフロー
-
-### 6.3 システム別テスト
-
-#### アニメーションシステム
-
-```csharp
-[Test]
-public void AnimationSystem_StateTransition_HandlesCorrectly()
-{
-    var model = new AnimationModel();
-    var viewModel = new AnimationViewModel(model);
-    var view = new AnimationView();
-    bool transitionHandled = false;
-
-    view.SetupBindings(viewModel);
-    view.OnTransition += () => transitionHandled = true;
-
-    model.TransitionTo(AnimationState.Attack);
-
-    Assert.IsTrue(transitionHandled);
-}
-```
-
-#### サウンドシステム
-
-```csharp
-[Test]
-public void SoundSystem_VolumeControl_UpdatesCorrectly()
-{
-    var model = new SoundModel();
-    var viewModel = new SoundViewModel(model);
-    var view = new SoundView();
-    bool volumeUpdated = false;
-
-    view.SetupBindings(viewModel);
-    view.OnVolumeChange += () => volumeUpdated = true;
-
-    model.SetVolume(0.5f);
-
-    Assert.IsTrue(volumeUpdated);
-}
-```
-
-#### UI システム
-
-```csharp
-[Test]
-public void UISystem_InputHandling_ProcessesCorrectly()
-{
-    var model = new UIModel();
-    var viewModel = new UIViewModel(model);
-    var view = new UIView();
-    bool inputProcessed = false;
-
-    view.SetupBindings(viewModel);
-    view.OnInputProcessed += () => inputProcessed = true;
-
-    model.ProcessInput(new UIInput());
-
-    Assert.IsTrue(inputProcessed);
-}
-```
-
-## 7. 変更履歴
-
-| バージョン | 更新日     | 変更内容                         |
-| ---------- | ---------- | -------------------------------- |
-| 0.1.0      | 2024-03-21 | 初版作成                         |
-| 0.2.0      | 2024-03-23 | 新しいリンクドキュメントを追加   |
-| 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加 |
-| 0.4.0      | 2024-03-23 | ネットワークシステムの削除       |
+| バージョン | 更新日     | 変更内容                                                                                       |
+| ---------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-23 | 機能拡張<br>- コンポーネント設計の追加<br>- インターフェース設計の追加<br>- データフローの追加 |
+| 0.1.0      | 2024-03-21 | 初版作成<br>- 基本設計の追加<br>- エラー処理の定義<br>- ベストプラクティスの追加               |

@@ -1,6 +1,6 @@
 ---
 title: MVVM+RXアーキテクチャ全体図
-version: 0.4.0
+version: 0.5.0
 status: draft
 updated: 2024-03-23
 tags:
@@ -11,6 +11,10 @@ tags:
 linked_docs:
     - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty詳細設計]]"
     - "[[12_03_detailed_design/01_core_components/02_event_bus|EventBus詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/00_common_systems/01_movement_system|共通移動システム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/00_common_systems/02_animation_system|共通アニメーションシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/00_common_systems/03_state_system|共通状態システム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/00_common_systems/04_combat_system|共通戦闘システム詳細設計]]"
     - "[[12_03_detailed_design/02_systems/01_player_system|プレイヤーシステム詳細設計]]"
     - "[[12_03_detailed_design/02_systems/02_skill_system|スキルシステム詳細設計]]"
     - "[[12_03_detailed_design/02_systems/03_level_generation|レベル生成システム詳細設計]]"
@@ -23,13 +27,19 @@ linked_docs:
     - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
     - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
     - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # MVVM+RX アーキテクチャ全体図
+
+# 目次
+
+1. [概要](#1-概要)
+2. [全体クラス図](#2-全体クラス図)
+3. [コンポーネント間の相互作用](#3-コンポーネント間の相互作用)
+4. [パッケージ構造](#4-パッケージ構造)
+5. [主要コンポーネントの説明](#5-主要コンポーネントの説明)
+6. [データフロー](#6-データフロー)
+7. [変更履歴](#7-変更履歴)
 
 ## 1. 概要
 
@@ -45,6 +55,7 @@ linked_docs:
 ### 1.2 適用範囲
 
 -   コアコンポーネント
+-   共通システム
 -   システム実装
 -   パフォーマンス最適化
 -   テスト戦略
@@ -77,155 +88,184 @@ classDiagram
         +GetEventStream~T~() IObservable~T~
     }
 
-    %% システム実装
-    class PlayerModel {
-        +ReactiveProperty~float~ Health
-        +ReactiveProperty~float~ MaxHealth
-        +ReactiveProperty~int~ ShadowFragments
-        +ReactiveProperty~Inventory~ Inventory
-        +ReactiveProperty~QuestProgress~ QuestProgress
-        +TakeDamage(float) void
-        +Heal(float) void
-        +UpdateQuestProgress(Quest) void
+    %% 共通システム
+    class MovementSystemBase {
+        <<interface>>
+        +Move()
+        +Jump()
+        +Dash()
     }
 
-    class PlayerViewModel {
-        -PlayerModel _model
-        +ReactiveProperty~string~ HealthText
-        +ReactiveProperty~string~ ShadowFragmentText
-        +ReactiveProperty~string~ QuestStatusText
-        +ReactiveProperty~bool~ IsAnimating
+    class CombatSystemBase {
+        <<interface>>
+        +Attack()
+        +Defend()
+        +UseSkill()
+    }
+
+    class AnimationSystemBase {
+        <<interface>>
+        +PlayAnimation()
+        +StopAnimation()
+        +UpdateAnimation()
+    }
+
+    class StateSystemBase {
+        <<interface>>
+        +ChangeState()
+        +AddState()
+        +RemoveState()
+    }
+
+    %% プレイヤーシステム
+    class PlayerSystem {
+        +PlayerInputSystem InputSystem
+        +PlayerMovementSystem MovementSystem
+        +PlayerCombatSystem CombatSystem
+        +PlayerAnimationSystem AnimationSystem
+        +PlayerStateSystem StateSystem
+        +PlayerProgressionSystem ProgressionSystem
+        +Initialize()
+        +Update()
+        +Dispose()
+    }
+
+    class PlayerMovementSystem {
+        +ReactiveProperty~Vector2~ Velocity
+        +ReactiveProperty~bool~ IsGrounded
+        +ReactiveProperty~bool~ IsDashing
+        +Move(Vector2) void
+        +Jump() void
+        +Dash() void
+    }
+
+    class PlayerCombatSystem {
+        +ReactiveProperty~float~ AttackPower
+        +ReactiveProperty~float~ Defense
+        +ReactiveProperty~List~Skill~~ Skills
+        +Attack() void
+        +Defend() void
+        +UseSkill(Skill) void
+    }
+
+    class PlayerAnimationSystem {
+        +ReactiveProperty~string~ CurrentAnimation
+        +ReactiveProperty~bool~ IsPlaying
         +PlayAnimation(string) void
-        +PlaySound(string) void
+        +StopAnimation() void
+        +UpdateAnimation() void
     }
 
-    class SkillModel {
-        +ReactiveProperty~bool~ IsUnlocked
-        +ReactiveProperty~int~ Level
-        +ReactiveProperty~float~ Cooldown
-        +ReactiveProperty~SkillCombo~ CurrentCombo
-        +ReactiveProperty~List~SkillRequirement~~ Requirements
-        +UseSkill() void
-        +CheckRequirements() bool
+    class PlayerStateSystem {
+        +ReactiveProperty~string~ CurrentState
+        +ReactiveProperty~Dictionary~string, float~~ BuffEffects
+        +ReactiveProperty~Dictionary~string, float~~ DebuffEffects
+        +ChangeState(string) void
+        +ApplyBuff(string, float) void
+        +RemoveBuff(string) void
     }
 
-    class SkillViewModel {
-        -SkillModel _model
-        +ReactiveProperty~string~ StatusText
-        +ReactiveProperty~float~ CooldownPercentage
-        +ReactiveProperty~bool~ IsEffectPlaying
-        +PlayEffect(string) void
-        +PlaySound(string) void
+    %% その他のシステム
+    class SkillSystem {
+        +ReactiveProperty~List~Skill~~ UnlockedSkills
+        +ReactiveProperty~int~ SkillPoints
+        +UnlockSkill(Skill) void
+        +UpgradeSkill(Skill) void
     }
 
     class LevelGenerationSystem {
-        -ReactiveProperty~LevelData~ CurrentLevel
-        -ReactiveProperty~float~ Difficulty
+        +ReactiveProperty~LevelData~ CurrentLevel
+        +ReactiveProperty~float~ Difficulty
         +GenerateLevel() void
         +AdjustDifficulty(float) void
-        +ManageResources() void
     }
 
     class EnemyAISystem {
-        -ReactiveProperty~List~EnemyBehavior~~ Behaviors
-        -ReactiveProperty~float~ Difficulty
+        +ReactiveProperty~List~EnemyBehavior~~ Behaviors
+        +ReactiveProperty~float~ Difficulty
         +UpdateBehavior() void
         +AdjustDifficulty(float) void
-        +ControlGroupBehavior() void
     }
 
     class InputSystem {
-        -ReactiveProperty~InputConfig~ Config
+        +ReactiveProperty~InputConfig~ Config
         +HandleKeyboardInput() void
         +HandleGamepadInput() void
-        +HandleTouchInput() void
         +UpdateConfig(InputConfig) void
     }
 
     class SaveLoadSystem {
-        -ReactiveProperty~SaveData~ CurrentSave
+        +ReactiveProperty~SaveData~ CurrentSave
         +AutoSave() void
         +QuickSave() void
         +LoadGame(string) void
-        +EncryptSaveData() void
     }
 
     %% パフォーマンス最適化
     class ObjectPool~T~ {
         -List~T~ _pool
-        -Dictionary~string, int~ _poolHierarchy
         +Get() T
         +Return(T) void
         +ResizePool(int) void
-        +MonitorMemoryUsage() void
     }
 
     class UpdateManager {
         -Dictionary~string, float~ _lastUpdateTimes
-        -Dictionary~string, int~ _updatePriorities
         +ShouldUpdate(string) bool
         +SetLOD(string, int) void
-        +ScheduleAsyncUpdate(Action) void
     }
 
     class ResourceManager {
         -Dictionary~string, object~ _cache
         +LoadAsync(string) Task
         +CacheResource(string, object) void
-        +PreloadResources(List~string~) void
-    }
-
-    class RenderingOptimizer {
-        -List~Renderer~ _visibleRenderers
-        +PerformOcclusionCulling() void
-        +BatchRenderers() void
-        +OptimizeShaders() void
     }
 
     %% テスト戦略
     class TestBase {
         #GameEventBus _eventBus
-        #Dictionary~string, object~ _mocks
         +Setup() void
         +TearDown() void
-        +CreateMock~T~() T
     }
 
     class ModelTestBase~T~ {
         #T _model
         +AssertModelState() void
         +TestValidation() void
-        +TestErrorHandling() void
     }
 
     class ViewModelTestBase~T~ {
         #T _viewModel
         +TestUIUpdates() void
         +TestCommandExecution() void
-        +TestErrorDisplay() void
     }
 
     class IntegrationTestBase {
         #List~ISystem~ _systems
         +TestSystemIntegration() void
         +TestEndToEnd() void
-        +TestPerformance() void
     }
 
     %% 関係性
     IReactiveProperty <|.. ReactiveProperty
     ReactiveProperty --> Subject
     GameEventBus --> Subject
-    PlayerModel --> ReactiveProperty
-    PlayerViewModel --> PlayerModel
-    PlayerViewModel --> ReactiveProperty
-    SkillModel --> ReactiveProperty
-    SkillViewModel --> SkillModel
-    SkillViewModel --> ReactiveProperty
-    LevelGenerationSystem --> ReactiveProperty
-    EnemyAISystem --> ReactiveProperty
-    InputSystem --> ReactiveProperty
-    SaveLoadSystem --> ReactiveProperty
+
+    MovementSystemBase <|-- PlayerMovementSystem
+    CombatSystemBase <|-- PlayerCombatSystem
+    AnimationSystemBase <|-- PlayerAnimationSystem
+    StateSystemBase <|-- PlayerStateSystem
+
+    PlayerSystem --> PlayerMovementSystem
+    PlayerSystem --> PlayerCombatSystem
+    PlayerSystem --> PlayerAnimationSystem
+    PlayerSystem --> PlayerStateSystem
+
+    PlayerMovementSystem --> ReactiveProperty
+    PlayerCombatSystem --> ReactiveProperty
+    PlayerAnimationSystem --> ReactiveProperty
+    PlayerStateSystem --> ReactiveProperty
+
     TestBase --> GameEventBus
     ModelTestBase --|> TestBase
     ViewModelTestBase --|> TestBase
@@ -239,39 +279,18 @@ sequenceDiagram
     participant V as View
     participant VM as ViewModel
     participant M as Model
-    participant RP as ReactiveProperty
+    participant CS as CommonSystem
+    participant PS as PlayerSystem
     participant EB as EventBus
-    participant UM as UpdateManager
-    participant RM as ResourceManager
-    participant RO as RenderingOptimizer
-    participant T as Test
 
     %% 通常の更新フロー
     V->>VM: ユーザー入力
     VM->>M: 状態更新
-    M->>RP: 値変更
-    RP->>VM: 通知
-    VM->>V: UI更新
-
-    %% イベント処理フロー
-    M->>EB: イベント発行
-    EB->>VM: イベント通知
-    VM->>V: UI更新
-
-    %% パフォーマンス最適化
-    V->>UM: 更新要求
-    UM-->>V: 更新判定
-    V->>RM: リソース要求
-    RM-->>V: リソース提供
-    V->>RO: レンダリング要求
-    RO-->>V: 最適化済みレンダリング
-
-    %% テストフロー
-    T->>M: テスト実行
-    M->>RP: 値変更
-    RP->>VM: 通知
-    VM->>V: UI更新
-    T->>V: 検証
+    M->>CS: 基本処理
+    CS->>PS: プレイヤー固有処理
+    PS->>EB: イベント発行
+    EB->>VM: 通知
+    VM->>V: 表示更新
 ```
 
 ## 4. パッケージ構造
@@ -329,50 +348,27 @@ classDiagram
     -   エラーハンドリング
     -   完了通知のサポート
 
-### 5.2 システム実装
+### 5.2 共通システム
 
--   **PlayerModel**: プレイヤーの状態管理
-    -   ステータス値のリアクティブな管理
-    -   バリデーション機能
-    -   状態変更の履歴管理
-    -   インベントリ管理
-    -   クエスト進捗管理
--   **PlayerViewModel**: プレイヤーの UI 表示制御
-    -   モデルデータの UI 適応
-    -   コマンドパターンによる操作処理
-    -   エラー状態の管理
-    -   アニメーション制御
-    -   サウンド制御
--   **SkillModel**: スキルの状態管理
-    -   スキルツリーの管理
-    -   クールダウン制御
-    -   スキル効果の計算
-    -   スキルコンボ管理
-    -   スキル習得条件管理
--   **SkillViewModel**: スキルの UI 表示制御
-    -   スキル状態の視覚化
-    -   使用条件の表示
-    -   アニメーション制御
-    -   エフェクト制御
-    -   サウンド制御
--   **LevelGenerationSystem**: レベル生成管理
-    -   プロシージャル生成
-    -   難易度調整
-    -   リソース管理
--   **EnemyAISystem**: 敵 AI 管理
-    -   行動パターン制御
-    -   難易度調整
-    -   グループ行動制御
--   **InputSystem**: 入力管理
-    -   キーコンフィグ
-    -   ゲームパッド対応
-    -   タッチ操作対応
--   **SaveLoadSystem**: セーブ/ロード管理
-    -   自動セーブ
-    -   クイックセーブ
-    -   セーブデータ暗号化
+-   **MovementSystemBase**: 共通の移動システムのインターフェース
+-   **CombatSystemBase**: 共通の戦闘システムのインターフェース
+-   **AnimationSystemBase**: 共通のアニメーションシステムのインターフェース
+-   **StateSystemBase**: 共通の状態システムのインターフェース
 
-### 5.3 パフォーマンス最適化
+### 5.3 システム実装
+
+-   **PlayerSystem**: プレイヤーシステムの統合
+-   **PlayerMovementSystem**: プレイヤーの移動システム
+-   **PlayerCombatSystem**: プレイヤーの戦闘システム
+-   **PlayerAnimationSystem**: プレイヤーのアニメーションシステム
+-   **PlayerStateSystem**: プレイヤーの状態システム
+-   **SkillSystem**: スキルシステム
+-   **LevelGenerationSystem**: レベル生成システム
+-   **EnemyAISystem**: 敵 AI システム
+-   **InputSystem**: 入力システム
+-   **SaveLoadSystem**: セーブ/ロードシステム
+
+### 5.4 パフォーマンス最適化
 
 -   **ObjectPool**: オブジェクトの再利用によるメモリ最適化
     -   動的プールサイズ調整
@@ -395,7 +391,7 @@ classDiagram
     -   バッチ処理
     -   シェーダー最適化
 
-### 5.4 テスト戦略
+### 5.5 テスト戦略
 
 -   **TestBase**: テストの基本クラス
     -   テスト環境のセットアップ
@@ -432,9 +428,10 @@ flowchart TD
 
 ## 7. 変更履歴
 
-| バージョン | 更新日     | 変更内容                                                                                     |
-| ---------- | ---------- | -------------------------------------------------------------------------------------------- |
-| 0.4.0      | 2024-03-23 | システム実装の拡充、パフォーマンス最適化の詳細化、テスト戦略の更新、リンクドキュメントの追加 |
-| 0.3.0      | 2024-03-22 | システム実装の拡充、パフォーマンス最適化の詳細化、テスト戦略の更新、リンクドキュメントの追加 |
-| 0.2.0      | 2024-03-22 | コンポーネント説明の詳細化、パフォーマンス最適化セクションの拡充                             |
-| 0.1.0      | 2024-03-21 | 初版作成                                                                                     |
+| バージョン | 更新日     | 変更内容                                                                                          |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| 0.5.0      | 2024-03-23 | 共通システムの追加と構造の更新<br>- 共通システムのインターフェース追加<br>- システム間の連携強化  |
+| 0.4.0      | 2024-03-23 | パフォーマンス最適化の追加<br>- ObjectPool 実装<br>- UpdateManager 実装<br>- ResourceManager 実装 |
+| 0.3.0      | 2024-03-22 | テスト戦略の追加<br>- テスト基底クラスの実装<br>- 各層のテスト戦略の定義                          |
+| 0.2.0      | 2024-03-22 | システム実装の詳細化<br>- プレイヤーシステムの実装<br>- スキルシステムの実装                      |
+| 0.1.0      | 2024-03-21 | 初版作成<br>- アーキテクチャ全体図の作成<br>- 基本コンポーネントの定義                            |

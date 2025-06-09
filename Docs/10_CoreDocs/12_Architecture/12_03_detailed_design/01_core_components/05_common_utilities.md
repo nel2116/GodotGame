@@ -1,0 +1,451 @@
+---
+title: 共通ユーティリティ実装詳細
+version: 0.2.0
+status: draft
+updated: 2024-03-23
+tags:
+    - Core
+    - Utility
+    - Implementation
+linked_docs:
+    - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[12_02_basic_design|MVVM+RX基本設計書]]"
+    - "[[01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+---
+
+# 共通ユーティリティ実装詳細
+
+## 目次
+
+1. [概要](#1-概要)
+2. [リアクティブユーティリティ](#2-リアクティブユーティリティ)
+3. [イベントユーティリティ](#3-イベントユーティリティ)
+4. [ログユーティリティ](#4-ログユーティリティ)
+5. [バリデーションユーティリティ](#5-バリデーションユーティリティ)
+6. [非同期処理ユーティリティ](#6-非同期処理ユーティリティ)
+7. [ベストプラクティス](#7-ベストプラクティス)
+8. [制限事項](#8-制限事項)
+9. [変更履歴](#9-変更履歴)
+
+## 1. 概要
+
+共通ユーティリティは、アプリケーション全体で使用される汎用的な機能を提供します。これらは、コードの重複を避け、一貫性のある実装を促進するために使用されます。
+
+## 2. リアクティブユーティリティ
+
+### 2.1 ReactiveCommand
+
+```csharp
+public class ReactiveCommand : ICommand, IDisposable
+{
+    private readonly Subject<Unit> _executeSubject = new();
+    private readonly ReactiveProperty<bool> _canExecute = new(true);
+    private bool _disposed;
+
+    public IObservable<Unit> ExecuteObservable => _executeSubject.AsObservable();
+    public IObservable<bool> CanExecuteObservable => _canExecute.ValueChanged;
+
+    public bool CanExecute(object parameter) => _canExecute.Value;
+
+    public void Execute(object parameter)
+    {
+        if (CanExecute(parameter))
+        {
+            _executeSubject.OnNext(Unit.Default);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _executeSubject.Dispose();
+            _canExecute.Dispose();
+            _disposed = true;
+        }
+    }
+}
+```
+
+### 2.2 ReactiveCollection
+
+```csharp
+public class ReactiveCollection<T> : IList<T>, IDisposable
+{
+    private readonly List<T> _items = new();
+    private readonly Subject<CollectionChangedEvent<T>> _changedSubject = new();
+    private bool _disposed;
+
+    public IObservable<CollectionChangedEvent<T>> Changed => _changedSubject.AsObservable();
+
+    public void Add(T item)
+    {
+        _items.Add(item);
+        _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Add, item));
+    }
+
+    public void Remove(T item)
+    {
+        if (_items.Remove(item))
+        {
+            _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, item));
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _changedSubject.Dispose();
+            _disposed = true;
+        }
+    }
+}
+```
+
+## 3. イベントユーティリティ
+
+### 3.1 EventAggregator
+
+```csharp
+public class EventAggregator : IEventAggregator
+{
+    private readonly Dictionary<Type, object> _handlers = new();
+    private readonly object _lock = new();
+
+    public void Publish<T>(T message) where T : class
+    {
+        lock (_lock)
+        {
+            if (_handlers.TryGetValue(typeof(T), out var handlers))
+            {
+                foreach (var handler in (List<Action<T>>)handlers)
+                {
+                    handler(message);
+                }
+            }
+        }
+    }
+
+    public void Subscribe<T>(Action<T> handler) where T : class
+    {
+        lock (_lock)
+        {
+            var type = typeof(T);
+            if (!_handlers.TryGetValue(type, out var handlers))
+            {
+                handlers = new List<Action<T>>();
+                _handlers[type] = handlers;
+            }
+            ((List<Action<T>>)handlers).Add(handler);
+        }
+    }
+}
+```
+
+### 3.2 WeakEventManager
+
+```csharp
+public class WeakEventManager
+{
+    private readonly Dictionary<string, List<WeakReference>> _handlers = new();
+
+    public void AddHandler(string eventName, EventHandler handler)
+    {
+        if (!_handlers.TryGetValue(eventName, out var handlers))
+        {
+            handlers = new List<WeakReference>();
+            _handlers[eventName] = handlers;
+        }
+        handlers.Add(new WeakReference(handler));
+    }
+
+    public void RemoveHandler(string eventName, EventHandler handler)
+    {
+        if (_handlers.TryGetValue(eventName, out var handlers))
+        {
+            handlers.RemoveAll(wr => !wr.IsAlive || wr.Target == handler);
+        }
+    }
+}
+```
+
+## 4. ロギングユーティリティ
+
+### 4.1 Logger
+
+```csharp
+public class Logger : ILogger
+{
+    private readonly IEventBus _eventBus;
+    private readonly LogLevel _minimumLevel;
+
+    public Logger(IEventBus eventBus, LogLevel minimumLevel = LogLevel.Info)
+    {
+        _eventBus = eventBus;
+        _minimumLevel = minimumLevel;
+    }
+
+    public void Log(LogLevel level, string message, Exception ex = null)
+    {
+        if (level < _minimumLevel) return;
+
+        var logEvent = new LogEvent
+        {
+            Level = level,
+            Message = message,
+            Exception = ex,
+            Timestamp = DateTime.UtcNow
+        };
+
+        _eventBus.Publish(logEvent);
+    }
+}
+```
+
+### 4.2 LogFormatter
+
+```csharp
+public class LogFormatter
+{
+    public string Format(LogEvent logEvent)
+    {
+        var sb = new StringBuilder();
+        sb.Append($"[{logEvent.Timestamp:yyyy-MM-dd HH:mm:ss}] ");
+        sb.Append($"{logEvent.Level}: {logEvent.Message}");
+
+        if (logEvent.Exception != null)
+        {
+            sb.AppendLine();
+            sb.Append($"Exception: {logEvent.Exception}");
+        }
+
+        return sb.ToString();
+    }
+}
+```
+
+## 5. バリデーションユーティリティ
+
+### 5.1 Validator
+
+```csharp
+public class Validator<T>
+{
+    private readonly List<ValidationRule<T>> _rules = new();
+
+    public void AddRule(ValidationRule<T> rule)
+    {
+        _rules.Add(rule);
+    }
+
+    public ValidationResult Validate(T value)
+    {
+        var errors = new List<string>();
+
+        foreach (var rule in _rules)
+        {
+            if (!rule.Validate(value))
+            {
+                errors.Add(rule.ErrorMessage);
+            }
+        }
+
+        return new ValidationResult(errors);
+    }
+}
+```
+
+### 5.2 ValidationRule
+
+```csharp
+public class ValidationRule<T>
+{
+    public Func<T, bool> Validate { get; }
+    public string ErrorMessage { get; }
+
+    public ValidationRule(Func<T, bool> validate, string errorMessage)
+    {
+        Validate = validate;
+        ErrorMessage = errorMessage;
+    }
+}
+```
+
+## 6. 非同期処理ユーティリティ
+
+### 6.1 AsyncCommand
+
+```csharp
+public class AsyncCommand : ICommand, IDisposable
+{
+    private readonly Func<Task> _execute;
+    private readonly ReactiveProperty<bool> _isExecuting = new(false);
+    private bool _disposed;
+
+    public IObservable<bool> IsExecuting => _isExecuting.ValueChanged;
+
+    public bool CanExecute(object parameter) => !_isExecuting.Value;
+
+    public async void Execute(object parameter)
+    {
+        if (!CanExecute(parameter)) return;
+
+        try
+        {
+            _isExecuting.Value = true;
+            await _execute();
+        }
+        finally
+        {
+            _isExecuting.Value = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _isExecuting.Dispose();
+            _disposed = true;
+        }
+    }
+}
+```
+
+### 6.2 TaskExtensions
+
+```csharp
+public static class TaskExtensions
+{
+    public static async Task<T> WithTimeout<T>(this Task<T> task, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource(timeout);
+        try
+        {
+            return await task.WaitAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException();
+        }
+    }
+
+    public static async Task<T> WithRetry<T>(this Func<Task<T>> taskFactory, int maxRetries)
+    {
+        for (int i = 0; i < maxRetries; i++)
+        {
+            try
+            {
+                return await taskFactory();
+            }
+            catch (Exception) when (i < maxRetries - 1)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
+            }
+        }
+        return await taskFactory();
+    }
+}
+```
+
+## 7. ベストプラクティス
+
+### 7.1 メモリ管理
+
+-   適切なタイミングで Dispose を呼び出す
+-   弱参照を活用する
+-   メモリリークを防ぐ
+
+### 7.2 パフォーマンス
+
+-   不要なオブジェクト生成を避ける
+-   キャッシュを適切に使用する
+-   非同期処理を活用する
+
+### 7.3 エラーハンドリング
+
+-   例外を適切に処理する
+-   ログを適切に記録する
+-   リカバリー処理を実装する
+
+## 8. 制限事項
+
+### 8.1 メモリ管理
+
+-   適切なタイミングで Dispose を呼び出す必要がある
+-   循環参照に注意が必要
+-   リソースの適切な解放
+
+### 8.2 パフォーマンス
+
+-   重い処理は非同期で実行する
+-   キャッシュの適切な使用
+-   リソース使用量の制御
+
+### 8.3 スレッドセーフ
+
+-   マルチスレッド環境での使用には注意が必要
+-   適切な同期処理を実装する
+-   スレッド間通信の制御
+
+## 9. 変更履歴
+
+| バージョン | 更新日     | 変更内容                                                                                                               |
+| ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-23 | 機能拡張<br>- ロギングユーティリティの追加<br>- バリデーションユーティリティの追加<br>- 非同期処理ユーティリティの追加 |
+| 0.1.0      | 2024-03-22 | 初版作成<br>- リアクティブユーティリティの実装<br>- イベントユーティリティの実装<br>- 使用例の追加                     |
+
+## 10. テスト
+
+### 10.1 単体テスト
+
+```csharp
+[Test]
+public void ReactiveCommand_Execute_NotifiesSubscribers()
+{
+    var command = new ReactiveCommand();
+    var executed = false;
+
+    command.ExecuteObservable.Subscribe(_ => executed = true);
+    command.Execute(null);
+
+    Assert.That(executed, Is.True);
+}
+```
+
+### 10.2 統合テスト
+
+```csharp
+[Test]
+public async Task AsyncCommand_Execute_HandlesErrorsCorrectly()
+{
+    var command = new AsyncCommand(async () =>
+    {
+        await Task.Delay(100);
+        throw new Exception("Test error");
+    });
+
+    var errorOccurred = false;
+    command.Execute(null);
+
+    await Task.Delay(200);
+    Assert.That(errorOccurred, Is.False);
+    Assert.That(command.IsExecuting.Value, Is.False);
+}
+```
+
+## 11. 今後の改善計画
+
+### 11.1 機能拡張
+
+-   非同期処理のサポート強化
+-   バリデーションルールの拡張
+-   ログ機能の強化
+
+### 11.2 ドキュメント
+
+-   使用例の追加
+-   パフォーマンスチューニングガイド
+-   トラブルシューティングガイド

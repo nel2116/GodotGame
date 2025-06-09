@@ -1,213 +1,136 @@
 ---
-title: MVVM + リアクティブプログラミング 詳細設計書
-version: 0.4.0
+title: MVVM+RX詳細設計書
+version: 0.2.0
 status: draft
 updated: 2024-03-23
 tags:
-    - Architecture
+    - Core
+    - Design
     - MVVM
     - Reactive
-    - Design
-    - Core
-    - Detailed
 linked_docs:
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
-    - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
-    - "[[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]"
-    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_04_system_integration|システム間連携]]"
+    - "[[12_05_common_utilities|共通ユーティリティ]]"
 ---
 
-# MVVM + リアクティブプログラミング 詳細設計書
+# MVVM+RX 詳細設計書
+
+## 目次
+
+1. [概要](#1-概要)
+2. [コアコンポーネント](#2-コアコンポーネント)
+3. [システム設計](#3-システム設計)
+4. [インターフェース設計](#4-インターフェース設計)
+5. [データフロー](#5-データフロー)
+6. [エラー処理](#6-エラー処理)
+7. [ベストプラクティス](#7-ベストプラクティス)
+8. [制限事項](#8-制限事項)
+9. [変更履歴](#9-変更履歴)
 
 ## 1. 概要
 
 ### 1.1 目的
 
-本ドキュメントは、Shrine of the Lost Ones における MVVM + リアクティブプログラミングの詳細な実装方針を定義し、以下の目的を達成することを目指します：
+-   MVVM パターンとリアクティブプログラミングの統合
+-   保守性と拡張性の高いアーキテクチャの実現
+-   テスト容易性の確保
 
--   具体的な実装パターンの確立
--   開発チーム間での実装の一貫性確保
--   保守性と拡張性の高いコードベースの構築
--   パフォーマンス最適化の指針提供
+### 1.2 対象システム
 
-### 1.2 適用範囲
-
--   ゲームコアシステム
--   UI/UX システム
--   データ管理システム
--   イベントシステム
+-   プレイヤーシステム
+-   スキルシステム
 -   アニメーションシステム
 -   サウンドシステム
+-   UI システム
 
-## 2. 詳細設計
+## 2. コアコンポーネント
 
-### 2.1 コアコンポーネント
-
-#### 2.1.1 システム全体のクラス図
+### 2.1 システム全体のクラス図
 
 ```mermaid
 classDiagram
-    %% コアコンポーネント
-    class IReactiveProperty~T~ {
-        <<interface>>
-        +T Value
-        +Subscribe(Action~T~) IDisposable
+    class Model {
+        +ReactiveProperty<T> Properties
+        +Update()
+        +Dispose()
     }
-
-    class ReactiveProperty~T~ {
-        -T _value
-        -Subject~T~ _subject
-        +Value
-        +Subscribe(Action~T~) IDisposable
+    class ViewModel {
+        +Model Model
+        +ReactiveCommand Commands
+        +Bind()
+        +Dispose()
     }
-
-    class IGameEvent {
-        <<interface>>
+    class View {
+        +ViewModel ViewModel
+        +Subscribe()
+        +Dispose()
     }
-
-    class GameEventBus {
-        -Subject~IGameEvent~ _subject
-        +Publish~T~(T) void
-        +GetEventStream~T~() IObservable~T~
+    class Service {
+        +EventBus Events
+        +Publish()
+        +Subscribe()
     }
-
-    %% システム実装
-    class PlayerSystem {
-        +PlayerModel Model
-        +PlayerViewModel ViewModel
-        +PlayerView View
-    }
-
-    class SkillSystem {
-        +SkillModel Model
-        +SkillViewModel ViewModel
-        +SkillView View
-    }
-
-    class AnimationSystem {
-        +AnimationModel Model
-        +AnimationViewModel ViewModel
-        +AnimationView View
-    }
-
-    class SoundSystem {
-        +SoundModel Model
-        +SoundViewModel ViewModel
-        +SoundView View
-    }
-
-    class UISystem {
-        +UIModel Model
-        +UIViewModel ViewModel
-        +UIView View
-    }
-
-    class NetworkSystem {
-        +NetworkModel Model
-        +NetworkViewModel ViewModel
-        +NetworkView View
-    }
-
-    %% 関係性
-    IReactiveProperty <|.. ReactiveProperty
-    ReactiveProperty --> Subject
-    GameEventBus --> Subject
-    PlayerSystem --> ReactiveProperty
-    SkillSystem --> ReactiveProperty
-    AnimationSystem --> ReactiveProperty
-    SoundSystem --> ReactiveProperty
-    UISystem --> ReactiveProperty
-    NetworkSystem --> ReactiveProperty
+    Model <|-- ViewModel
+    ViewModel <|-- View
+    Service --> Model
+    Service --> ViewModel
 ```
 
-#### 2.1.2 システム間の相互作用
+### 2.2 システム間の相互作用
 
 ```mermaid
 sequenceDiagram
     participant V as View
     participant VM as ViewModel
     participant M as Model
-    participant RP as ReactiveProperty
-    participant EB as EventBus
-    participant AS as AnimationSystem
-    participant SS as SoundSystem
-    participant NS as NetworkSystem
-
-    %% 通常の更新フロー
-    V->>VM: ユーザー入力
+    participant S as Service
+    V->>VM: コマンド実行
     VM->>M: 状態更新
-    M->>RP: 値変更
-    RP->>VM: 通知
-    VM->>V: UI更新
-
-    %% イベント処理フロー
-    M->>EB: イベント発行
-    EB->>VM: イベント通知
-    VM->>V: UI更新
-
-    %% アニメーション処理
-    V->>AS: アニメーション要求
-    AS->>V: アニメーション実行
-
-    %% サウンド処理
-    V->>SS: サウンド再生要求
-    SS->>V: サウンド再生
-
-    %% ネットワーク処理
-    V->>NS: ネットワーク要求
-    NS->>V: ネットワーク応答
+    M->>VM: 通知
+    VM->>V: 更新
+    S->>M: イベント発行
+    M->>VM: 通知
+    VM->>V: 更新
 ```
 
-### 2.2 システム別実装詳細
+## 3. システム設計
 
-#### 2.2.1 プレイヤーシステム
+### 3.1 プレイヤーシステム
 
 ```csharp
-// Model
 public class PlayerModel
 {
-    public ReactiveProperty<float> Health { get; } = new(100f);
-    public ReactiveProperty<float> MaxHealth { get; } = new(100f);
-    public ReactiveProperty<int> ShadowFragments { get; } = new(0);
-    public ReactiveProperty<Vector2> Position { get; } = new(Vector2.Zero);
-    public ReactiveProperty<PlayerState> State { get; } = new(PlayerState.Idle);
+    public ReactiveProperty<float> Health { get; } = new();
+    public ReactiveProperty<float> MaxHealth { get; } = new();
+    public ReactiveProperty<int> ShadowFragments { get; } = new();
 
     public void TakeDamage(float damage)
     {
-        Health.Value = Mathf.Max(0, Health.Value - damage);
-        if (Health.Value <= 0)
-        {
-            State.Value = PlayerState.Dead;
-            GameEventBus.Publish(new PlayerDeathEvent());
-        }
+        Health.Value = Math.Max(0, Health.Value - damage);
+    }
+
+    public void Heal(float amount)
+    {
+        Health.Value = Math.Min(MaxHealth.Value, Health.Value + amount);
     }
 }
 
-// ViewModel
 public class PlayerViewModel
 {
     private readonly PlayerModel _model;
     public ReactiveProperty<string> HealthText { get; } = new();
     public ReactiveProperty<float> HealthPercentage { get; } = new();
-    public ReactiveProperty<bool> IsDead { get; } = new();
+    public ReactiveCommand TakeDamageCommand { get; }
+    public ReactiveCommand HealCommand { get; }
 
     public PlayerViewModel(PlayerModel model)
     {
         _model = model;
-        SetupSubscriptions();
-    }
-
-    private void SetupSubscriptions()
-    {
         _model.Health.Subscribe(UpdateHealthDisplay);
-        _model.State.Subscribe(state => IsDead.Value = state == PlayerState.Dead);
+        TakeDamageCommand = new ReactiveCommand<float>(damage => _model.TakeDamage(damage));
+        HealCommand = new ReactiveCommand<float>(amount => _model.Heal(amount));
     }
 
     private void UpdateHealthDisplay(float health)
@@ -216,361 +139,223 @@ public class PlayerViewModel
         HealthPercentage.Value = health / _model.MaxHealth.Value;
     }
 }
-
-// View
-public partial class PlayerView : Node2D
-{
-    private PlayerViewModel _viewModel;
-    private IDisposable _healthSubscription;
-    private IDisposable _stateSubscription;
-
-    public override void _Ready()
-    {
-        _viewModel = new PlayerViewModel(new PlayerModel());
-        SetupBindings();
-    }
-
-    private void SetupBindings()
-    {
-        _healthSubscription = _viewModel.HealthText.Subscribe(text =>
-            GetNode<Label>("HealthLabel").Text = text);
-
-        _stateSubscription = _viewModel.IsDead.Subscribe(isDead =>
-            GetNode<AnimationPlayer>("AnimationPlayer").Play(isDead ? "Death" : "Idle"));
-    }
-
-    public override void _ExitTree()
-    {
-        _healthSubscription?.Dispose();
-        _stateSubscription?.Dispose();
-    }
-}
 ```
 
-#### 2.2.2 スキルシステム
+### 3.2 スキルシステム
 
 ```csharp
-// Model
 public class SkillModel
 {
-    public ReactiveProperty<bool> IsUnlocked { get; } = new(false);
-    public ReactiveProperty<int> Level { get; } = new(0);
-    public ReactiveProperty<float> Cooldown { get; } = new(0f);
-    public ReactiveProperty<float> MaxCooldown { get; } = new(5f);
+    public ReactiveProperty<float> Cooldown { get; } = new();
+    public ReactiveProperty<bool> IsReady { get; } = new();
+    public ReactiveProperty<float> ManaCost { get; } = new();
 
     public void UseSkill()
     {
-        if (IsUnlocked.Value && Cooldown.Value <= 0)
-        {
-            Cooldown.Value = MaxCooldown.Value;
-            GameEventBus.Publish(new SkillUsedEvent(this));
-        }
+        if (!IsReady.Value) return;
+        IsReady.Value = false;
+        StartCooldown();
     }
 
-    public void UpdateCooldown(float delta)
+    private async void StartCooldown()
     {
-        if (Cooldown.Value > 0)
-        {
-            Cooldown.Value = Mathf.Max(0, Cooldown.Value - delta);
-        }
+        await Task.Delay(TimeSpan.FromSeconds(Cooldown.Value));
+        IsReady.Value = true;
     }
 }
 
-// ViewModel
 public class SkillViewModel
 {
     private readonly SkillModel _model;
-    public ReactiveProperty<string> StatusText { get; } = new();
-    public ReactiveProperty<bool> IsAvailable { get; } = new();
-    public ReactiveProperty<float> CooldownPercentage { get; } = new();
+    public ReactiveProperty<string> CooldownText { get; } = new();
+    public ReactiveProperty<bool> CanUse { get; } = new();
+    public ReactiveCommand UseSkillCommand { get; }
 
     public SkillViewModel(SkillModel model)
     {
         _model = model;
-        SetupSubscriptions();
+        _model.Cooldown.Subscribe(UpdateCooldownDisplay);
+        _model.IsReady.Subscribe(UpdateCanUse);
+        UseSkillCommand = new ReactiveCommand(() => _model.UseSkill());
     }
 
-    private void SetupSubscriptions()
+    private void UpdateCooldownDisplay(float cooldown)
     {
-        _model.IsUnlocked.Subscribe(UpdateStatus);
-        _model.Cooldown.Subscribe(UpdateCooldown);
+        CooldownText.Value = cooldown > 0 ? $"{cooldown:F1}s" : "Ready";
     }
 
-    private void UpdateStatus(bool isUnlocked)
+    private void UpdateCanUse(bool isReady)
     {
-        StatusText.Value = isUnlocked ? "使用可能" : "未解放";
-        IsAvailable.Value = isUnlocked && _model.Cooldown.Value <= 0;
-    }
-
-    private void UpdateCooldown(float cooldown)
-    {
-        CooldownPercentage.Value = 1 - (cooldown / _model.MaxCooldown.Value);
-        IsAvailable.Value = _model.IsUnlocked.Value && cooldown <= 0;
+        CanUse.Value = isReady;
     }
 }
 ```
 
-### 2.3 パフォーマンス最適化
+## 4. インターフェース設計
 
-#### 2.3.1 メモリ管理
+### 4.1 基本インターフェース
 
 ```csharp
-public class DisposableManager
+public interface IModel
 {
-    private readonly List<IDisposable> _disposables = new();
+    void Update();
+    void Dispose();
+}
 
-    public void Add(IDisposable disposable)
+public interface IViewModel
+{
+    void Bind();
+    void Dispose();
+}
+
+public interface IView
+{
+    void Subscribe();
+    void Dispose();
+}
+
+public interface IService
+{
+    void Publish<T>(T eventData);
+    IDisposable Subscribe<T>(Action<T> onNext);
+}
+```
+
+### 4.2 イベントインターフェース
+
+```csharp
+public interface IEventBus
+{
+    void Publish<T>(T eventData);
+    IDisposable Subscribe<T>(Action<T> onNext);
+    void Dispose();
+}
+
+public interface IEventFilter
+{
+    bool ShouldPublish<T>(T eventData);
+    bool ShouldSubscribe<T>(Action<T> onNext);
+}
+```
+
+## 5. データフロー
+
+### 5.1 一方向データフロー
+
+```mermaid
+graph LR
+    A[View] -->|コマンド| B[ViewModel]
+    B -->|状態更新| C[Model]
+    C -->|通知| B
+    B -->|更新| A
+```
+
+### 5.2 イベントフロー
+
+```mermaid
+graph LR
+    A[Service] -->|イベント発行| B[EventBus]
+    B -->|イベント通知| C[Model]
+    C -->|状態更新| D[ViewModel]
+    D -->|表示更新| E[View]
+```
+
+## 6. エラー処理
+
+### 6.1 エラーハンドリング
+
+```csharp
+public class ErrorHandler
+{
+    private readonly ILogger _logger;
+    private readonly IEventBus _eventBus;
+
+    public ErrorHandler(ILogger logger, IEventBus eventBus)
     {
-        _disposables.Add(disposable);
+        _logger = logger;
+        _eventBus = eventBus;
     }
 
-    public void DisposeAll()
+    public void HandleError(Exception ex, string context)
     {
-        foreach (var disposable in _disposables)
+        _logger.LogError($"Error in {context}: {ex.Message}");
+        _eventBus.Publish(new ErrorEvent(ex, context));
+    }
+}
+```
+
+### 6.2 リカバリー処理
+
+```csharp
+public class RecoveryManager
+{
+    private readonly IEventBus _eventBus;
+    private readonly Dictionary<string, Action> _recoveryActions;
+
+    public RecoveryManager(IEventBus eventBus)
+    {
+        _eventBus = eventBus;
+        _recoveryActions = new Dictionary<string, Action>();
+    }
+
+    public void RegisterRecovery(string context, Action recoveryAction)
+    {
+        _recoveryActions[context] = recoveryAction;
+    }
+
+    public void HandleRecovery(string context)
+    {
+        if (_recoveryActions.TryGetValue(context, out var action))
         {
-            disposable.Dispose();
+            action();
         }
-        _disposables.Clear();
     }
 }
 ```
 
-#### 2.3.2 更新最適化
+## 7. ベストプラクティス
 
-```csharp
-public class UpdateOptimizer
-{
-    private readonly float _updateInterval;
-    private float _timeSinceLastUpdate;
+### 7.1 メモリ管理
 
-    public UpdateOptimizer(float updateInterval = 0.1f)
-    {
-        _updateInterval = updateInterval;
-    }
+-   適切なタイミングで Dispose を呼び出す
+-   循環参照を避ける
+-   リソースを適切に解放する
 
-    public bool ShouldUpdate(float delta)
-    {
-        _timeSinceLastUpdate += delta;
-        if (_timeSinceLastUpdate >= _updateInterval)
-        {
-            _timeSinceLastUpdate = 0;
-            return true;
-        }
-        return false;
-    }
-}
-```
+### 7.2 パフォーマンス
 
-## 3. 実装ガイドライン
+-   重い処理は非同期で実行する
+-   更新頻度を最適化する
+-   リソース使用量を制御する
 
-### 3.1 命名規則
+### 7.3 テスト
 
-#### 3.1.1 クラス命名
+-   単体テストを書く
+-   統合テストを書く
+-   モックを活用する
 
--   Model: `[機能名]Model`
--   ViewModel: `[機能名]ViewModel`
--   View: `[機能名]View`
--   Service: `[機能名]Service`
--   Event: `[機能名]Event`
+## 8. 制限事項
 
-#### 3.1.2 プロパティ命名
+### 8.1 メモリ管理
 
--   リアクティブプロパティ: `[プロパティ名]`
--   通常のプロパティ: `[プロパティ名]`
--   プライベートフィールド: `_[フィールド名]`
+-   適切なタイミングで Dispose を呼び出す必要がある
+-   循環参照に注意が必要
+-   リソースの適切な解放
 
-### 3.2 ディレクトリ構造
+### 8.2 パフォーマンス
 
-```
-Assets/
-├── Scripts/
-│   ├── Core/
-│   │   ├── Reactive/
-│   │   ├── Events/
-│   │   └── Utils/
-│   ├── Models/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── Items/
-│   ├── ViewModels/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   ├── Views/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   └── Services/
-│       ├── Resource/
-│       ├── Save/
-│       └── Event/
-```
+-   重い処理は非同期で実行する
+-   更新頻度の最適化
+-   リソース使用量の制御
 
-## 4. テスト戦略
+### 8.3 スレッドセーフ
 
-### 4.1 単体テスト
+-   マルチスレッド環境での使用には注意が必要
+-   適切な同期処理を実装する
+-   UI スレッドとの連携に注意
 
-```csharp
-[Test]
-public void PlayerModel_TakeDamage_HealthDecreases()
-{
-    var model = new PlayerModel();
-    float initialHealth = model.Health.Value;
-    float damage = 10f;
+## 9. 変更履歴
 
-    model.TakeDamage(damage);
-
-    Assert.AreEqual(initialHealth - damage, model.Health.Value);
-}
-
-[Test]
-public void PlayerViewModel_HealthUpdate_TextUpdates()
-{
-    var model = new PlayerModel();
-    var viewModel = new PlayerViewModel(model);
-    string expectedText = "HP: 90/100";
-
-    model.Health.Value = 90;
-
-    Assert.AreEqual(expectedText, viewModel.HealthText.Value);
-}
-```
-
-### 4.2 統合テスト
-
-```csharp
-[Test]
-public void PlayerSystem_DeathEvent_TriggersAnimation()
-{
-    var model = new PlayerModel();
-    var viewModel = new PlayerViewModel(model);
-    var view = new PlayerView();
-    bool animationTriggered = false;
-
-    view.SetupBindings(viewModel);
-    view.OnDeathAnimation += () => animationTriggered = true;
-
-    model.TakeDamage(model.Health.Value);
-
-    Assert.IsTrue(animationTriggered);
-}
-```
-
-### 4.3 システム別テスト
-
-#### アニメーションシステム
-
-```csharp
-[Test]
-public void AnimationSystem_BlendTree_TransitionsSmoothly()
-{
-    var model = new AnimationModel();
-    var viewModel = new AnimationViewModel(model);
-    var view = new AnimationView();
-    bool blendTransitioned = false;
-
-    view.SetupBindings(viewModel);
-    view.OnBlendTransition += () => blendTransitioned = true;
-
-    model.BlendTo(AnimationState.Walk, 0.5f);
-
-    Assert.IsTrue(blendTransitioned);
-}
-
-[Test]
-public void AnimationSystem_EventHandling_TriggersCorrectly()
-{
-    var model = new AnimationModel();
-    var viewModel = new AnimationViewModel(model);
-    var view = new AnimationView();
-    bool eventTriggered = false;
-
-    view.SetupBindings(viewModel);
-    view.OnAnimationEvent += (eventName) => eventTriggered = true;
-
-    model.TriggerEvent("footstep");
-
-    Assert.IsTrue(eventTriggered);
-}
-```
-
-#### サウンドシステム
-
-```csharp
-[Test]
-public void SoundSystem_Mixing_AppliesCorrectly()
-{
-    var model = new SoundModel();
-    var viewModel = new SoundViewModel(model);
-    var view = new SoundView();
-    bool mixingApplied = false;
-
-    view.SetupBindings(viewModel);
-    view.OnMixingApplied += () => mixingApplied = true;
-
-    model.ApplyMixing(new SoundMix());
-
-    Assert.IsTrue(mixingApplied);
-}
-
-[Test]
-public void SoundSystem_SpatialAudio_UpdatesPosition()
-{
-    var model = new SoundModel();
-    var viewModel = new SoundViewModel(model);
-    var view = new SoundView();
-    bool positionUpdated = false;
-
-    view.SetupBindings(viewModel);
-    view.OnPositionUpdate += () => positionUpdated = true;
-
-    model.UpdateSoundPosition(Vector3.One);
-
-    Assert.IsTrue(positionUpdated);
-}
-```
-
-#### UI システム
-
-```csharp
-[Test]
-public void UISystem_Layout_UpdatesCorrectly()
-{
-    var model = new UIModel();
-    var viewModel = new UIViewModel(model);
-    var view = new UIView();
-    bool layoutUpdated = false;
-
-    view.SetupBindings(viewModel);
-    view.OnLayoutUpdate += () => layoutUpdated = true;
-
-    model.UpdateLayout(new UILayout());
-
-    Assert.IsTrue(layoutUpdated);
-}
-
-[Test]
-public void UISystem_Theme_AppliesCorrectly()
-{
-    var model = new UIModel();
-    var viewModel = new UIViewModel(model);
-    var view = new UIView();
-    bool themeApplied = false;
-
-    view.SetupBindings(viewModel);
-    view.OnThemeApplied += () => themeApplied = true;
-
-    model.ApplyTheme(new UITheme());
-
-    Assert.IsTrue(themeApplied);
-}
-```
-
-## 5. 変更履歴
-
-| バージョン | 更新日     | 変更内容                           |
-| ---------- | ---------- | ---------------------------------- |
-| 0.1.0      | 2024-03-21 | 初版作成                           |
-| 0.2.0      | 2024-03-23 | 更新日付とリンクドキュメントの追加 |
-| 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加   |
-| 0.4.0      | 2024-03-23 | ネットワークシステムの削除         |
+| バージョン | 更新日     | 変更内容                                                                                       |
+| ---------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-23 | 機能拡張<br>- コアコンポーネントの追加<br>- システム設計の追加<br>- インターフェース設計の追加 |
+| 0.1.0      | 2024-03-21 | 初版作成<br>- 基本設計の追加<br>- エラー処理の定義<br>- ベストプラクティスの追加               |
