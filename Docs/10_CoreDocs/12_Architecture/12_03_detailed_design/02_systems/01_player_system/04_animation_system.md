@@ -1,8 +1,8 @@
 ---
 title: プレイヤーアニメーションシステム実装詳細
-version: 0.2.0
+version: 0.3.0
 status: draft
-updated: 2024-03-23
+updated: 2024-03-24
 tags:
     - Architecture
     - MVVM
@@ -14,6 +14,7 @@ tags:
 linked_docs:
     - "[[12_03_detailed_design/02_systems/01_player_system/index|プレイヤーシステム実装詳細]]"
     - "[[12_03_detailed_design/02_systems/00_common_systems/02_animation_system|共通アニメーションシステム実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/06_player_system_base|プレイヤーシステム基底クラス実装詳細]]"
 ---
 
 # プレイヤーアニメーションシステム実装詳細
@@ -50,11 +51,13 @@ linked_docs:
 
 ```mermaid
 classDiagram
-    class CommonAnimationModel {
-        +string CurrentAnimation
-        +float Speed
-        +void Play()
-        +void Stop()
+    class PlayerSystemBase {
+        +CompositeDisposable Disposables
+        +IEventBus EventBus
+        +PlayerStateManager StateManager
+        +void Initialize()
+        +void Update()
+        +void Dispose()
     }
 
     class PlayerAnimationModel {
@@ -77,7 +80,7 @@ classDiagram
         +void UpdateAnimationDisplay()
     }
 
-    CommonAnimationModel <|-- PlayerAnimationModel
+    PlayerSystemBase <|-- PlayerAnimationModel
     PlayerAnimationModel --> PlayerAnimationViewModel : uses
     PlayerAnimationViewModel --> PlayerAnimationView : observes
 ```
@@ -89,15 +92,15 @@ sequenceDiagram
     participant View as PlayerAnimationView
     participant ViewModel as PlayerAnimationViewModel
     participant Model as PlayerAnimationModel
-    participant Common as CommonAnimationModel
-    participant State as StateSystem
+    participant Base as PlayerSystemBase
+    participant State as PlayerStateManager
+    participant Event as EventBus
 
     View->>ViewModel: アニメーション要求
     ViewModel->>Model: アニメーション処理
-    Model->>Common: 基本アニメーション処理
-    Common->>State: 状態更新
-    State->>Common: 状態結果
-    Common->>Model: アニメーション結果
+    Model->>Base: 基本処理
+    Base->>State: 状態確認
+    Base->>Event: イベント発行
     Model->>ViewModel: 状態更新
     ViewModel->>View: 表示更新
 ```
@@ -107,62 +110,109 @@ sequenceDiagram
 ### 4.1 モデル層
 
 ```csharp
-public class PlayerAnimationModel : CommonAnimationModel
+public class PlayerAnimationModel : PlayerSystemBase
 {
-    private readonly CompositeDisposable _disposables;
-    private Dictionary<string, AnimationClip> _clips;
+    private readonly Dictionary<string, AnimationClip> _clips;
     private float _transitionSpeed;
     private bool _isPlaying;
 
-    public PlayerAnimationModel()
+    public PlayerAnimationModel(IEventBus eventBus) : base(eventBus)
     {
-        _disposables = new CompositeDisposable();
         _clips = new Dictionary<string, AnimationClip>();
         _transitionSpeed = 0.25f;
     }
 
-    public void Initialize()
+    public override void Initialize()
     {
-        // プレイヤー固有のアニメーションパラメータの初期化
-        LoadAnimationClips();
-        CurrentAnimation = "Idle";
-        Speed = 1.0f;
-        _isPlaying = true;
+        try
+        {
+            // プレイヤー固有のアニメーションパラメータの初期化
+            LoadAnimationClips();
+            CurrentAnimation = "Idle";
+            Speed = 1.0f;
+            _isPlaying = true;
+
+            // 状態の登録
+            StateManager.RegisterState("Animation", new AnimationState());
+            StateManager.RegisterTransition("Animation", "Playing", () => _isPlaying);
+            StateManager.RegisterTransition("Animation", "Paused", () => !_isPlaying);
+        }
+        catch (Exception ex)
+        {
+            HandleError("Initialize", ex);
+        }
     }
 
     private void LoadAnimationClips()
     {
-        _clips["Idle"] = Resources.Load<AnimationClip>("Animations/Player/Idle");
-        _clips["Walk"] = Resources.Load<AnimationClip>("Animations/Player/Walk");
-        _clips["Run"] = Resources.Load<AnimationClip>("Animations/Player/Run");
-        _clips["Jump"] = Resources.Load<AnimationClip>("Animations/Player/Jump");
-        _clips["Attack"] = Resources.Load<AnimationClip>("Animations/Player/Attack");
+        try
+        {
+            using (var resourceLoader = new ResourceLoader())
+            {
+                _clips["Idle"] = resourceLoader.Load<AnimationClip>("Animations/Player/Idle");
+                _clips["Walk"] = resourceLoader.Load<AnimationClip>("Animations/Player/Walk");
+                _clips["Run"] = resourceLoader.Load<AnimationClip>("Animations/Player/Run");
+                _clips["Jump"] = resourceLoader.Load<AnimationClip>("Animations/Player/Jump");
+                _clips["Attack"] = resourceLoader.Load<AnimationClip>("Animations/Player/Attack");
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError("LoadAnimationClips", ex);
+        }
     }
 
-    public void Update()
+    public override void Update()
     {
-        if (_isPlaying)
+        try
         {
-            // アニメーション更新処理
-            UpdateAnimation();
+            if (_isPlaying)
+            {
+                // アニメーション更新処理
+                UpdateAnimation();
+            }
+        }
+        catch (Exception ex)
+        {
+            HandleError("Update", ex);
         }
     }
 
     public void PlayAnimation(string animationName)
     {
-        if (_clips.ContainsKey(animationName))
+        try
         {
+            if (!_clips.ContainsKey(animationName))
+            {
+                throw new ArgumentException($"Invalid animation name: {animationName}");
+            }
+
             CurrentAnimation = animationName;
             Play();
+            EventBus.Publish(new AnimationPlayedEvent(animationName));
+        }
+        catch (Exception ex)
+        {
+            HandleError("PlayAnimation", ex);
         }
     }
 
     public void BlendAnimation(string fromAnimation, string toAnimation, float blendTime)
     {
-        if (_clips.ContainsKey(fromAnimation) && _clips.ContainsKey(toAnimation))
+        try
         {
+            if (!_clips.ContainsKey(fromAnimation) || !_clips.ContainsKey(toAnimation))
+            {
+                throw new ArgumentException("Invalid animation names for blending");
+            }
+
             // アニメーションブレンド処理
             StartCoroutine(BlendAnimationCoroutine(fromAnimation, toAnimation, blendTime));
+            EventBus.Publish(new AnimationBlendStartedEvent(fromAnimation, toAnimation, blendTime));
+        }
+        catch (Exception ex)
+        {
+            HandleError("BlendAnimation", ex);
         }
     }
 
@@ -177,11 +227,7 @@ public class PlayerAnimationModel : CommonAnimationModel
             yield return null;
         }
         CurrentAnimation = toAnimation;
-    }
-
-    public void Dispose()
-    {
-        _disposables.Dispose();
+        EventBus.Publish(new AnimationBlendCompletedEvent(toAnimation));
     }
 }
 ```
@@ -253,7 +299,8 @@ public class PlayerAnimationView : MonoBehaviour
 
     private void Start()
     {
-        var model = new PlayerAnimationModel();
+        var eventBus = new EventBus();
+        var model = new PlayerAnimationModel(eventBus);
         _viewModel = new PlayerAnimationViewModel(model);
         _viewModel.Initialize();
     }
@@ -292,7 +339,8 @@ public class PlayerAnimationView : MonoBehaviour
 [Test]
 public void TestPlayerAnimation()
 {
-    var model = new PlayerAnimationModel();
+    var eventBus = new EventBus();
+    var model = new PlayerAnimationModel(eventBus);
     var viewModel = new PlayerAnimationViewModel(model);
 
     // アニメーションのテスト
@@ -307,18 +355,20 @@ public void TestPlayerAnimation()
 [Test]
 public void TestPlayerAnimationToStateIntegration()
 {
-    var animationSystem = new PlayerAnimationSystem();
-    var stateSystem = new PlayerStateSystem();
+    var eventBus = new EventBus();
+    var animationSystem = new PlayerAnimationModel(eventBus);
+    var stateSystem = new PlayerStateManager();
 
     // アニメーションから状態への連携テスト
-    animationSystem.UpdateAnimation();
-    Assert.That(stateSystem.CurrentState.Value, Is.EqualTo("Idle"));
+    animationSystem.Update();
+    Assert.That(stateSystem.IsValidTransition("Animation", "Playing"), Is.True);
 }
 ```
 
 ## 7. 変更履歴
 
-| バージョン | 更新日     | 変更内容                                                                               |
-| ---------- | ---------- | -------------------------------------------------------------------------------------- |
-| 0.2.0      | 2024-03-23 | 共通システムとの連携を追加<br>- アニメーション処理の最適化<br>- ブレンドシステムの統合 |
-| 0.1.0      | 2024-03-21 | 初版作成                                                                               |
+| バージョン | 更新日     | 変更内容                                                                                   |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------ |
+| 0.3.0      | 2024-03-24 | 基底クラスの導入<br>- エラーハンドリングの統一<br>- 状態管理の統合<br>- イベント処理の改善 |
+| 0.2.0      | 2024-03-23 | 共通システムとの連携を追加<br>- アニメーション処理の最適化<br>- ブレンドシステムの統合     |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                   |

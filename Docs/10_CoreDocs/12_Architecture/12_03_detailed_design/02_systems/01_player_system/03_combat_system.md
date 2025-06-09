@@ -1,8 +1,8 @@
 ---
 title: プレイヤー戦闘システム実装詳細
-version: 0.2.0
+version: 0.3.0
 status: draft
-updated: 2024-03-23
+updated: 2024-03-24
 tags:
     - Architecture
     - MVVM
@@ -14,6 +14,7 @@ tags:
 linked_docs:
     - "[[12_03_detailed_design/02_systems/01_player_system/index|プレイヤーシステム実装詳細]]"
     - "[[12_03_detailed_design/02_systems/00_common_systems/04_combat_system|共通戦闘システム実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/06_player_system_base|プレイヤーシステム基底クラス実装詳細]]"
 ---
 
 # プレイヤー戦闘システム実装詳細
@@ -50,11 +51,13 @@ linked_docs:
 
 ```mermaid
 classDiagram
-    class CommonCombatModel {
-        <<interface>>
-        +Attack()
-        +TakeDamage()
-        +Heal()
+    class PlayerSystemBase {
+        +CompositeDisposable Disposables
+        +IEventBus EventBus
+        +PlayerStateManager StateManager
+        +void Initialize()
+        +void Update()
+        +void Dispose()
     }
 
     class PlayerCombatModel {
@@ -84,7 +87,7 @@ classDiagram
         +void UpdateCombatDisplay()
     }
 
-    CommonCombatModel <|-- PlayerCombatModel
+    PlayerSystemBase <|-- PlayerCombatModel
     PlayerCombatModel --> PlayerCombatViewModel : uses
     PlayerCombatViewModel --> PlayerCombatView : observes
 ```
@@ -96,14 +99,15 @@ sequenceDiagram
     participant View as PlayerCombatView
     participant ViewModel as PlayerCombatViewModel
     participant Model as PlayerCombatModel
-    participant Common as CommonCombatModel
-    participant State as StateSystem
+    participant Base as PlayerSystemBase
+    participant State as PlayerStateManager
+    participant Event as EventBus
 
     View->>ViewModel: 戦闘アクション要求
     ViewModel->>Model: 戦闘状態更新
-    Model->>Common: 基本戦闘処理
-    Common->>Model: 戦闘結果
-    Model->>State: 状態更新
+    Model->>Base: 基本処理
+    Base->>State: 状態確認
+    Base->>Event: イベント発行
     Model->>ViewModel: 状態変更通知
     ViewModel->>View: 表示更新
 ```
@@ -113,54 +117,96 @@ sequenceDiagram
 ### 4.1 モデル層
 
 ```csharp
-public class PlayerCombatModel : CommonCombatModel, IDisposable
+public class PlayerCombatModel : PlayerSystemBase
 {
-    private readonly CompositeDisposable _disposables;
-    private Dictionary<string, CombatData> _combatActions;
+    private readonly Dictionary<string, CombatData> _combatActions;
     private float _attackPower;
     private float _defensePower;
     private float _maxHealth;
     private float _currentHealth;
 
-    public PlayerCombatModel()
+    public PlayerCombatModel(IEventBus eventBus) : base(eventBus)
     {
-        _disposables = new CompositeDisposable();
         _combatActions = new Dictionary<string, CombatData>();
     }
 
-    public void Initialize()
+    public override void Initialize()
     {
-        LoadCombatActions();
-        _attackPower = 10.0f;
-        _defensePower = 5.0f;
-        _maxHealth = 100.0f;
-        _currentHealth = _maxHealth;
-    }
-
-    public void Update()
-    {
-        UpdateCombatState();
-    }
-
-    public override void Attack(string actionName)
-    {
-        if (_combatActions.ContainsKey(actionName))
+        try
         {
-            var action = _combatActions[actionName];
-            var damage = _attackPower * action.DamageMultiplier;
-            action.OnExecute(damage);
+            LoadCombatActions();
+            _attackPower = 10.0f;
+            _defensePower = 5.0f;
+            _maxHealth = 100.0f;
+            _currentHealth = _maxHealth;
+
+            // 状態の登録
+            StateManager.RegisterState("Combat", new CombatState());
+            StateManager.RegisterTransition("Combat", "Damaged", () => _currentHealth < _maxHealth * 0.5f);
+        }
+        catch (Exception ex)
+        {
+            HandleError("Initialize", ex);
         }
     }
 
-    public override void TakeDamage(float damage)
+    public override void Update()
     {
-        var actualDamage = Math.Max(0, damage - _defensePower);
-        _currentHealth = Math.Max(0, _currentHealth - actualDamage);
+        try
+        {
+            UpdateCombatState();
+        }
+        catch (Exception ex)
+        {
+            HandleError("Update", ex);
+        }
     }
 
-    public override void Heal(float amount)
+    public void Attack(string actionName)
     {
-        _currentHealth = Math.Min(_maxHealth, _currentHealth + amount);
+        try
+        {
+            if (!_combatActions.ContainsKey(actionName))
+            {
+                throw new ArgumentException($"Invalid action name: {actionName}");
+            }
+
+            var action = _combatActions[actionName];
+            var damage = _attackPower * action.DamageMultiplier;
+            action.OnExecute(damage);
+            EventBus.Publish(new AttackExecutedEvent(actionName, damage));
+        }
+        catch (Exception ex)
+        {
+            HandleError("Attack", ex);
+        }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        try
+        {
+            var actualDamage = Math.Max(0, damage - _defensePower);
+            _currentHealth = Math.Max(0, _currentHealth - actualDamage);
+            EventBus.Publish(new DamageTakenEvent(actualDamage));
+        }
+        catch (Exception ex)
+        {
+            HandleError("TakeDamage", ex);
+        }
+    }
+
+    public void Heal(float amount)
+    {
+        try
+        {
+            _currentHealth = Math.Min(_maxHealth, _currentHealth + amount);
+            EventBus.Publish(new HealAppliedEvent(amount));
+        }
+        catch (Exception ex)
+        {
+            HandleError("Heal", ex);
+        }
     }
 
     private void LoadCombatActions()
@@ -183,11 +229,6 @@ public class PlayerCombatModel : CommonCombatModel, IDisposable
     private void OnSpecialAttack(float damage)
     {
         // 特殊攻撃の処理
-    }
-
-    public void Dispose()
-    {
-        _disposables.Dispose();
     }
 }
 ```
@@ -269,7 +310,8 @@ public class PlayerCombatView : MonoBehaviour
 
     private void Start()
     {
-        var model = new PlayerCombatModel();
+        var eventBus = new EventBus();
+        var model = new PlayerCombatModel(eventBus);
         _viewModel = new PlayerCombatViewModel(model);
         _viewModel.Initialize();
     }
@@ -308,7 +350,8 @@ public class PlayerCombatView : MonoBehaviour
 [Test]
 public void TestPlayerCombat()
 {
-    var model = new PlayerCombatModel();
+    var eventBus = new EventBus();
+    var model = new PlayerCombatModel(eventBus);
     var viewModel = new PlayerCombatViewModel(model);
 
     // 戦闘のテスト
@@ -323,18 +366,20 @@ public void TestPlayerCombat()
 [Test]
 public void TestPlayerCombatToStateIntegration()
 {
-    var combatSystem = new PlayerCombatSystem();
-    var stateSystem = new PlayerStateSystem();
+    var eventBus = new EventBus();
+    var combatSystem = new PlayerCombatModel(eventBus);
+    var stateSystem = new PlayerStateManager();
 
     // 戦闘から状態への連携テスト
     combatSystem.TakeDamage(50.0f);
-    Assert.That(stateSystem.CurrentState.Value, Is.EqualTo("Damaged"));
+    Assert.That(stateSystem.IsValidTransition("Combat", "Damaged"), Is.True);
 }
 ```
 
 ## 7. 変更履歴
 
-| バージョン | 更新日     | 変更内容                                                                         |
-| ---------- | ---------- | -------------------------------------------------------------------------------- |
-| 0.2.0      | 2024-03-23 | 共通システムとの連携を追加<br>- 戦闘処理の最適化<br>- ダメージ計算システムの統合 |
-| 0.1.0      | 2024-03-21 | 初版作成                                                                         |
+| バージョン | 更新日     | 変更内容                                                                                   |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------ |
+| 0.3.0      | 2024-03-24 | 基底クラスの導入<br>- エラーハンドリングの統一<br>- 状態管理の統合<br>- イベント処理の改善 |
+| 0.2.0      | 2024-03-23 | 共通システムとの連携を追加<br>- 戦闘処理の最適化<br>- ダメージ計算システムの統合           |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                   |

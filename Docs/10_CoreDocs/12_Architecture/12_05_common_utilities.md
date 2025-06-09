@@ -1,20 +1,22 @@
 ---
-title: 共通ユーティリティ
+title: 共通ユーティリティ概要
 version: 0.2.0
 status: draft
 updated: 2024-03-23
 tags:
     - Core
     - Utility
-    - Implementation
+    - Overview
 linked_docs:
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
-    - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
+    - "[[12_03_detailed_design/01_core_components/05_common_utilities|共通ユーティリティ実装詳細]]"
     - "[[12_04_system_integration|システム間連携]]"
 ---
 
-# 共通ユーティリティ
+# 共通ユーティリティ概要
+
+> **注意**: このドキュメントは概要と使用例に焦点を当てています。実装の詳細については [[12_03_detailed_design/01_core_components/05_common_utilities|共通ユーティリティ実装詳細]] を参照してください。
 
 ## 目次
 

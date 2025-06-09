@@ -10,11 +10,14 @@ tags:
 linked_docs:
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
+    - "[[12_05_common_utilities|共通ユーティリティ概要]]"
     - "[[01_reactive_property|ReactiveProperty実装詳細]]"
     - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
 ---
 
 # 共通ユーティリティ実装詳細
+
+> **注意**: このドキュメントは実装の詳細に焦点を当てています。概要や使用例については [[12_05_common_utilities|共通ユーティリティ概要]] を参照してください。
 
 ## 目次
 
