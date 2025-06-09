@@ -81,5 +81,16 @@ namespace Tests.Core
 
             Assert.AreEqual("new", property.Value);
         }
+
+        [Test]
+        public void Activate_ChangesState()
+        {
+            var bus = new GameEventBus();
+            var vm = new TestViewModel(bus);
+            vm.Activate();
+            Assert.AreEqual(ViewModelState.Active, vm.State.Value);
+            vm.Deactivate();
+            Assert.AreEqual(ViewModelState.Inactive, vm.State.Value);
+        }
     }
 }
