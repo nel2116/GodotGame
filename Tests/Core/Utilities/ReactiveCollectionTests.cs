@@ -8,6 +8,7 @@ namespace Tests.Core
 {
     public class ReactiveCollectionTests
     {
+        private const long MEMORY_THRESHOLD_BYTES = 1024 * 50;
         [Test]
         public void Add_RaisesChangeEvent()
         {
@@ -93,7 +94,7 @@ namespace Tests.Core
             System.GC.Collect();
             System.GC.WaitForPendingFinalizers();
             long after = System.GC.GetTotalMemory(true);
-            Assert.Less(after - before, 1024 * 50);
+            Assert.Less(after - before, MEMORY_THRESHOLD_BYTES);
             Assert.Less(after, before * 1.1, "Memory usage after clearing should not exceed 10% of the initial memory usage.");
         }
 

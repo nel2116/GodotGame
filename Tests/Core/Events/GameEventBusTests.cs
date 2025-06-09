@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Core.Events;
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,8 +109,8 @@ namespace Tests.Core
             int count = 0;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
             {
-                var end = DateTime.UtcNow.AddSeconds(1);
-                while (DateTime.UtcNow < end)
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                while (stopwatch.Elapsed < TimeSpan.FromSeconds(1))
                 {
                     bus.Publish(new DummyEvent());
                 }

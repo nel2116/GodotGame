@@ -6,6 +6,8 @@ namespace Tests.Core
 {
     public class WeakEventManagerTests
     {
+        // WeakEventManager の private フィールド名
+        private const string HANDLERS_FIELD_NAME = "_handlers";
         [Test]
         public void AddRaiseRemove_Works()
         {
@@ -102,8 +104,8 @@ namespace Tests.Core
         /// </summary>
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>> GetHandlers(WeakEventManager mgr)
         {
-            // 実装変更に依存するため注意
-            var field = typeof(WeakEventManager).GetField("_handlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            // 内部実装に依存するため、将来的には InternalsVisibleTo の利用を検討
+            var field = typeof(WeakEventManager).GetField(HANDLERS_FIELD_NAME, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
             return (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
         }
 
