@@ -1,6 +1,6 @@
 ---
 title: リアクティブシステム
-version: 0.3.0
+version: 0.4.0
 status: draft
 updated: 2024-03-21
 tags:
@@ -24,10 +24,11 @@ linked_docs:
 2. [リアクティブプロパティ](#リアクティブプロパティ)
 3. [イベントシステム](#イベントシステム)
 4. [リソース管理](#リソース管理)
-5. [使用例](#使用例)
-6. [制限事項](#制限事項)
-7. [テスト](#テスト)
-8. [変更履歴](#変更履歴)
+5. [ViewModel](#viewmodel)
+6. [使用例](#使用例)
+7. [制限事項](#制限事項)
+8. [テスト](#テスト)
+9. [変更履歴](#変更履歴)
 
 ## 概要
 
@@ -36,6 +37,7 @@ linked_docs:
 -   リアクティブプロパティによる値変更通知
 -   イベントバスによるイベント発行・購読
 -   リソースの自動解放管理
+-   MVVM パターンのサポート
 
 ## リアクティブプロパティ
 
@@ -160,7 +162,93 @@ public class CompositeDisposable : IDisposable
 -   効率的なリソース管理
 -   一括操作のサポート
 
+## ViewModel
+
+### ViewModelBase
+
+MVVM パターンのベースクラスです。
+
+```csharp
+public abstract class ViewModelBase : IDisposable
+{
+    protected readonly CompositeDisposable Disposables = new();
+    protected readonly IGameEventBus EventBus;
+    protected ReactiveProperty<bool> IsBusy { get; }
+    public ReactiveProperty<ViewModelState> State { get; }
+
+    protected ViewModelBase(IGameEventBus eventBus);
+    public virtual void Dispose();
+    protected void AddDisposable(IDisposable disposable);
+    protected IDisposable SubscribeToEvent<T>(Action<T> onNext) where T : GameEvent;
+    protected ReactiveCommand CreateCommand();
+    protected ReactiveCommand<T> CreateCommand<T>();
+    protected async Task ExecuteAsync(Func<Task> action);
+    protected T GetValue<T>(IReactiveProperty<T> property);
+    protected void SetValue<T>(IReactiveProperty<T> property, T value);
+    public virtual void Activate();
+    public virtual void Deactivate();
+    protected virtual void OnActivate();
+    protected virtual void OnDeactivate();
+}
+```
+
+主な特徴：
+
+-   リソース管理の自動化
+-   イベント購読の簡易化
+-   コマンド生成のヘルパーメソッド
+-   非同期処理のサポート
+-   アクティブ/非アクティブ状態の管理
+
+### ViewModelState
+
+ViewModel の状態を表す列挙型です。
+
+```csharp
+public enum ViewModelState
+{
+    Initial,
+    Active,
+    Inactive
+}
+```
+
 ## 使用例
+
+### ViewModel の使用例
+
+```csharp
+public class PlayerViewModel : ViewModelBase
+{
+    private readonly ReactiveProperty<int> _health;
+    public IReactiveProperty<int> Health => _health;
+
+    public PlayerViewModel(IGameEventBus eventBus) : base(eventBus)
+    {
+        _health = new ReactiveProperty<int>(100).AddTo(Disposables);
+
+        // イベントの購読
+        SubscribeToEvent<PlayerDamagedEvent>(OnPlayerDamaged);
+    }
+
+    private void OnPlayerDamaged(PlayerDamagedEvent evt)
+    {
+        _health.Value -= evt.Damage;
+    }
+
+    protected override void OnActivate()
+    {
+        base.OnActivate();
+        // アクティブ化時の処理
+    }
+
+    protected override void OnDeactivate()
+    {
+        base.OnDeactivate();
+        // 非アクティブ化時の処理
+    }
+}
+```
 
 ### リアクティブプロパティの使用例
 
@@ -297,8 +385,9 @@ dotnet test Tests/Core/CoreTests.csproj
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容                                                                                                                             |
-| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 0.3.0      | 2024-03-21 | コアシステムの実装詳細を追加<br>- スレッドセーフ性の実装詳細を更新<br>- メモリ管理の説明を改善<br>- パフォーマンス最適化の説明を追加 |
-| 0.2.0      | 2024-03-21 | テストセクションの更新<br>- テストカバレッジの詳細化<br>- スレッドセーフ性のテスト追加<br>- パフォーマンステストの追加               |
-| 0.1.0      | 2024-03-21 | 初版作成                                                                                                                             |
+| バージョン | 更新日     | 変更内容                               |
+| ---------- | ---------- | -------------------------------------- |
+| 0.4.0      | 2024-03-21 | ViewModel 機能の追加とドキュメント更新 |
+| 0.3.0      | 2024-03-21 | リアクティブプロパティの機能拡張       |
+| 0.2.0      | 2024-03-20 | イベントシステムの実装追加             |
+| 0.1.0      | 2024-03-19 | 初版作成                               |
