@@ -18,6 +18,16 @@ namespace Tests.Core
             {
                 return SubscribeToEvent(onNext);
             }
+
+            public T ExposeGet<T>(IReactiveProperty<T> property)
+            {
+                return GetValue(property);
+            }
+
+            public void ExposeSet<T>(IReactiveProperty<T> property, T value)
+            {
+                SetValue(property, value);
+            }
         }
 
         [Test]
@@ -46,6 +56,30 @@ namespace Tests.Core
             eventBus.Publish(new TestEvent());
 
             Assert.IsFalse(received);
+        }
+
+        [Test]
+        public void GetValue_ReturnsPropertyValue()
+        {
+            var eventBus = new GameEventBus();
+            var viewModel = new TestViewModel(eventBus);
+            var property = new ReactiveProperty<int>(123);
+
+            int value = viewModel.ExposeGet(property);
+
+            Assert.AreEqual(123, value);
+        }
+
+        [Test]
+        public void SetValue_UpdatesPropertyValue()
+        {
+            var eventBus = new GameEventBus();
+            var viewModel = new TestViewModel(eventBus);
+            var property = new ReactiveProperty<string>("old");
+
+            viewModel.ExposeSet(property, "new");
+
+            Assert.AreEqual("new", property.Value);
         }
     }
 }
