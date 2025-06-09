@@ -2,6 +2,8 @@ using NUnit.Framework;
 using Core.Events;
 using System;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tests.Core
 {
@@ -67,6 +69,33 @@ namespace Tests.Core
                 }
             }
             Assert.AreEqual(10000, count);
+        }
+
+        [Test, MaxTime(3000)]
+        public void Publish_LargeVolume_Performance()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => count++))
+            {
+                for (int i = 0; i < 50000; i++)
+                {
+                    bus.Publish(new DummyEvent());
+                }
+            }
+            Assert.AreEqual(50000, count);
+        }
+
+        [Test]
+        public void Publish_Concurrent()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                Parallel.For(0, 1000, _ => bus.Publish(new DummyEvent()));
+            }
+            Assert.AreEqual(1000, count);
         }
     }
 }

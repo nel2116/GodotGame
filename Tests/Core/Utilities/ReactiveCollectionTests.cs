@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Core.Utilities;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Tests.Core
 {
@@ -49,5 +50,21 @@ namespace Tests.Core
             Assert.AreEqual(CollectionChangeType.Add, events[1].ChangeType);
             Assert.AreEqual(5, events[1].Item);
         }
+
+        [Test]
+        public void LargeAddRemove_Performance()
+        {
+            var col = new ReactiveCollection<int>();
+            for (int i = 0; i < 10000; i++)
+            {
+                col.Add(i);
+            }
+            for (int i = 9999; i >= 0; i--)
+            {
+                col.RemoveAt(i);
+            }
+            Assert.AreEqual(0, col.Count);
+        }
+
     }
 }
