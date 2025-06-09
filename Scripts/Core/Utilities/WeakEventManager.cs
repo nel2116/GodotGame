@@ -27,5 +27,31 @@ namespace Core.Utilities
                 list.RemoveAll(wr => !wr.IsAlive || wr.Target == handler);
             }
         }
+
+        /// <summary>
+        /// 登録されたハンドラを呼び出す
+        /// </summary>
+        public void RaiseEvent(string eventName, object sender, EventArgs args)
+        {
+            if (_handlers.TryGetValue(eventName, out var list))
+            {
+                var dead = new List<WeakReference>();
+                foreach (var wr in list)
+                {
+                    if (wr.IsAlive && wr.Target is EventHandler handler)
+                    {
+                        handler(sender, args);
+                    }
+                    else
+                    {
+                        dead.Add(wr);
+                    }
+                }
+                foreach (var d in dead)
+                {
+                    list.Remove(d);
+                }
+            }
+        }
     }
 }

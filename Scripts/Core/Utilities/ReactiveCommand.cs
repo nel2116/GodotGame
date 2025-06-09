@@ -14,6 +14,8 @@ namespace Core.Utilities
     {
         private readonly Subject<Unit> _executeSubject = new();
         private readonly ReactiveProperty<bool> _canExecute = new(true);
+        private readonly CompositeDisposable _disposables = new();
+        private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 
         /// <summary>
@@ -26,12 +28,24 @@ namespace Core.Utilities
         /// </summary>
         public IObservable<bool> CanExecuteObservable => _canExecute.ValueChanged;
 
+        public ReactiveCommand()
+        {
+            _canExecute.ValueChanged
+                .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+                .AddTo(_disposables);
+        }
+
         public bool CanExecute(object parameter) => _canExecute.Value;
 
         public event EventHandler? CanExecuteChanged
         {
-            add { }
-            remove { }
+            add { _canExecuteChanged += value; }
+            remove { _canExecuteChanged -= value; }
+        }
+
+        public void SetCanExecute(bool value)
+        {
+            _canExecute.Value = value;
         }
 
         public void Execute(object parameter)
@@ -45,6 +59,7 @@ namespace Core.Utilities
         public void Dispose()
         {
             if (_disposed) return;
+            _disposables.Dispose();
             _executeSubject.Dispose();
             _canExecute.Dispose();
             _disposed = true;
@@ -58,6 +73,8 @@ namespace Core.Utilities
     {
         private readonly Subject<T> _executeSubject = new();
         private readonly ReactiveProperty<bool> _canExecute = new(true);
+        private readonly CompositeDisposable _disposables = new();
+        private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 
         /// <summary>
@@ -70,12 +87,24 @@ namespace Core.Utilities
         /// </summary>
         public IObservable<bool> CanExecuteObservable => _canExecute.ValueChanged;
 
+        public ReactiveCommand()
+        {
+            _canExecute.ValueChanged
+                .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+                .AddTo(_disposables);
+        }
+
         public bool CanExecute(object parameter) => _canExecute.Value;
 
         public event EventHandler? CanExecuteChanged
         {
-            add { }
-            remove { }
+            add { _canExecuteChanged += value; }
+            remove { _canExecuteChanged -= value; }
+        }
+
+        public void SetCanExecute(bool value)
+        {
+            _canExecute.Value = value;
         }
 
         public void Execute(object parameter)
@@ -88,6 +117,7 @@ namespace Core.Utilities
         public void Dispose()
         {
             if (_disposed) return;
+            _disposables.Dispose();
             _executeSubject.Dispose();
             _canExecute.Dispose();
             _disposed = true;

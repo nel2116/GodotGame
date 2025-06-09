@@ -1,6 +1,6 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.2
+version: 0.2.3
 status: draft
 updated: 2025-06-09
 tags:
@@ -41,12 +41,32 @@ public class ReactiveCommand : ICommand, IDisposable
 {
     private readonly Subject<Unit> _executeSubject = new();
     private readonly ReactiveProperty<bool> _canExecute = new(true);
+    private readonly CompositeDisposable _disposables = new();
+    private event EventHandler? _canExecuteChanged;
     private bool _disposed;
 
     public IObservable<Unit> ExecuteObservable => _executeSubject.AsObservable();
     public IObservable<bool> CanExecuteObservable => _canExecute.ValueChanged;
 
+    public ReactiveCommand()
+    {
+        _canExecute.ValueChanged
+            .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+            .AddTo(_disposables);
+    }
+
     public bool CanExecute(object parameter) => _canExecute.Value;
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add { _canExecuteChanged += value; }
+        remove { _canExecuteChanged -= value; }
+    }
+
+    public void SetCanExecute(bool value)
+    {
+        _canExecute.Value = value;
+    }
 
     public void Execute(object parameter)
     {
@@ -60,6 +80,7 @@ public class ReactiveCommand : ICommand, IDisposable
     {
         if (!_disposed)
         {
+            _disposables.Dispose();
             _executeSubject.Dispose();
             _canExecute.Dispose();
             _disposed = true;
@@ -166,6 +187,29 @@ public class WeakEventManager
         if (_handlers.TryGetValue(eventName, out var handlers))
         {
             handlers.RemoveAll(wr => !wr.IsAlive || wr.Target == handler);
+        }
+    }
+
+    public void RaiseEvent(string eventName, object sender, EventArgs args)
+    {
+        if (_handlers.TryGetValue(eventName, out var handlers))
+        {
+            var dead = new List<WeakReference>();
+            foreach (var wr in handlers)
+            {
+                if (wr.IsAlive && wr.Target is EventHandler handler)
+                {
+                    handler(sender, args);
+                }
+                else
+                {
+                    dead.Add(wr);
+                }
+            }
+            foreach (var d in dead)
+            {
+                handlers.Remove(d);
+            }
         }
     }
 }
@@ -400,6 +444,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.3      | 2025-06-09 | WeakEventManager に RaiseEvent 追加<br>ReactiveCommand の CanExecuteChanged 実装 |
 | 0.2.2      | 2025-06-09 | WithRetry の変数名を明確化 |
 | 0.2.1      | 2025-06-09 | WithRetry 実装のリトライ回数を修正 |
 | 0.2.0      | 2024-03-23 | 機能拡張<br>- ロギングユーティリティの追加<br>- バリデーションユーティリティの追加<br>- 非同期処理ユーティリティの追加 |

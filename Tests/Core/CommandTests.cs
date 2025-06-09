@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Threading.Tasks;
 using Core.Utilities;
 
@@ -42,6 +43,16 @@ namespace Tests.Core
             cmd.Execute(null);
             await Task.Delay(20);
             Assert.IsTrue(run);
+        }
+
+        [Test]
+        public void ReactiveCommand_CanExecuteChanged_Raises()
+        {
+            var cmd = new ReactiveCommand();
+            bool raised = false;
+            cmd.CanExecuteChanged += (_, _) => raised = true;
+            cmd.SetCanExecute(false);
+            Assert.IsTrue(raised);
         }
     }
 }
