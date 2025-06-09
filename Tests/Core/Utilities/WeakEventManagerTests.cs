@@ -45,5 +45,22 @@ namespace Tests.Core
             Assert.AreEqual(1, called);
             Assert.AreEqual(1, dict["dead"].Count);
         }
+
+        [Test]
+        public void MultipleEvents_Independent()
+        {
+            var mgr = new WeakEventManager();
+            int a = 0;
+            int b = 0;
+            EventHandler ha = (_, _) => a++;
+            EventHandler hb = (_, _) => b++;
+            mgr.AddHandler("a", ha);
+            mgr.AddHandler("b", hb);
+            mgr.RaiseEvent("a", this, EventArgs.Empty);
+            mgr.RaiseEvent("b", this, EventArgs.Empty);
+            Assert.AreEqual(1, a);
+            Assert.AreEqual(1, b);
+        }
+
     }
 }
