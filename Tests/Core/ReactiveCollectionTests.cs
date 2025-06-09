@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Core.Utilities;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Tests.Core
 {
@@ -29,6 +30,24 @@ namespace Tests.Core
                 col.Remove("a");
             }
             Assert.AreEqual("a", notified);
+        }
+
+        [Test]
+        public void Indexer_Set_ReplacesItemWithNotifications()
+        {
+            var col = new ReactiveCollection<int>();
+            col.Add(1);
+            col.Add(2);
+            var events = new List<CollectionChangedEvent<int>>();
+            using (col.Changed.Subscribe(e => events.Add(e)))
+            {
+                col[0] = 5;
+            }
+            Assert.AreEqual(2, events.Count);
+            Assert.AreEqual(CollectionChangeType.Remove, events[0].ChangeType);
+            Assert.AreEqual(1, events[0].Item);
+            Assert.AreEqual(CollectionChangeType.Add, events[1].ChangeType);
+            Assert.AreEqual(5, events[1].Item);
         }
     }
 }
