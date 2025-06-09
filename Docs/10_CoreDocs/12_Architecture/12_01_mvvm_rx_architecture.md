@@ -1,8 +1,8 @@
 ---
 title: Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
-version: 0.1.0
+version: 0.4.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
     - Architecture
     - MVVM
@@ -12,6 +12,13 @@ linked_docs:
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
     - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
     - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
+    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
 ---
 
 # Godot + C# における MVVM + リアクティブプログラミング アーキテクチャ
@@ -256,6 +263,68 @@ public partial class PlayerView : Node2D
 -   レイヤー間の連携
 -   エンドツーエンドの動作確認
 
+#### システム別テスト
+
+##### アニメーションシステム
+
+```csharp
+[Test]
+public void AnimationSystem_StateChange_TriggersCorrectAnimation()
+{
+    var model = new AnimationModel();
+    var viewModel = new AnimationViewModel(model);
+    var view = new AnimationView();
+    bool animationTriggered = false;
+
+    view.SetupBindings(viewModel);
+    view.OnAnimationPlay += (animName) => animationTriggered = true;
+
+    model.State.Value = AnimationState.Attack;
+
+    Assert.IsTrue(animationTriggered);
+}
+```
+
+##### サウンドシステム
+
+```csharp
+[Test]
+public void SoundSystem_PlaySound_TriggersCorrectAudio()
+{
+    var model = new SoundModel();
+    var viewModel = new SoundViewModel(model);
+    var view = new SoundView();
+    bool soundPlayed = false;
+
+    view.SetupBindings(viewModel);
+    view.OnSoundPlay += (soundName) => soundPlayed = true;
+
+    model.PlaySound("attack");
+
+    Assert.IsTrue(soundPlayed);
+}
+```
+
+##### UI システム
+
+```csharp
+[Test]
+public void UISystem_UpdateState_ReflectsInView()
+{
+    var model = new UIModel();
+    var viewModel = new UIViewModel(model);
+    var view = new UIView();
+    bool uiUpdated = false;
+
+    view.SetupBindings(viewModel);
+    view.OnUIUpdate += () => uiUpdated = true;
+
+    model.State.Value = UIState.Menu;
+
+    Assert.IsTrue(uiUpdated);
+}
+```
+
 ## 6. 実装例
 
 ### 6.1 基本的な実装パターン
@@ -336,3 +405,12 @@ public class GameService
 -   ログ出力の戦略
 -   状態の可視化
 -   パフォーマンスプロファイリング
+
+## 8. 変更履歴
+
+| バージョン | 更新日     | 変更内容                         |
+| ---------- | ---------- | -------------------------------- |
+| 0.1.0      | 2024-03-21 | 初版作成                         |
+| 0.2.0      | 2024-03-23 | 新しいリンクドキュメントを追加   |
+| 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加 |
+| 0.4.0      | 2024-03-23 | ネットワークシステムの削除       |

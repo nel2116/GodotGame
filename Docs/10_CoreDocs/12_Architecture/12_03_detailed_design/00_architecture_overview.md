@@ -1,8 +1,8 @@
 ---
 title: MVVM+RXアーキテクチャ全体図
-version: 0.3.0
+version: 0.4.0
 status: draft
-updated: 2024-03-22
+updated: 2024-03-23
 tags:
     - Architecture
     - MVVM
@@ -19,6 +19,14 @@ linked_docs:
     - "[[12_03_detailed_design/02_systems/06_save_load_system|セーブ/ロードシステム詳細設計]]"
     - "[[12_03_detailed_design/03_optimization/01_performance_optimization|パフォーマンス最適化詳細設計]]"
     - "[[12_03_detailed_design/04_testing/01_testing_strategy|テスト戦略詳細設計]]"
+    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # MVVM+RX アーキテクチャ全体図
@@ -426,6 +434,7 @@ flowchart TD
 
 | バージョン | 更新日     | 変更内容                                                                                     |
 | ---------- | ---------- | -------------------------------------------------------------------------------------------- |
+| 0.4.0      | 2024-03-23 | システム実装の拡充、パフォーマンス最適化の詳細化、テスト戦略の更新、リンクドキュメントの追加 |
 | 0.3.0      | 2024-03-22 | システム実装の拡充、パフォーマンス最適化の詳細化、テスト戦略の更新、リンクドキュメントの追加 |
 | 0.2.0      | 2024-03-22 | コンポーネント説明の詳細化、パフォーマンス最適化セクションの拡充                             |
 | 0.1.0      | 2024-03-21 | 初版作成                                                                                     |

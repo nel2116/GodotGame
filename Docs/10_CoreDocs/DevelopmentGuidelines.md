@@ -1,8 +1,8 @@
 ---
 title: 開発ガイドライン
-version: 0.3.0
+version: 0.4.0
 status: draft
-updated: 2025-06-01
+updated: 2024-03-23
 tags:
     - Development
     - Guidelines
@@ -13,6 +13,14 @@ linked_docs:
     - "[[10_CoreDocs/00_index|コアドキュメントインデックス]]"
     - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[30_APIReference/CoreSystemAPI|コアシステムAPI]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # 開発ガイドライン
@@ -93,6 +101,36 @@ func _on_display_health_changed(new_text: String) -> void:
 func _on_death_state_changed(is_dead: bool) -> void:
     modulate.a = 0.5 if is_dead else 1.0
 ```
+
+### システム開発ガイドライン
+
+#### アニメーションシステム
+
+-   アニメーションの状態管理は Model で行う
+-   アニメーションの再生制御は ViewModel で行う
+-   アニメーションの実際の再生は View で行う
+-   アニメーションの切り替えはイベントバスを使用
+
+#### サウンドシステム
+
+-   サウンドの状態管理は Model で行う
+-   サウンドの再生制御は ViewModel で行う
+-   サウンドの実際の再生は View で行う
+-   音量やミキシングの設定は ViewModel で管理
+
+#### UI システム
+
+-   UI の状態管理は Model で行う
+-   UI の表示制御は ViewModel で行う
+-   UI の実際の描画は View で行う
+-   UI のアニメーションは ViewModel で制御
+
+#### ネットワークシステム
+
+-   ネットワークの状態管理は Model で行う
+-   ネットワークの通信制御は ViewModel で行う
+-   ネットワークの実際の通信は View で行う
+-   データの同期は ViewModel で管理
 
 ## コーディング規約
 
@@ -497,8 +535,7 @@ func _on_death_state_changed(is_dead: bool) -> void:
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容                                              |
-| ---------- | ---------- | ----------------------------------------------------- |
-| 0.3.0      | 2025-06-01 | MVVM とリアクティブプログラミングのガイドラインを追加 |
-| 0.2.0      | 2025-06-01 | パフォーマンスとセキュリティのガイドラインを追加      |
-| 0.1.0      | 2025-06-01 | 初版作成                                              |
+| バージョン | 更新日     | 変更内容                           |
+| ---------- | ---------- | ---------------------------------- |
+| 0.3.0      | 2025-06-01 | 初版作成                           |
+| 0.4.0      | 2024-03-23 | 新規システムの開発ガイドライン追加 |

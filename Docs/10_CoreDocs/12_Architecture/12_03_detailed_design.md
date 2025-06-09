@@ -1,8 +1,8 @@
 ---
 title: MVVM + リアクティブプログラミング 詳細設計書
-version: 0.1.0
+version: 0.4.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
     - Architecture
     - MVVM
@@ -15,6 +15,13 @@ linked_docs:
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
     - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
     - "[[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]"
+    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
 ---
 
 # MVVM + リアクティブプログラミング 詳細設計書
@@ -43,78 +50,119 @@ linked_docs:
 
 ### 2.1 コアコンポーネント
 
-#### 2.1.1 ReactiveProperty の実装
+#### 2.1.1 システム全体のクラス図
 
-```csharp
-public class ReactiveProperty<T>
-{
-    private T _value;
-    private readonly Subject<T> _subject = new();
-    private readonly BehaviorSubject<T> _behaviorSubject;
-
-    public T Value
-    {
-        get => _value;
-        set
-        {
-            if (!EqualityComparer<T>.Default.Equals(_value, value))
-            {
-                _value = value;
-                _subject.OnNext(value);
-                _behaviorSubject.OnNext(value);
-            }
-        }
+```mermaid
+classDiagram
+    %% コアコンポーネント
+    class IReactiveProperty~T~ {
+        <<interface>>
+        +T Value
+        +Subscribe(Action~T~) IDisposable
     }
 
-    public ReactiveProperty(T initialValue = default)
-    {
-        _value = initialValue;
-        _behaviorSubject = new BehaviorSubject<T>(initialValue);
+    class ReactiveProperty~T~ {
+        -T _value
+        -Subject~T~ _subject
+        +Value
+        +Subscribe(Action~T~) IDisposable
     }
 
-    public IDisposable Subscribe(Action<T> onNext)
-    {
-        return _behaviorSubject.Subscribe(onNext);
+    class IGameEvent {
+        <<interface>>
     }
 
-    public void Dispose()
-    {
-        _subject.Dispose();
-        _behaviorSubject.Dispose();
+    class GameEventBus {
+        -Subject~IGameEvent~ _subject
+        +Publish~T~(T) void
+        +GetEventStream~T~() IObservable~T~
     }
-}
+
+    %% システム実装
+    class PlayerSystem {
+        +PlayerModel Model
+        +PlayerViewModel ViewModel
+        +PlayerView View
+    }
+
+    class SkillSystem {
+        +SkillModel Model
+        +SkillViewModel ViewModel
+        +SkillView View
+    }
+
+    class AnimationSystem {
+        +AnimationModel Model
+        +AnimationViewModel ViewModel
+        +AnimationView View
+    }
+
+    class SoundSystem {
+        +SoundModel Model
+        +SoundViewModel ViewModel
+        +SoundView View
+    }
+
+    class UISystem {
+        +UIModel Model
+        +UIViewModel ViewModel
+        +UIView View
+    }
+
+    class NetworkSystem {
+        +NetworkModel Model
+        +NetworkViewModel ViewModel
+        +NetworkView View
+    }
+
+    %% 関係性
+    IReactiveProperty <|.. ReactiveProperty
+    ReactiveProperty --> Subject
+    GameEventBus --> Subject
+    PlayerSystem --> ReactiveProperty
+    SkillSystem --> ReactiveProperty
+    AnimationSystem --> ReactiveProperty
+    SoundSystem --> ReactiveProperty
+    UISystem --> ReactiveProperty
+    NetworkSystem --> ReactiveProperty
 ```
 
-#### 2.1.2 イベントバスの実装
+#### 2.1.2 システム間の相互作用
 
-```csharp
-public class GameEventBus
-{
-    private static readonly Subject<GameEvent> _events = new();
-    private static readonly Dictionary<Type, Subject<GameEvent>> _typedEvents = new();
+```mermaid
+sequenceDiagram
+    participant V as View
+    participant VM as ViewModel
+    participant M as Model
+    participant RP as ReactiveProperty
+    participant EB as EventBus
+    participant AS as AnimationSystem
+    participant SS as SoundSystem
+    participant NS as NetworkSystem
 
-    public static IObservable<GameEvent> Events => _events.AsObservable();
+    %% 通常の更新フロー
+    V->>VM: ユーザー入力
+    VM->>M: 状態更新
+    M->>RP: 値変更
+    RP->>VM: 通知
+    VM->>V: UI更新
 
-    public static IObservable<T> GetEventStream<T>() where T : GameEvent
-    {
-        var type = typeof(T);
-        if (!_typedEvents.ContainsKey(type))
-        {
-            _typedEvents[type] = new Subject<GameEvent>();
-        }
-        return _typedEvents[type].OfType<T>();
-    }
+    %% イベント処理フロー
+    M->>EB: イベント発行
+    EB->>VM: イベント通知
+    VM->>V: UI更新
 
-    public static void Publish(GameEvent gameEvent)
-    {
-        _events.OnNext(gameEvent);
-        var type = gameEvent.GetType();
-        if (_typedEvents.ContainsKey(type))
-        {
-            _typedEvents[type].OnNext(gameEvent);
-        }
-    }
-}
+    %% アニメーション処理
+    V->>AS: アニメーション要求
+    AS->>V: アニメーション実行
+
+    %% サウンド処理
+    V->>SS: サウンド再生要求
+    SS->>V: サウンド再生
+
+    %% ネットワーク処理
+    V->>NS: ネットワーク要求
+    NS->>V: ネットワーク応答
 ```
 
 ### 2.2 システム別実装詳細
@@ -408,8 +456,121 @@ public void PlayerSystem_DeathEvent_TriggersAnimation()
 }
 ```
 
+### 4.3 システム別テスト
+
+#### アニメーションシステム
+
+```csharp
+[Test]
+public void AnimationSystem_BlendTree_TransitionsSmoothly()
+{
+    var model = new AnimationModel();
+    var viewModel = new AnimationViewModel(model);
+    var view = new AnimationView();
+    bool blendTransitioned = false;
+
+    view.SetupBindings(viewModel);
+    view.OnBlendTransition += () => blendTransitioned = true;
+
+    model.BlendTo(AnimationState.Walk, 0.5f);
+
+    Assert.IsTrue(blendTransitioned);
+}
+
+[Test]
+public void AnimationSystem_EventHandling_TriggersCorrectly()
+{
+    var model = new AnimationModel();
+    var viewModel = new AnimationViewModel(model);
+    var view = new AnimationView();
+    bool eventTriggered = false;
+
+    view.SetupBindings(viewModel);
+    view.OnAnimationEvent += (eventName) => eventTriggered = true;
+
+    model.TriggerEvent("footstep");
+
+    Assert.IsTrue(eventTriggered);
+}
+```
+
+#### サウンドシステム
+
+```csharp
+[Test]
+public void SoundSystem_Mixing_AppliesCorrectly()
+{
+    var model = new SoundModel();
+    var viewModel = new SoundViewModel(model);
+    var view = new SoundView();
+    bool mixingApplied = false;
+
+    view.SetupBindings(viewModel);
+    view.OnMixingApplied += () => mixingApplied = true;
+
+    model.ApplyMixing(new SoundMix());
+
+    Assert.IsTrue(mixingApplied);
+}
+
+[Test]
+public void SoundSystem_SpatialAudio_UpdatesPosition()
+{
+    var model = new SoundModel();
+    var viewModel = new SoundViewModel(model);
+    var view = new SoundView();
+    bool positionUpdated = false;
+
+    view.SetupBindings(viewModel);
+    view.OnPositionUpdate += () => positionUpdated = true;
+
+    model.UpdateSoundPosition(Vector3.One);
+
+    Assert.IsTrue(positionUpdated);
+}
+```
+
+#### UI システム
+
+```csharp
+[Test]
+public void UISystem_Layout_UpdatesCorrectly()
+{
+    var model = new UIModel();
+    var viewModel = new UIViewModel(model);
+    var view = new UIView();
+    bool layoutUpdated = false;
+
+    view.SetupBindings(viewModel);
+    view.OnLayoutUpdate += () => layoutUpdated = true;
+
+    model.UpdateLayout(new UILayout());
+
+    Assert.IsTrue(layoutUpdated);
+}
+
+[Test]
+public void UISystem_Theme_AppliesCorrectly()
+{
+    var model = new UIModel();
+    var viewModel = new UIViewModel(model);
+    var view = new UIView();
+    bool themeApplied = false;
+
+    view.SetupBindings(viewModel);
+    view.OnThemeApplied += () => themeApplied = true;
+
+    model.ApplyTheme(new UITheme());
+
+    Assert.IsTrue(themeApplied);
+}
+```
+
 ## 5. 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                           |
+| ---------- | ---------- | ---------------------------------- |
+| 0.1.0      | 2024-03-21 | 初版作成                           |
+| 0.2.0      | 2024-03-23 | 更新日付とリンクドキュメントの追加 |
+| 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加   |
+| 0.4.0      | 2024-03-23 | ネットワークシステムの削除         |

@@ -12,6 +12,8 @@ tags:
 linked_docs:
     - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[03_composite_disposable|CompositeDisposable実装詳細]]"
 ---
 
 # イベントバス実装詳細

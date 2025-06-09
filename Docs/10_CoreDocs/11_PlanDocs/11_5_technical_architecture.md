@@ -1,8 +1,8 @@
 ---
 title: 技術アーキテクチャ設計書
-version: 0.1.0
+version: 0.2.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
     - Architecture
     - Technical
@@ -12,6 +12,14 @@ linked_docs:
     - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
     - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[11_PlanDocs/00_index|計画ドキュメント]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
+    - "[[12_Architecture/12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # 技術アーキテクチャ設計書
@@ -32,6 +40,9 @@ linked_docs:
 -   UI/UX システム
 -   データ管理システム
 -   イベントシステム
+-   アニメーションシステム
+-   サウンドシステム
+-   ネットワークシステム
 
 ## 2. アーキテクチャ概要
 
@@ -51,181 +62,52 @@ linked_docs:
 
 #### 2.1.2 各レイヤーの責務
 
-| レイヤー  | 責務               | 実装例               |
-| --------- | ------------------ | -------------------- |
-| View      | UI 表示・入力受付  | Godot Node           |
-| ViewModel | 状態管理・変換     | ReactiveProperty     |
-| Model     | ビジネスロジック   | ゲームロジッククラス |
-| Service   | 外部連携・共通機能 | リソース管理         |
+| レイヤー  | 責務              | 実装例               |
+| --------- | ----------------- | -------------------- |
+| View      | UI 表示・入力受付 | Godot Node           |
+| ViewModel | 状態管理・変換    | ReactiveProperty     |
+| Model     | ビジネスロジック  | ゲームロジッククラス |
+| Service   | 共通機能提供      | システムクラス       |
 
-### 2.2 リアクティブプログラミングの適用
+### 2.2 システム構成
 
-#### 2.2.1 適用対象
+#### 2.2.1 コアシステム
 
-1. **ゲーム状態管理**
+-   プレイヤーシステム
+-   スキルシステム
+-   レベル生成システム
+-   敵 AI システム
+-   入力システム
+-   セーブ/ロードシステム
 
-    - プレイヤーステータス
-    - スキルツリー状態
-    - インベントリ
+#### 2.2.2 新規追加システム
 
-2. **イベント処理**
+-   アニメーションシステム
 
-    - 戦闘イベント
-    - スキル発動
-    - アイテム使用
+    -   キャラクターアニメーション
+    -   エフェクトアニメーション
+    -   UI アニメーション
 
-3. **UI 更新**
-    - ステータス表示
-    - スキルツリー表示
-    - インベントリ表示
+-   サウンドシステム
 
-## 3. 実装詳細
+    -   BGM 管理
+    -   効果音管理
+    -   音声管理
 
-### 3.1 コアシステム
+-   UI システム
 
-#### 3.1.1 プレイヤーシステム
+    -   メニュー管理
+    -   HUD 管理
+    -   ダイアログ管理
 
-```csharp
-// Model
-public class PlayerModel
-{
-    public ReactiveProperty<float> Health { get; } = new();
-    public ReactiveProperty<float> MaxHealth { get; } = new();
-    public ReactiveProperty<int> ShadowFragments { get; } = new();
-}
+-   ネットワークシステム
+    -   マルチプレイヤー対応
+    -   データ同期
+    -   通信管理
 
-// ViewModel
-public class PlayerViewModel
-{
-    private readonly PlayerModel _model;
-    public ReactiveProperty<string> HealthText { get; } = new();
-    public ReactiveProperty<float> HealthPercentage { get; } = new();
+## 3. 変更履歴
 
-    public PlayerViewModel(PlayerModel model)
-    {
-        _model = model;
-        _model.Health.Subscribe(UpdateHealthDisplay);
-    }
-
-    private void UpdateHealthDisplay(float health)
-    {
-        HealthText.Value = $"HP: {health}/{_model.MaxHealth.Value}";
-        HealthPercentage.Value = health / _model.MaxHealth.Value;
-    }
-}
-```
-
-#### 3.1.2 スキルシステム
-
-```csharp
-// Model
-public class SkillModel
-{
-    public ReactiveProperty<bool> IsUnlocked { get; } = new();
-    public ReactiveProperty<int> Level { get; } = new();
-    public ReactiveProperty<float> Cooldown { get; } = new();
-}
-
-// ViewModel
-public class SkillViewModel
-{
-    private readonly SkillModel _model;
-    public ReactiveProperty<string> StatusText { get; } = new();
-    public ReactiveProperty<bool> IsAvailable { get; } = new();
-
-    public SkillViewModel(SkillModel model)
-    {
-        _model = model;
-        _model.IsUnlocked.Subscribe(UpdateStatus);
-        _model.Cooldown.Subscribe(UpdateAvailability);
-    }
-}
-```
-
-### 3.2 データフロー
-
-#### 3.2.1 一方向データフロー
-
-```
-[User Input] → [View] → [ViewModel] → [Model] → [Service]
-```
-
-#### 3.2.2 イベントバス
-
-```csharp
-public static class GameEventBus
-{
-    public static Subject<GameEvent> Events { get; } = new();
-
-    public static void Publish(GameEvent gameEvent)
-    {
-        Events.OnNext(gameEvent);
-    }
-}
-```
-
-## 4. 実装ガイドライン
-
-### 4.1 命名規則
-
--   Model: `[機能名]Model`
--   ViewModel: `[機能名]ViewModel`
--   View: `[機能名]View`
--   Service: `[機能名]Service`
-
-### 4.2 ディレクトリ構造
-
-```
-Assets/
-├── Scripts/
-│   ├── Models/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── Items/
-│   ├── ViewModels/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   ├── Views/
-│   │   ├── Player/
-│   │   ├── Skills/
-│   │   └── UI/
-│   └── Services/
-│       ├── Resource/
-│       ├── Save/
-│       └── Event/
-```
-
-## 5. パフォーマンス最適化
-
-### 5.1 メモリ管理
-
--   不要なサブスクリプションの解除
--   オブジェクトプーリングの活用
--   リソースの適切な解放
-
-### 5.2 更新最適化
-
--   バッチ処理の実装
--   更新頻度の制御
--   不要な更新の防止
-
-## 6. テスト戦略
-
-### 6.1 単体テスト
-
--   Model: ビジネスロジックの検証
--   ViewModel: 状態変換の検証
--   Service: 機能の検証
-
-### 6.2 統合テスト
-
--   レイヤー間の連携
--   イベント処理
--   データフロー
-
-## 7. 変更履歴
-
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                       |
+| ---------- | ---------- | ------------------------------ |
+| 0.1.0      | 2024-03-21 | 初版作成                       |
+| 0.2.0      | 2024-03-23 | 新規システムの追加と構成の更新 |

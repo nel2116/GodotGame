@@ -1,8 +1,8 @@
 ---
 title: MVVM + リアクティブプログラミング 基本設計書
-version: 0.1.0
+version: 0.4.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
     - Architecture
     - MVVM
@@ -13,6 +13,13 @@ linked_docs:
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[11_5_technical_architecture|技術アーキテクチャ設計書]]"
     - "[[99_Reference/DocumentManagementRules|ドキュメント管理ルール]]"
+    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
+    - "[[12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
 ---
 
 # MVVM + リアクティブプログラミング 基本設計書
@@ -201,8 +208,73 @@ public static class GameEventBus
 -   イベント処理
 -   データフロー
 
+### 6.3 システム別テスト
+
+#### アニメーションシステム
+
+```csharp
+[Test]
+public void AnimationSystem_StateTransition_HandlesCorrectly()
+{
+    var model = new AnimationModel();
+    var viewModel = new AnimationViewModel(model);
+    var view = new AnimationView();
+    bool transitionHandled = false;
+
+    view.SetupBindings(viewModel);
+    view.OnTransition += () => transitionHandled = true;
+
+    model.TransitionTo(AnimationState.Attack);
+
+    Assert.IsTrue(transitionHandled);
+}
+```
+
+#### サウンドシステム
+
+```csharp
+[Test]
+public void SoundSystem_VolumeControl_UpdatesCorrectly()
+{
+    var model = new SoundModel();
+    var viewModel = new SoundViewModel(model);
+    var view = new SoundView();
+    bool volumeUpdated = false;
+
+    view.SetupBindings(viewModel);
+    view.OnVolumeChange += () => volumeUpdated = true;
+
+    model.SetVolume(0.5f);
+
+    Assert.IsTrue(volumeUpdated);
+}
+```
+
+#### UI システム
+
+```csharp
+[Test]
+public void UISystem_InputHandling_ProcessesCorrectly()
+{
+    var model = new UIModel();
+    var viewModel = new UIViewModel(model);
+    var view = new UIView();
+    bool inputProcessed = false;
+
+    view.SetupBindings(viewModel);
+    view.OnInputProcessed += () => inputProcessed = true;
+
+    model.ProcessInput(new UIInput());
+
+    Assert.IsTrue(inputProcessed);
+}
+```
+
 ## 7. 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                         |
+| ---------- | ---------- | -------------------------------- |
+| 0.1.0      | 2024-03-21 | 初版作成                         |
+| 0.2.0      | 2024-03-23 | 新しいリンクドキュメントを追加   |
+| 0.3.0      | 2024-03-23 | 新規システムのテストケースを追加 |
+| 0.4.0      | 2024-03-23 | ネットワークシステムの削除       |

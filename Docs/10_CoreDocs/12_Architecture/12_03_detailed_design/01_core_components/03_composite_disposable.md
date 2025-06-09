@@ -13,6 +13,7 @@ linked_docs:
     - "[[12_03_detailed_design|MVVM+RX詳細設計書]]"
     - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
 ---
 
 # CompositeDisposable 実装詳細

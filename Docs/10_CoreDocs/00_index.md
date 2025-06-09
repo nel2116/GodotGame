@@ -16,6 +16,10 @@ linked_docs:
     - "[[99_Reference/ProjectRules|プロジェクトルール]]"
     - "[[30_APIReference/00_index|APIリファレンス]]"
     - "[[40_Tutorials/00_index|チュートリアル]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
 ---
 
 # プロジェクトドキュメントインデックス
