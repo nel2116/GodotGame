@@ -66,5 +66,33 @@ namespace Tests.Core
             Assert.AreEqual(0, col.Count);
         }
 
+        /// <summary>
+        /// 無効なインデックス指定時に例外が発生するか検証
+        /// </summary>
+        [Test]
+        public void RemoveAt_InvalidIndex_Throws()
+        {
+            var col = new ReactiveCollection<int>();
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => col.RemoveAt(0));
+        }
+
+        /// <summary>
+        /// 大量追加後にクリアしてもメモリが増え続けないことを確認
+        /// </summary>
+        [Test]
+        public void AddAndClear_MemoryUsageStable()
+        {
+            var col = new ReactiveCollection<byte[]>();
+            long before = System.GC.GetTotalMemory(true);
+            for (int i = 0; i < 1000; i++)
+            {
+                col.Add(new byte[1024]);
+            }
+            col.Clear();
+            System.GC.Collect();
+            long after = System.GC.GetTotalMemory(true);
+            Assert.Less(after - before, 1024 * 50);
+        }
+
     }
 }

@@ -97,5 +97,50 @@ namespace Tests.Core
             }
             Assert.AreEqual(1000, count);
         }
+
+        /// <summary>
+        /// 1 秒間連続でイベント発行し続けても安定して通知されるか検証
+        /// </summary>
+        [Test, MaxTime(2000)]
+        public void LongRunning_Stability()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                var end = DateTime.UtcNow.AddSeconds(1);
+                while (DateTime.UtcNow < end)
+                {
+                    bus.Publish(new DummyEvent());
+                }
+            }
+            Assert.Greater(count, 1000);
+        }
+
+        /// <summary>
+        /// 多数のタスクから同時に発行しても全て処理されるか確認
+        /// </summary>
+        [Test, MaxTime(3000)]
+        public void LoadTest_ConcurrentPublish()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                var tasks = new Task[20];
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i] = Task.Run(() =>
+                    {
+                        for (int j = 0; j < 1000; j++)
+                        {
+                            bus.Publish(new DummyEvent());
+                        }
+                    });
+                }
+                Task.WaitAll(tasks);
+            }
+            Assert.AreEqual(20000, count);
+        }
     }
 }
