@@ -35,8 +35,8 @@ namespace Tests.Core
             EventHandler handler = (_, _) => called++;
             mgr.AddHandler("dead", handler);
 
-            var field = typeof(WeakEventManager).GetField("_handlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-            var dict = (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
+            // テスト目的で内部フィールドにアクセスする
+            var dict = GetHandlers(mgr);
             dict["dead"].Add(new WeakReference(null));
             Assert.AreEqual(2, dict["dead"].Count);
 
@@ -79,8 +79,8 @@ namespace Tests.Core
         public void GarbageCollectedHandlers_AreRemoved()
         {
             var mgr = new WeakEventManager();
-            var field = typeof(WeakEventManager).GetField("_handlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-            var dict = (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
+            // テストのためプライベートフィールドを取得
+            var dict = GetHandlers(mgr);
 
             void SubscribeTemp()
             {
@@ -95,6 +95,16 @@ namespace Tests.Core
             System.GC.WaitForPendingFinalizers();
             mgr.RaiseEvent("temp", this, EventArgs.Empty);
             Assert.AreEqual(0, dict["temp"].Count);
+        }
+
+        /// <summary>
+        /// リフレクションで WeakEventManager の内部ハンドラ辞書を取得する
+        /// </summary>
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>> GetHandlers(WeakEventManager mgr)
+        {
+            // 実装変更に依存するため注意
+            var field = typeof(WeakEventManager).GetField("_handlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            return (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
         }
 
     }
