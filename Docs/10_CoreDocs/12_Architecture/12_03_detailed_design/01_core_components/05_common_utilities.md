@@ -1,6 +1,6 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.5
+version: 0.2.6
 status: draft
 updated: 2025-06-09
 tags:
@@ -89,6 +89,66 @@ public class ReactiveCommand : ICommand, IDisposable
 }
 ```
 
+```csharp
+public class ReactiveCommand<T> : ICommand, IDisposable
+{
+    private readonly Subject<T> _executeSubject = new();
+    private readonly ReactiveProperty<bool> _canExecute = new(true);
+    private readonly CompositeDisposable _disposables = new();
+    private event EventHandler? _canExecuteChanged;
+    private bool _disposed;
+
+    public IObservable<T> ExecuteObservable => _executeSubject.AsObservable();
+    public IObservable<bool> CanExecuteObservable => _canExecute.ValueChanged;
+
+    public ReactiveCommand()
+    {
+        _canExecute.ValueChanged
+            .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+            .AddTo(_disposables);
+    }
+
+    public bool CanExecute(object parameter) => _canExecute.Value;
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add { _canExecuteChanged += value; }
+        remove { _canExecuteChanged -= value; }
+    }
+
+    public void SetCanExecute(bool value)
+    {
+        _canExecute.Value = value;
+    }
+
+    public void Execute(object parameter)
+    {
+        if (!CanExecute(parameter)) return;
+        if (parameter is T t)
+        {
+            _executeSubject.OnNext(t);
+        }
+        else if (parameter is null)
+        {
+            _executeSubject.OnNext(default!);
+        }
+        else
+        {
+            throw new ArgumentException($"Invalid parameter type. Expected {typeof(T)}, but got {parameter.GetType()}", nameof(parameter));
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposables.Dispose();
+        _executeSubject.Dispose();
+        _canExecute.Dispose();
+        _disposed = true;
+    }
+}
+```
+
 ### 2.2 ReactiveCollection
 
 ```csharp
@@ -100,27 +160,74 @@ public class ReactiveCollection<T> : IList<T>, IDisposable
 
     public IObservable<CollectionChangedEvent<T>> Changed => _changedSubject.AsObservable();
 
+    public T this[int index]
+    {
+        get => _items[index];
+        set
+        {
+            var old = _items[index];
+            _items[index] = value;
+            _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, old));
+            _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Add, value));
+        }
+    }
+
+    public int Count => _items.Count;
+    public bool IsReadOnly => false;
+
     public void Add(T item)
     {
         _items.Add(item);
         _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Add, item));
     }
 
-    public void Remove(T item)
+    public void Clear()
+    {
+        foreach (var item in _items)
+        {
+            _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, item));
+        }
+        _items.Clear();
+    }
+
+    public bool Contains(T item) => _items.Contains(item);
+
+    public void CopyTo(T[] array, int arrayIndex) => _items.CopyTo(array, arrayIndex);
+
+    public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public int IndexOf(T item) => _items.IndexOf(item);
+
+    public void Insert(int index, T item)
+    {
+        _items.Insert(index, item);
+        _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Add, item));
+    }
+
+    public bool Remove(T item)
     {
         if (_items.Remove(item))
         {
             _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, item));
+            return true;
         }
+        return false;
+    }
+
+    public void RemoveAt(int index)
+    {
+        var item = _items[index];
+        _items.RemoveAt(index);
+        _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, item));
     }
 
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            _changedSubject.Dispose();
-            _disposed = true;
-        }
+        if (_disposed) return;
+        _changedSubject.Dispose();
+        _disposed = true;
     }
 }
 ```
@@ -416,7 +523,7 @@ public static class TaskExtensions
                 }
             }
         }
-        throw last_exception;
+        throw last_exception ?? new Exception("Unknown error");
     }
 }
 ```
@@ -466,6 +573,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.6      | 2025-06-09 | ReactiveCollection のインデクサ追加<br>ReactiveCommand<T> の検証追加<br>WithRetry の例外処理改善 |
 | 0.2.5      | 2025-06-09 | EventAggregator の Publish 改善<br>WithRetry の null 許容型更新 |
 | 0.2.4      | 2025-06-09 | AsyncCommand の CanExecuteChanged 実装 |
 | 0.2.3      | 2025-06-09 | WeakEventManager に RaiseEvent 追加<br>ReactiveCommand の CanExecuteChanged 実装 |
