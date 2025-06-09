@@ -1,8 +1,8 @@
 ---
 title: ViewModelBase実装詳細
-version: 0.1.0
+version: 0.2.0
 status: draft
-updated: 2024-03-21
+updated: 2025-06-09
 tags:
     - Architecture
     - MVVM
@@ -249,3 +249,4 @@ public void ViewModelBase_EventSubscription_DoesNotLeak()
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
 | 0.1.0      | 2024-03-21 | 初版作成 |
+| 0.2.0      | 2025-06-09 | 実装内容の更新 |
