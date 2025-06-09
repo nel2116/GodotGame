@@ -110,8 +110,18 @@ namespace Core.Utilities
         public void Execute(object parameter)
         {
             if (!CanExecute(parameter)) return;
-            var value = parameter is T t ? t : default!;
-            _executeSubject.OnNext(value);
+            if (parameter is T t)
+            {
+                _executeSubject.OnNext(t);
+            }
+            else if (parameter is null)
+            {
+                _executeSubject.OnNext(default!);
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid parameter type. Expected {typeof(T)}, but got {parameter.GetType()}", nameof(parameter));
+            }
         }
 
         public void Dispose()

@@ -1,6 +1,6 @@
 ---
 title: ViewModelBase実装詳細
-version: 0.2.0
+version: 0.2.1
 status: draft
 updated: 2025-06-09
 tags:
@@ -115,7 +115,7 @@ public abstract class ViewModelBase : IDisposable
 ```csharp
 public abstract class ViewModelBase : IDisposable
 {
-    protected ReactiveProperty<bool> IsBusy { get; } = new(false);
+    protected ReactiveProperty<bool> IsBusy { get; } = new(false).AddTo(Disposables);
 
     protected async Task ExecuteAsync(Func<Task> action)
     {
@@ -158,7 +158,7 @@ public abstract class ViewModelBase : IDisposable
 ```csharp
 public abstract class ViewModelBase : IDisposable
 {
-    public ReactiveProperty<ViewModelState> State { get; } = new(ViewModelState.Initial);
+    public ReactiveProperty<ViewModelState> State { get; } = new(ViewModelState.Initial).AddTo(Disposables);
 
     protected virtual void OnActivate()
     {
@@ -321,5 +321,6 @@ public async Task ViewModelBase_AsyncOperation_UpdatesStateCorrectly()
 
 | バージョン | 更新日     | 変更内容                                                                                                     |
 | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------ |
+| 0.2.1      | 2025-06-09 | IsBusy と State を Disposables に登録 |
 | 0.2.0      | 2025-06-09 | パフォーマンス最適化の追加<br>- メモリ管理の改善<br>- ライフサイクル管理の強化<br>- 非同期処理のサポート追加 |
 | 0.1.0      | 2024-03-22 | 初版作成<br>- 基本実装の定義<br>- コマンド実装の追加<br>- 使用例の追加                                       |

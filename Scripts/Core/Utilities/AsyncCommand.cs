@@ -14,6 +14,8 @@ namespace Core.Utilities
     {
         private readonly Func<Task> _execute;
         private readonly ReactiveProperty<bool> _isExecuting = new(false);
+        private readonly CompositeDisposable _disposables = new();
+        private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 
         /// <summary>
@@ -24,14 +26,17 @@ namespace Core.Utilities
         public AsyncCommand(Func<Task> execute)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+            _isExecuting.ValueChanged
+                .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+                .AddTo(_disposables);
         }
 
         public bool CanExecute(object parameter) => !_isExecuting.Value;
 
         public event EventHandler? CanExecuteChanged
         {
-            add { }
-            remove { }
+            add { _canExecuteChanged += value; }
+            remove { _canExecuteChanged -= value; }
         }
 
         public async void Execute(object parameter)
@@ -51,6 +56,7 @@ namespace Core.Utilities
         public void Dispose()
         {
             if (_disposed) return;
+            _disposables.Dispose();
             _isExecuting.Dispose();
             _disposed = true;
         }

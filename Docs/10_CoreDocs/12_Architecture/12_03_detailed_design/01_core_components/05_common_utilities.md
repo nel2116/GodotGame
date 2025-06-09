@@ -1,6 +1,6 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.3
+version: 0.2.4
 status: draft
 updated: 2025-06-09
 tags:
@@ -326,11 +326,27 @@ public class AsyncCommand : ICommand, IDisposable
 {
     private readonly Func<Task> _execute;
     private readonly ReactiveProperty<bool> _isExecuting = new(false);
+    private readonly CompositeDisposable _disposables = new();
+    private event EventHandler? _canExecuteChanged;
     private bool _disposed;
 
     public IObservable<bool> IsExecuting => _isExecuting.ValueChanged;
 
+    public AsyncCommand(Func<Task> execute)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _isExecuting.ValueChanged
+            .Subscribe(_ => _canExecuteChanged?.Invoke(this, EventArgs.Empty))
+            .AddTo(_disposables);
+    }
+
     public bool CanExecute(object parameter) => !_isExecuting.Value;
+
+    public event EventHandler? CanExecuteChanged
+    {
+        add { _canExecuteChanged += value; }
+        remove { _canExecuteChanged -= value; }
+    }
 
     public async void Execute(object parameter)
     {
@@ -351,6 +367,7 @@ public class AsyncCommand : ICommand, IDisposable
     {
         if (!_disposed)
         {
+            _disposables.Dispose();
             _isExecuting.Dispose();
             _disposed = true;
         }
@@ -444,6 +461,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.4      | 2025-06-09 | AsyncCommand の CanExecuteChanged 実装 |
 | 0.2.3      | 2025-06-09 | WeakEventManager に RaiseEvent 追加<br>ReactiveCommand の CanExecuteChanged 実装 |
 | 0.2.2      | 2025-06-09 | WithRetry の変数名を明確化 |
 | 0.2.1      | 2025-06-09 | WithRetry 実装のリトライ回数を修正 |

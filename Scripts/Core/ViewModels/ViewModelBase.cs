@@ -24,12 +24,12 @@ namespace Core.ViewModels
         /// <summary>
         /// ビジー状態
         /// </summary>
-        protected ReactiveProperty<bool> IsBusy { get; } = new(false);
+        protected ReactiveProperty<bool> IsBusy { get; }
 
         /// <summary>
         /// ViewModelの状態
         /// </summary>
-        public ReactiveProperty<ViewModelState> State { get; } = new(ViewModelState.Initial);
+        public ReactiveProperty<ViewModelState> State { get; }
 
         /// <summary>
         /// コンストラクタ
@@ -37,6 +37,8 @@ namespace Core.ViewModels
         protected ViewModelBase(IGameEventBus eventBus)
         {
             EventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+            IsBusy = new ReactiveProperty<bool>(false).AddTo(Disposables);
+            State = new ReactiveProperty<ViewModelState>(ViewModelState.Initial).AddTo(Disposables);
         }
 
         /// <summary>
