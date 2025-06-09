@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using Core.Reactive;
 
@@ -23,7 +24,7 @@ namespace Tests.Core
         {
             var prop = new ReactiveProperty<int>(0);
             prop.SetValidator(v => v >= 0);
-            prop.Value = -1;
+            Assert.Throws<ArgumentException>(() => prop.Value = -1);
             Assert.AreEqual(0, prop.Value);
         }
 

@@ -1,8 +1,8 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.0
+version: 0.2.1
 status: draft
-updated: 2024-03-23
+updated: 2025-06-09
 tags:
     - Core
     - Utility
@@ -334,21 +334,27 @@ public static class TaskExtensions
 
     public static async Task<T> WithRetry<T>(this Func<Task<T>> taskFactory, int maxRetries)
     {
+        Exception last = null;
         for (int i = 0; i < maxRetries; i++)
         {
             try
             {
                 return await taskFactory();
             }
-            catch (Exception) when (i < maxRetries - 1)
+            catch (Exception ex)
             {
-                await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
+                last = ex;
+                if (i < maxRetries - 1)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
+                }
             }
         }
-        return await taskFactory();
+        throw last;
     }
 }
 ```
+`maxRetries` 回すべて失敗した場合は最後に捕捉した例外を送出します。
 
 ## 7. ベストプラクティス
 
@@ -394,6 +400,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.1      | 2025-06-09 | WithRetry 実装のリトライ回数を修正 |
 | 0.2.0      | 2024-03-23 | 機能拡張<br>- ロギングユーティリティの追加<br>- バリデーションユーティリティの追加<br>- 非同期処理ユーティリティの追加 |
 | 0.1.0      | 2024-03-22 | 初版作成<br>- リアクティブユーティリティの実装<br>- イベントユーティリティの実装<br>- 使用例の追加                     |
 

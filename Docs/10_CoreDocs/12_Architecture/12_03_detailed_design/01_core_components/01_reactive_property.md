@@ -1,8 +1,8 @@
 ---
 title: ReactiveProperty実装詳細
-version: 0.2.0
+version: 0.3.0
 status: draft
-updated: 2024-03-23
+updated: 2025-06-09
 tags:
     - Core
     - Reactive
@@ -48,6 +48,10 @@ public class ReactiveProperty<T>
         get => _value;
         set
         {
+            if (_validator != null && !_validator(value))
+            {
+                throw new ArgumentException("Validation failed", nameof(value));
+            }
             if (!EqualityComparer<T>.Default.Equals(_value, value))
             {
                 _value = value;
@@ -103,6 +107,8 @@ public class ReactiveProperty<T>
     }
 }
 ```
+
+`SetValidator` で登録した関数が `false` を返した場合、値の設定時に `ArgumentException` が送出されます。
 
 ### 3.2 値の変換
 
@@ -284,5 +290,6 @@ public void ReactiveProperty_Integration_WorksWithViewModel()
 
 | バージョン | 更新日     | 変更内容                                                                                           |
 | ---------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| 0.3.0      | 2025-06-09 | バリデーション失敗時に例外を送出するよう変更 |
 | 0.2.0      | 2024-03-23 | パフォーマンス最適化の追加<br>- メモリ管理の改善<br>- バッチ更新機能の追加<br>- 値の検証機能の強化 |
 | 0.1.0      | 2024-03-22 | 初版作成<br>- 基本実装の定義<br>- 拡張機能の実装<br>- 使用例の追加                                 |

@@ -25,7 +25,9 @@ namespace Core.Utilities
             get => _items[index];
             set
             {
+                var old = _items[index];
                 _items[index] = value;
+                _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Remove, old));
                 _changedSubject.OnNext(new CollectionChangedEvent<T>(CollectionChangeType.Add, value));
             }
         }

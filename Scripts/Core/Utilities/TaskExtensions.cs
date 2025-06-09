@@ -30,18 +30,23 @@ namespace Core.Utilities
         /// </summary>
         public static async Task<T> WithRetry<T>(this Func<Task<T>> taskFactory, int maxRetries)
         {
+            Exception? last = null;
             for (int i = 0; i < maxRetries; i++)
             {
                 try
                 {
                     return await taskFactory();
                 }
-                catch (Exception) when (i < maxRetries - 1)
+                catch (Exception ex)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
+                    last = ex;
+                    if (i < maxRetries - 1)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
+                    }
                 }
             }
-            return await taskFactory();
+            throw last ?? new Exception("Unknown error");
         }
     }
 }

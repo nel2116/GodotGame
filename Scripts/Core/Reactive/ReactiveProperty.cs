@@ -31,7 +31,10 @@ namespace Core.Reactive
                 lock (_sync_lock)
                 {
                     if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
-                    if (_validator != null && !_validator(value)) return;
+                    if (_validator != null && !_validator(value))
+                    {
+                        throw new ArgumentException("Validation failed", nameof(value));
+                    }
                     if (!EqualityComparer<T>.Default.Equals(_value, value))
                     {
                         _value = value;
