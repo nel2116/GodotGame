@@ -30,7 +30,7 @@ namespace Core.Utilities
         /// </summary>
         public static async Task<T> WithRetry<T>(this Func<Task<T>> taskFactory, int maxRetries)
         {
-            Exception? last = null;
+            Exception? last_exception = null;
             for (int i = 0; i < maxRetries; i++)
             {
                 try
@@ -39,14 +39,14 @@ namespace Core.Utilities
                 }
                 catch (Exception ex)
                 {
-                    last = ex;
+                    last_exception = ex;
                     if (i < maxRetries - 1)
                     {
                         await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, i)));
                     }
                 }
             }
-            throw last ?? new Exception("Unknown error");
+            throw last_exception ?? new Exception("Unknown error");
         }
     }
 }

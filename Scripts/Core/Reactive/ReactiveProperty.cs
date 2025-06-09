@@ -14,6 +14,7 @@ namespace Core.Reactive
         private readonly Subject<T> _raw_subject = new();
         private readonly ISubject<T> _sync_subject;
         private readonly List<IDisposable> _disposables = new();
+        private const string VALIDATION_FAILED_MESSAGE = "Validation failed";
         private Func<T, bool>? _validator;
         private bool _is_updating;
         private readonly object _sync_lock = new();
@@ -33,7 +34,7 @@ namespace Core.Reactive
                     if (_is_disposed) throw new ObjectDisposedException(nameof(ReactiveProperty<T>));
                     if (_validator != null && !_validator(value))
                     {
-                        throw new ArgumentException("Validation failed", nameof(value));
+                        throw new ArgumentException(VALIDATION_FAILED_MESSAGE, nameof(value));
                     }
                     if (!EqualityComparer<T>.Default.Equals(_value, value))
                     {
