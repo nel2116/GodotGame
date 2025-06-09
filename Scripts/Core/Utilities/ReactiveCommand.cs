@@ -14,7 +14,7 @@ namespace Core.Utilities
     {
         private readonly Subject<Unit> _executeSubject = new();
         private readonly ReactiveProperty<bool> _canExecute = new(true);
-        private readonly CompositeDisposable _disposables = new();
+        private readonly Core.Reactive.CompositeDisposable _disposables = new();
         private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 
@@ -73,7 +73,7 @@ namespace Core.Utilities
     {
         private readonly Subject<T> _executeSubject = new();
         private readonly ReactiveProperty<bool> _canExecute = new(true);
-        private readonly CompositeDisposable _disposables = new();
+        private readonly Core.Reactive.CompositeDisposable _disposables = new();
         private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 

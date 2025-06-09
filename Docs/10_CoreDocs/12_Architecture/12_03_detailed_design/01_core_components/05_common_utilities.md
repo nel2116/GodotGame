@@ -1,6 +1,6 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.4
+version: 0.2.5
 status: draft
 updated: 2025-06-09
 tags:
@@ -137,14 +137,19 @@ public class EventAggregator : IEventAggregator
 
     public void Publish<T>(T message) where T : class
     {
+        List<Action<T>>? handlers_to_invoke = null;
         lock (_lock)
         {
             if (_handlers.TryGetValue(typeof(T), out var handlers))
             {
-                foreach (var handler in (List<Action<T>>)handlers)
-                {
-                    handler(message);
-                }
+                handlers_to_invoke = new List<Action<T>>((List<Action<T>>)handlers);
+            }
+        }
+        if (handlers_to_invoke != null)
+        {
+            foreach (var handler in handlers_to_invoke)
+            {
+                handler(message);
             }
         }
     }
@@ -395,7 +400,7 @@ public static class TaskExtensions
 
     public static async Task<T> WithRetry<T>(this Func<Task<T>> taskFactory, int maxRetries)
     {
-        Exception last_exception = null;
+        Exception? last_exception = null;
         for (int i = 0; i < maxRetries; i++)
         {
             try
@@ -461,6 +466,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.5      | 2025-06-09 | EventAggregator の Publish 改善<br>WithRetry の null 許容型更新 |
 | 0.2.4      | 2025-06-09 | AsyncCommand の CanExecuteChanged 実装 |
 | 0.2.3      | 2025-06-09 | WeakEventManager に RaiseEvent 追加<br>ReactiveCommand の CanExecuteChanged 実装 |
 | 0.2.2      | 2025-06-09 | WithRetry の変数名を明確化 |

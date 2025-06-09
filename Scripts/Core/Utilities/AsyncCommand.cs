@@ -14,7 +14,7 @@ namespace Core.Utilities
     {
         private readonly Func<Task> _execute;
         private readonly ReactiveProperty<bool> _isExecuting = new(false);
-        private readonly CompositeDisposable _disposables = new();
+        private readonly Core.Reactive.CompositeDisposable _disposables = new();
         private event EventHandler? _canExecuteChanged;
         private bool _disposed;
 

@@ -13,14 +13,19 @@ namespace Core.Utilities
 
         public void Publish<T>(T message) where T : class
         {
+            List<Action<T>>? handlers_to_invoke = null;
             lock (_lock)
             {
                 if (_handlers.TryGetValue(typeof(T), out var list))
                 {
-                    foreach (var handler in (List<Action<T>>)list)
-                    {
-                        handler(message);
-                    }
+                    handlers_to_invoke = new List<Action<T>>((List<Action<T>>)list);
+                }
+            }
+            if (handlers_to_invoke != null)
+            {
+                foreach (var handler in handlers_to_invoke)
+                {
+                    handler(message);
                 }
             }
         }
