@@ -60,4 +60,5 @@ Docs/.obsidian/workspace.json
 # .NET build outputs
 **/bin/
 **/obj/
+**/TestResults/
 
