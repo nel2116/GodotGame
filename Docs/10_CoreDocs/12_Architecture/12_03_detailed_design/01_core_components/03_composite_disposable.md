@@ -1,6 +1,6 @@
 ---
 title: CompositeDisposable実装詳細
-version: 0.1.0
+version: 0.1.1
 status: draft
 updated: 2025-06-09
 tags:
@@ -160,6 +160,19 @@ public class CompositeDisposable : IDisposable
 }
 ```
 
+### 4.1.1 AddTo 拡張
+
+```csharp
+public static class DisposableExtensions
+{
+    public static T AddTo<T>(this T disposable, CompositeDisposable composite) where T : IDisposable
+    {
+        composite.Add(disposable);
+        return disposable;
+    }
+}
+```
+
 ### 4.2 使用例
 
 ```csharp
@@ -276,4 +289,5 @@ public void CompositeDisposable_ConcurrentAccess_ThreadSafe()
 
 | バージョン | 更新日     | 変更内容                                                                                               |
 | ---------- | ---------- | ------------------------------------------------------------------------------------------------------ |
+| 0.1.1      | 2025-06-09 | AddTo 拡張メソッドを追加 |
 | 0.1.0      | 2025-06-09 | 初版作成<br>- 基本実装の定義<br>- スレッドセーフティの実装<br>- テストケースの追加<br>- 制限事項の追加 |
