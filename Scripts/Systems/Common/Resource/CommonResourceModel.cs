@@ -18,6 +18,11 @@ namespace Systems.Common.Resource
         private int _current_cache_size;
 
         /// <summary>
+        /// キャッシュクリア時に削除するリソース数
+        /// </summary>
+        private const int MAX_RESOURCES_TO_EVICT = 5;
+
+        /// <summary>
         /// キャッシュ
         /// </summary>
         public Dictionary<string, ResourceData> ResourceCache => _resource_cache;
@@ -111,7 +116,7 @@ namespace Systems.Common.Resource
         private void CleanupOldestResources()
         {
             var oldest = _resource_cache.OrderBy(kvp => kvp.Value.LastAccessTime)
-                .Take(5).Select(kvp => kvp.Key).ToList();
+                .Take(MAX_RESOURCES_TO_EVICT).Select(kvp => kvp.Key).ToList();
             foreach (var key in oldest)
             {
                 UnloadResource(key);

@@ -16,6 +16,11 @@ namespace Systems.Common.Movement
         private bool _can_dash;
 
         /// <summary>
+        /// 接地判定に使用する許容誤差
+        /// </summary>
+        private const float GROUNDED_THRESHOLD = 0.01f;
+
+        /// <summary>
         /// 現在の速度
         /// </summary>
         public Vector2 Velocity => _velocity;
@@ -82,7 +87,7 @@ namespace Systems.Common.Movement
 
         private void UpdateGroundedState()
         {
-            _is_grounded = Math.Abs(_velocity.Y) <= 0.01f;
+            _is_grounded = Math.Abs(_velocity.Y) <= GROUNDED_THRESHOLD;
             if (_is_grounded)
             {
                 _can_jump = true;
