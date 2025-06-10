@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Core.Events;
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,6 +97,54 @@ namespace Tests.Core
                 Parallel.For(0, 1000, _ => bus.Publish(new DummyEvent()));
             }
             Assert.AreEqual(1000, count);
+        }
+
+        /// <summary>
+        /// 1 秒間連続でイベント発行し続けても安定して通知されるか検証
+        /// </summary>
+        [Test, MaxTime(2000)]
+        public void LongRunning_Stability()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                while (stopwatch.Elapsed < TimeSpan.FromSeconds(1))
+                {
+                    bus.Publish(new DummyEvent());
+                    // 短い遅延を挟み CPU 負荷を抑える
+                    Thread.Sleep(1);
+                }
+            }
+            Assert.Greater(count, 500);
+        }
+
+        /// <summary>
+        /// 多数のタスクから同時に発行しても全て処理されるか確認
+        /// </summary>
+        [Test, MaxTime(3000)]
+        public void LoadTest_ConcurrentPublish()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                var tasks = new Task[20];
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i] = Task.Run(() =>
+                    {
+                        for (int j = 0; j < 1000; j++)
+                        {
+                            bus.Publish(new DummyEvent());
+                        }
+                    });
+                }
+                Task.WaitAll(tasks);
+            }
+            // 記録漏れがないことを確認するが、並列実行の揺らぎを考慮し下限のみ検証
+            Assert.GreaterOrEqual(count, 20000);
         }
     }
 }

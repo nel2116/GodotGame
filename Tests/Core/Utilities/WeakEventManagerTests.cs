@@ -6,6 +6,8 @@ namespace Tests.Core
 {
     public class WeakEventManagerTests
     {
+        // WeakEventManager の private フィールド名
+        private const string HANDLERS_FIELD_NAME = "_handlers";
         [Test]
         public void AddRaiseRemove_Works()
         {
@@ -35,8 +37,8 @@ namespace Tests.Core
             EventHandler handler = (_, _) => called++;
             mgr.AddHandler("dead", handler);
 
-            var field = typeof(WeakEventManager).GetField("_handlers", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
-            var dict = (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
+            // テスト目的で内部フィールドにアクセスする
+            var dict = GetHandlers(mgr);
             dict["dead"].Add(new WeakReference(null));
             Assert.AreEqual(2, dict["dead"].Count);
 
@@ -60,6 +62,51 @@ namespace Tests.Core
             mgr.RaiseEvent("b", this, EventArgs.Empty);
             Assert.AreEqual(1, a);
             Assert.AreEqual(1, b);
+        }
+
+        /// <summary>
+        /// 登録されていないイベント名を指定しても例外が発生しないことを確認
+        /// </summary>
+        [Test]
+        public void RemoveHandler_NoSuchEvent_DoesNotThrow()
+        {
+            var mgr = new WeakEventManager();
+            Assert.DoesNotThrow(() => mgr.RemoveHandler("none", (_, _) => { }));
+        }
+
+        /// <summary>
+        /// GC 発生後に無効なハンドラ参照が削除されることを検証
+        /// </summary>
+        [Test]
+        public void GarbageCollectedHandlers_AreRemoved()
+        {
+            var mgr = new WeakEventManager();
+            // テストのためプライベートフィールドを取得
+            var dict = GetHandlers(mgr);
+
+            void SubscribeTemp()
+            {
+                var dummy = new Dummy(() => { });
+                mgr.AddHandler("temp", dummy.Handler);
+            }
+
+            SubscribeTemp();
+            Assert.AreEqual(1, dict["temp"].Count);
+            System.GC.Collect();
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+            mgr.RaiseEvent("temp", this, EventArgs.Empty);
+            Assert.AreEqual(0, dict["temp"].Count);
+        }
+
+        /// <summary>
+        /// リフレクションで WeakEventManager の内部ハンドラ辞書を取得する
+        /// </summary>
+        private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>> GetHandlers(WeakEventManager mgr)
+        {
+            // テストから安全にアクセスできるよう、今後は InternalsVisibleTo による公開を検討する
+            var field = typeof(WeakEventManager).GetField(HANDLERS_FIELD_NAME, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            return (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
         }
 
     }
