@@ -17,6 +17,7 @@ jobs:
         container:
             image: barichello/godot-ci:4.4.1
         strategy:
+            fail-fast: false
             matrix:
                 include:
                     - label: windows
