@@ -104,7 +104,7 @@ namespace Tests.Core
         /// </summary>
         private static System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>> GetHandlers(WeakEventManager mgr)
         {
-            // 内部実装に依存するため、将来的には InternalsVisibleTo の利用を検討
+            // テストから安全にアクセスできるよう、今後は InternalsVisibleTo による公開を検討する
             var field = typeof(WeakEventManager).GetField(HANDLERS_FIELD_NAME, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
             return (System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<WeakReference>>)field.GetValue(mgr)!;
         }

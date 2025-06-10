@@ -8,6 +8,7 @@ namespace Tests.Core
 {
     public class ReactiveCollectionTests
     {
+        // GC 変動による誤差を考慮し、許容するメモリ増加量の目安を 50KB とする
         private const long MEMORY_THRESHOLD_BYTES = 1024 * 50;
         [Test]
         public void Add_RaisesChangeEvent()
@@ -94,6 +95,7 @@ namespace Tests.Core
             System.GC.Collect();
             System.GC.WaitForPendingFinalizers();
             long after = System.GC.GetTotalMemory(true);
+            // 環境差異で多少増減するため、絶対値ではなく一定の目安を用いて検証
             Assert.Less(after - before, MEMORY_THRESHOLD_BYTES);
             Assert.Less(after, before * 1.1, "Memory usage after clearing should not exceed 10% of the initial memory usage.");
         }
