@@ -101,6 +101,36 @@ namespace Tests.Core
             Assert.Less(after - before, MEMORY_THRESHOLD_BYTES);
             Assert.Less(after, before * (1 + MEMORY_RELATIVE_THRESHOLD),
                 "Memory usage after clearing should not exceed 10% of the initial memory usage.");
+
+            // 変動を観測するため複数回計測し平均を算出
+            const int iterations = 5;
+            var memory_deltas = new List<long>();
+            var relative_increases = new List<double>();
+            for (int iteration = 0; iteration < iterations; iteration++)
+            {
+                var loop_col = new ReactiveCollection<byte[]>();
+                long loop_before = System.GC.GetTotalMemory(true);
+                for (int i = 0; i < 1000; i++)
+                {
+                    loop_col.Add(new byte[1024]);
+                }
+                loop_col.Clear();
+                System.GC.Collect();
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
+                long loop_after = System.GC.GetTotalMemory(true);
+                long delta = loop_after - loop_before;
+                double relative = (double)delta / loop_before;
+                memory_deltas.Add(delta);
+                relative_increases.Add(relative);
+                TestContext.WriteLine($"Iteration {iteration + 1}: Memory delta = {delta} bytes, Relative increase = {relative:P}");
+            }
+            long average_delta = (long)memory_deltas.Average();
+            double average_relative = relative_increases.Average();
+            Assert.Less(average_delta, MEMORY_THRESHOLD_BYTES,
+                $"Average memory delta ({average_delta} bytes) exceeds threshold.");
+            Assert.Less(average_relative, MEMORY_RELATIVE_THRESHOLD,
+                $"Average relative memory increase ({average_relative:P}) exceeds threshold.");
         }
 
     }
