@@ -32,19 +32,6 @@ jobs:
                       path: build/linux
                       output: linux/$EXPORT_NAME.x86_64
                       artifact: linux
-                    - label: web
-                      name: Web Export
-                      preset: "Web"
-                      path: build/web
-                      output: web/index.html
-                      artifact: web
-                      deploy_web: true
-                    - label: mac
-                      name: Mac Export
-                      preset: "macOS"
-                      path: build/mac
-                      output: mac/$EXPORT_NAME.zip
-                      artifact: mac
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -67,14 +54,4 @@ jobs:
               with:
                   name: ${{ matrix.artifact }}
                   path: ${{ matrix.path }}
-            - name: Install rsync 📚
-              if: matrix.deploy_web == true
-              run: |
-                  apt-get update && apt-get install -y rsync
-            - name: Deploy to GitHub Pages 🚀
-              if: matrix.deploy_web == true
-              uses: JamesIves/github-pages-deploy-action@releases/v4
-              with:
-                  branch: gh-pages
-                  folder: ${{ matrix.path }}
 
