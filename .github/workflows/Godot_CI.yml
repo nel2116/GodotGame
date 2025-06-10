@@ -12,11 +12,38 @@ env:
     PROJECT_PATH: .
 
 jobs:
-    export-windows:
-        name: Windows Export
+    export:
         runs-on: ubuntu-22.04
         container:
-            image: barichello/godot-ci:4.3
+            image: barichello/godot-ci:4.4.1
+        strategy:
+            matrix:
+                include:
+                    - label: windows
+                      name: Windows Export
+                      preset: "Windows Desktop"
+                      path: build/windows
+                      output: windows/$EXPORT_NAME.exe
+                      artifact: windows
+                    - label: linux
+                      name: Linux Export
+                      preset: "Linux/X11"
+                      path: build/linux
+                      output: linux/$EXPORT_NAME.x86_64
+                      artifact: linux
+                    - label: web
+                      name: Web Export
+                      preset: "Web"
+                      path: build/web
+                      output: web/index.html
+                      artifact: web
+                      deploy_web: true
+                    - label: mac
+                      name: Mac Export
+                      preset: "macOS"
+                      path: build/mac
+                      output: mac/$EXPORT_NAME.zip
+                      artifact: mac
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -28,101 +55,25 @@ jobs:
                   mkdir -v -p ~/.config/
                   mv /root/.config/godot ~/.config/godot
                   mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-            - name: Windows Build
+            - name: ${{ matrix.name }} Build
               run: |
-                  mkdir -v -p build/windows
+                  mkdir -v -p ${{ matrix.path }}
                   EXPORT_DIR="$(readlink -f build)"
                   cd $PROJECT_PATH
-                  godot --headless --verbose --export-release "Windows Desktop" "$EXPORT_DIR/windows/$EXPORT_NAME.exe"
+                  godot --headless --verbose --export-release "${{ matrix.preset }}" "$EXPORT_DIR/${{ matrix.output }}"
             - name: Upload Artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: windows
-                  path: build/windows
-
-    export-linux:
-        name: Linux Export
-        runs-on: ubuntu-22.04
-        container:
-            image: barichello/godot-ci:4.3
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  lfs: true
-            - name: Setup
-              run: |
-                  mkdir -v -p ~/.local/share/godot/export_templates/
-                  mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-            - name: Linux Build
-              run: |
-                  mkdir -v -p build/linux
-                  EXPORT_DIR="$(readlink -f build)"
-                  cd $PROJECT_PATH
-                  godot --headless --verbose --export-release "Linux/X11" "$EXPORT_DIR/linux/$EXPORT_NAME.x86_64"
-            - name: Upload Artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: linux
-                  path: build/linux
-
-    export-web:
-        name: Web Export
-        runs-on: ubuntu-22.04
-        container:
-            image: barichello/godot-ci:4.3
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  lfs: true
-            - name: Setup
-              run: |
-                  mkdir -v -p ~/.local/share/godot/export_templates/
-                  mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-            - name: Web Build
-              run: |
-                  mkdir -v -p build/web
-                  EXPORT_DIR="$(readlink -f build)"
-                  cd $PROJECT_PATH
-                  godot --headless --verbose --export-release "Web" "$EXPORT_DIR/web/index.html"
-            - name: Upload Artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: web
-                  path: build/web
+                  name: ${{ matrix.artifact }}
+                  path: ${{ matrix.path }}
             - name: Install rsync 📚
+              if: matrix.deploy_web == true
               run: |
                   apt-get update && apt-get install -y rsync
             - name: Deploy to GitHub Pages 🚀
+              if: matrix.deploy_web == true
               uses: JamesIves/github-pages-deploy-action@releases/v4
               with:
                   branch: gh-pages
-                  folder: build/web
-
-    export-mac:
-        name: Mac Export
-        runs-on: ubuntu-22.04
-        container:
-            image: barichello/godot-ci:4.3
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  lfs: true
-            - name: Setup
-              run: |
-                  mkdir -v -p ~/.local/share/godot/export_templates/
-                  mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-            - name: Mac Build
-              run: |
-                  mkdir -v -p build/mac
-                  EXPORT_DIR="$(readlink -f build)"
-                  cd $PROJECT_PATH
-                  godot --headless --verbose --export-release "macOS" "$EXPORT_DIR/mac/$EXPORT_NAME.zip"
-            - name: Upload Artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: mac
-                  path: build/mac
+                  folder: ${{ matrix.path }}
 
