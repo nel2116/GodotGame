@@ -51,9 +51,8 @@ namespace Systems.Common.Resource
         /// <inheritdoc />
         public async Task<ResourceData?> LoadResource(string path)
         {
-            if (_resource_cache.ContainsKey(path))
+            if (_resource_cache.TryGetValue(path, out var cached))
             {
-                var cached = _resource_cache[path];
                 cached.Touch();
                 return cached;
             }
@@ -75,9 +74,8 @@ namespace Systems.Common.Resource
         /// <inheritdoc />
         public void UnloadResource(string path)
         {
-            if (_resource_cache.ContainsKey(path))
+            if (_resource_cache.TryGetValue(path, out var data))
             {
-                var data = _resource_cache[path];
                 _current_cache_size -= data.Size;
                 _resource_cache.Remove(path);
                 data.Dispose();

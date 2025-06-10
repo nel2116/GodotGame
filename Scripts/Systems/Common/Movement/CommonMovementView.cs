@@ -8,13 +8,22 @@ namespace Systems.Common.Movement
     /// </summary>
     public partial class CommonMovementView : Node3D
     {
+        private readonly GameEventBus _bus;
         private CommonMovementViewModel _view_model = default!;
+
+        public CommonMovementView() : this(new GameEventBus())
+        {
+        }
+
+        public CommonMovementView(GameEventBus bus)
+        {
+            _bus = bus;
+        }
 
         public override void _Ready()
         {
-            var bus = new GameEventBus();
             var model = new CommonMovementModel();
-            _view_model = new CommonMovementViewModel(model, bus);
+            _view_model = new CommonMovementViewModel(model, _bus);
             _view_model.Initialize();
         }
 
