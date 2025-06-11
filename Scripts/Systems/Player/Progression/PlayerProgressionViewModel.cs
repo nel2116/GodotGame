@@ -2,6 +2,7 @@ using System.Linq;
 using Core.Events;
 using Core.Reactive;
 using Core.ViewModels;
+using Core.Interfaces;
 using Systems.Player.Events;
 
 namespace Systems.Player.Progression
@@ -9,7 +10,7 @@ namespace Systems.Player.Progression
     /// <summary>
     /// プレイヤー進行ビューモデル
     /// </summary>
-    public class PlayerProgressionViewModel : ViewModelBase
+    public class PlayerProgressionViewModel : ViewModelBase, IUpdatable
     {
         private readonly PlayerProgressionModel _model;
         private readonly ReactiveProperty<int> _level;

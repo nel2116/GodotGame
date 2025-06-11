@@ -11,6 +11,7 @@ namespace Core.Events
     public class GameEventBus : IGameEventBus, IDisposable
     {
         private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
+        private readonly object _dispose_lock = new();
         private bool _disposed;
 
         /// <summary>
@@ -40,21 +41,24 @@ namespace Core.Events
         /// </summary>
         public void Dispose()
         {
-            if (_disposed)
+            lock (_dispose_lock)
             {
-                return;
-            }
-
-            foreach (var subject in _subjects.Values)
-            {
-                subject.OnCompleted();
-                if (subject is IDisposable disposable)
+                if (_disposed)
                 {
-                    disposable.Dispose();
+                    return;
                 }
+
+                foreach (var subject in _subjects.Values)
+                {
+                    subject.OnCompleted();
+                    if (subject is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
+                _subjects.Clear();
+                _disposed = true;
             }
-            _subjects.Clear();
-            _disposed = true;
         }
     }
 }

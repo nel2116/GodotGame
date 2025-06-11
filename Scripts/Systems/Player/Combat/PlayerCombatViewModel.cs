@@ -1,6 +1,7 @@
 using Core.Events;
 using Core.Reactive;
 using Core.ViewModels;
+using Core.Interfaces;
 using Systems.Player.Events;
 
 namespace Systems.Player.Combat
@@ -8,7 +9,7 @@ namespace Systems.Player.Combat
     /// <summary>
     /// プレイヤー戦闘ビューモデル
     /// </summary>
-    public class PlayerCombatViewModel : ViewModelBase
+    public class PlayerCombatViewModel : ViewModelBase, IUpdatable
     {
         private readonly PlayerCombatModel _model;
         private readonly ReactiveProperty<float> _attackPower;
