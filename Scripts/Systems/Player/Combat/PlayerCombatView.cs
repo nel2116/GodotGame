@@ -1,0 +1,31 @@
+using Core.Events;
+using Godot;
+
+namespace Systems.Player.Combat
+{
+    /// <summary>
+    /// プレイヤー戦闘ビュー
+    /// </summary>
+    public partial class PlayerCombatView : Node
+    {
+        private PlayerCombatViewModel _view_model = default!;
+
+        public override void _Ready()
+        {
+            var bus = new GameEventBus();
+            var model = new PlayerCombatModel(bus);
+            _view_model = new PlayerCombatViewModel(model, bus);
+            _view_model.Initialize();
+        }
+
+        public override void _Process(double delta)
+        {
+            _view_model.UpdateCombat();
+        }
+
+        public override void _ExitTree()
+        {
+            _view_model.Dispose();
+        }
+    }
+}

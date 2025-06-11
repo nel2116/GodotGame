@@ -26,4 +26,17 @@ namespace Systems.Common.Events
             IsGrounded = grounded;
         }
     }
+
+    /// <summary>
+    /// ダッシュ状態変更イベント
+    /// </summary>
+    public class MovementDashingChangedEvent : GameEvent
+    {
+        public bool IsDashing { get; }
+
+        public MovementDashingChangedEvent(bool isDashing)
+        {
+            IsDashing = isDashing;
+        }
+    }
 }

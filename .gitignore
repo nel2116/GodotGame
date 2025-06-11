@@ -62,3 +62,12 @@ Docs/.obsidian/workspace.json
 **/obj/
 **/TestResults/
 
+
+# Godot scene identifiers
+*.uid
+
+# Test logs
+dotnet_test.log
+setup.log
+gut.log
+build.log
