@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Systems.Player.Base;
 using Systems.Player.Events;
 using Core.Events;
@@ -66,7 +67,7 @@ namespace Systems.Player.Animation
             }
         }
 
-        public void BlendAnimation(string from, string to, float time)
+        public async Task BlendAnimationAsync(string from, string to, float time)
         {
             try
             {
@@ -75,12 +76,13 @@ namespace Systems.Player.Animation
                     throw new ArgumentException("Invalid animation blend");
                 }
                 EventBus.Publish(new AnimationBlendStartedEvent(from, to, time));
+                await Task.Delay(TimeSpan.FromSeconds(time));
                 CurrentAnimation = to;
                 EventBus.Publish(new AnimationBlendCompletedEvent(to));
             }
             catch (Exception ex)
             {
-                HandleError("BlendAnimation", ex);
+                HandleError("BlendAnimationAsync", ex);
             }
         }
 

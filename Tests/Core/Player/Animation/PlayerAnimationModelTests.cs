@@ -8,7 +8,7 @@ namespace Tests.Core.Player.Animation
     public class PlayerAnimationModelTests
     {
         [Test]
-        public void BlendAnimation_PublishesEvents()
+        public async Task BlendAnimation_PublishesEvents()
         {
             var bus = new GameEventBus();
             var model = new PlayerAnimationModel(bus);
@@ -19,12 +19,12 @@ namespace Tests.Core.Player.Animation
             bus.GetEventStream<AnimationBlendStartedEvent>().Subscribe(e => start = e);
             bus.GetEventStream<AnimationBlendCompletedEvent>().Subscribe(e => complete = e);
 
-            model.BlendAnimation("Idle", "Walk", 0.5f);
+            await model.BlendAnimationAsync("Idle", "Walk", 0.01f);
 
             Assert.IsNotNull(start);
             Assert.AreEqual("Idle", start!.FromAnimation);
             Assert.AreEqual("Walk", start.ToAnimation);
-            Assert.AreEqual(0.5f, start.BlendTime);
+            Assert.AreEqual(0.01f, start.BlendTime);
             Assert.IsNotNull(complete);
             Assert.AreEqual("Walk", complete!.AnimationName);
         }
