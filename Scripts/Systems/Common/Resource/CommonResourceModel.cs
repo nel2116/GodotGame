@@ -11,7 +11,6 @@ namespace Systems.Common.Resource
     /// </summary>
     public class CommonResourceModel : IResourceSystem
     {
-        private readonly CompositeDisposable _disposables = new();
         private Dictionary<string, ResourceData> _resource_cache = new();
         private Dictionary<string, ResourcePool> _resource_pools = new();
         private int _max_cache_size;
@@ -124,7 +123,12 @@ namespace Systems.Common.Resource
         /// <inheritdoc />
         public void Dispose()
         {
-            _disposables.Dispose();
+            foreach (var res in _resource_cache.Values)
+            {
+                res.Dispose();
+            }
+            _resource_cache.Clear();
+            _current_cache_size = 0;
         }
     }
 }
