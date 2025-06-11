@@ -21,6 +21,16 @@ namespace Systems.Common.Movement
         private const float GROUNDED_THRESHOLD = 0.01f;
 
         /// <summary>
+        /// 速度減衰率
+        /// </summary>
+        private const float DAMPING_FACTOR = 0.9f;
+
+        /// <summary>
+        /// 速度ゼロ判定に使用するしきい値
+        /// </summary>
+        private const float VELOCITY_THRESHOLD = 0.001f;
+
+        /// <summary>
         /// 現在の速度
         /// </summary>
         public Vector2 Velocity => _velocity;
@@ -98,8 +108,8 @@ namespace Systems.Common.Movement
         private void UpdateMovementState()
         {
             // 速度減衰の簡易処理
-            _velocity *= 0.9f;
-            if (_velocity.LengthSquared() < 0.001f)
+            _velocity *= DAMPING_FACTOR;
+            if (_velocity.LengthSquared() < VELOCITY_THRESHOLD)
             {
                 _velocity = Vector2.Zero;
             }

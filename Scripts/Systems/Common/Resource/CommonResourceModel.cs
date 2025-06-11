@@ -14,6 +14,11 @@ namespace Systems.Common.Resource
         private Dictionary<string, ResourceData> _resource_cache = new();
         private Dictionary<string, ResourcePool> _resource_pools = new();
         private int _max_cache_size;
+
+        /// <summary>
+        /// デフォルトのキャッシュサイズ上限
+        /// </summary>
+        private const int DEFAULT_MAX_CACHE_SIZE = 1024 * 1024 * 100;
         private int _current_cache_size;
 
         /// <summary>
@@ -36,7 +41,7 @@ namespace Systems.Common.Resource
         {
             _resource_cache = new Dictionary<string, ResourceData>();
             _resource_pools = new Dictionary<string, ResourcePool>();
-            _max_cache_size = 1024 * 1024 * 100;
+            _max_cache_size = DEFAULT_MAX_CACHE_SIZE;
             _current_cache_size = 0;
         }
 
