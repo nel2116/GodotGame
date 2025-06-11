@@ -8,9 +8,10 @@ namespace Core.Events
     /// <summary>
     /// ゲームイベントを発行・購読するバス
     /// </summary>
-    public class GameEventBus : IGameEventBus
+    public class GameEventBus : IGameEventBus, IDisposable
     {
         private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
+        private bool _disposed;
 
         /// <summary>
         /// イベントを発行
@@ -32,6 +33,25 @@ namespace Core.Events
         private ISubject<GameEvent> GetOrCreateSubject(Type type)
         {
             return _subjects.GetOrAdd(type, _ => Subject.Synchronize(new Subject<GameEvent>()));
+        }
+
+        /// <summary>
+        /// バスが保持するリソースを解放する
+        /// </summary>
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            foreach (var subject in _subjects.Values)
+            {
+                subject.OnCompleted();
+                subject.Dispose();
+            }
+            _subjects.Clear();
+            _disposed = true;
         }
     }
 }
