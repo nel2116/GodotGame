@@ -8,13 +8,22 @@ namespace Systems.Player.Combat
     /// </summary>
     public partial class PlayerCombatView : Node
     {
-        private PlayerCombatViewModel _view_model = default!;
+        private readonly PlayerCombatViewModel _view_model;
 
-        public override void _Ready()
+        public PlayerCombatView()
         {
             var bus = new GameEventBus();
             var model = new PlayerCombatModel(bus);
             _view_model = new PlayerCombatViewModel(model, bus);
+        }
+
+        public PlayerCombatView(GameEventBus bus, PlayerCombatModel model)
+        {
+            _view_model = new PlayerCombatViewModel(model, bus);
+        }
+
+        public override void _Ready()
+        {
             _view_model.Initialize();
         }
 

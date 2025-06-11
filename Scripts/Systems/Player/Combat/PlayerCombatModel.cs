@@ -35,6 +35,7 @@ namespace Systems.Player.Combat
                 _max_health = 100f;
                 _current_health = _max_health;
                 StateManager.RegisterState("Combat", new AttackingState());
+                StateManager.RegisterState("Damaged", new DamagedState());
                 StateManager.RegisterTransition("Combat", "Damaged", () => _current_health < _max_health * 0.5f);
             }
             catch (Exception ex)

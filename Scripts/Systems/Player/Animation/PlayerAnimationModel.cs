@@ -4,6 +4,7 @@ using Systems.Player.Base;
 using Systems.Player.Events;
 using Core.Events;
 using Systems.Player.State;
+using Godot;
 
 namespace Systems.Player.Animation
 {
@@ -12,7 +13,7 @@ namespace Systems.Player.Animation
     /// </summary>
     public class PlayerAnimationModel : PlayerSystemBase
     {
-        private readonly Dictionary<string, object> _clips = new();
+        private readonly Dictionary<string, Godot.Animation> _clips = new();
         private float _transition_speed = 0.25f;
         private bool _is_playing;
         public string CurrentAnimation { get; private set; } = "Idle";
@@ -83,11 +84,11 @@ namespace Systems.Player.Animation
 
         private void LoadAnimationClips()
         {
-            _clips["Idle"] = new object();
-            _clips["Walk"] = new object();
-            _clips["Run"] = new object();
-            _clips["Jump"] = new object();
-            _clips["Attack"] = new object();
+            _clips["Idle"] = new Godot.Animation();
+            _clips["Walk"] = new Godot.Animation();
+            _clips["Run"] = new Godot.Animation();
+            _clips["Jump"] = new Godot.Animation();
+            _clips["Attack"] = new Godot.Animation();
         }
     }
 }
