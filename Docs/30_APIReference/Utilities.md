@@ -12,7 +12,7 @@ tags:
     - Validation
     - Reactive
 linked_docs:
-    - "[[EventSystem]]"
+    - "[[CoreEventSystem]]"
     - "[[ReactiveSystem]]"
 ---
 

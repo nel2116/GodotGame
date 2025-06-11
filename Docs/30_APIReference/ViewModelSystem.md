@@ -11,7 +11,7 @@ tags:
 linked_docs:
     - "[[ReactiveSystem]]"
     - "[[ReactiveProperty]]"
-    - "[[EventSystem]]"
+    - "[[CoreEventSystem]]"
     - "[[CompositeDisposable]]"
     - "[[00_index]]"
 ---

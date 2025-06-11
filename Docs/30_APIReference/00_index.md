@@ -19,7 +19,8 @@ linked_docs:
     - "[[ReactiveSystem]]"
     - "[[ViewModelSystem]]"
     - "[[ReactiveProperty]]"
-    - "[[EventSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
     - "[[CompositeDisposable]]"
 ---
 
@@ -53,7 +54,11 @@ linked_docs:
     -   値の変更通知
     -   バリデーション
     -   バッチ更新
--   [[EventSystem|イベントシステム]]
+-   [[CoreEventSystem|Core Event System]]
+    -   イベント発行・購読
+    -   型安全なイベント処理
+    -   スレッドセーフな実装
+-   [[CommonEventSystem|Common Event System]]
     -   イベント発行・購読
     -   型安全なイベント処理
     -   スレッドセーフな実装

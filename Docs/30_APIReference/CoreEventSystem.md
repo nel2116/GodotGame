@@ -1,39 +1,30 @@
 ---
-title: イベントシステム
-version: 0.1.0
+title: Core Event System API Reference
+version: 0.1
 status: draft
 updated: 2024-03-21
 tags:
     - API
-    - Events
     - Core
-    - Reactive
-linked_docs:
-    - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
-    - "[[00_index]]"
+    - Event
+    - Systems
+    - Reference
 ---
 
-# イベントシステム
+# Core Event System API Reference
 
 ## 目次
 
 1. [概要](#概要)
 2. [インターフェース](#インターフェース)
-3. [実装詳細](#実装詳細)
+3. [主要クラス](#主要クラス)
 4. [使用方法](#使用方法)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-イベントシステムは、コンポーネント間の疎結合な通信を実現するための基盤を提供します。主に以下の機能を提供します：
-
--   イベントの発行と購読
--   型安全なイベント処理
--   スレッドセーフな実装
--   リソース管理の自動化
--   非同期イベント処理のサポート
+Core Event System は、ゲーム全体で使用される基本的なイベント処理の基盤を提供するシステムです。スレッドセーフな実装と型安全なイベント処理を特徴とし、システム間の疎結合な通信を実現します。
 
 ## インターフェース
 
@@ -46,6 +37,10 @@ public interface IGameEvent
 }
 ```
 
+#### プロパティ
+
+-   `Timestamp`: イベントが発生した時刻（UTC）
+
 ### IGameEventBus
 
 ```csharp
@@ -56,7 +51,12 @@ public interface IGameEventBus
 }
 ```
 
-## 実装詳細
+#### メソッド
+
+-   `Publish<T>`: イベントを発行します
+-   `GetEventStream<T>`: イベントの購読ストリームを取得します
+
+## 主要クラス
 
 ### GameEvent
 
@@ -79,24 +79,9 @@ public class GameEventBus : IGameEventBus
 }
 ```
 
-主な特徴：
-
--   スレッドセーフな実装
-    -   `ConcurrentDictionary`による型ごとのストリーム管理
-    -   `Subject.Synchronize`による同期化
--   型安全なイベント処理
-    -   ジェネリック型による型チェック
-    -   コンパイル時の型安全性
--   効率的なメモリ管理
-    -   型ごとのストリーム分離
-    -   不要なストリームの自動解放
--   拡張性
-    -   カスタムイベントの簡単な追加
-    -   イベントフィルタリングのサポート
-
 ## 使用方法
 
-### イベントの定義
+### 1. イベントの定義
 
 ```csharp
 public class PlayerDamagedEvent : GameEvent
@@ -112,7 +97,7 @@ public class PlayerHealedEvent : GameEvent
 }
 ```
 
-### イベントの発行と購読
+### 2. イベントの発行と購読
 
 ```csharp
 // イベントバスの作成
@@ -129,7 +114,7 @@ eventBus.Publish(new PlayerDamagedEvent(10));
 subscription.Dispose();
 ```
 
-### ViewModel での使用例
+### 3. ViewModel での使用例
 
 ```csharp
 public class PlayerViewModel : ViewModelBase
@@ -166,7 +151,7 @@ public class PlayerViewModel : ViewModelBase
 2. **メモリ管理**
 
     - 購読は明示的に解除する必要があります
-    - `CompositeDisposable`を使用して複数の購読を管理することを推奨
+    - `CompositeDisposable` を使用して複数の購読を管理することを推奨
     - 循環参照に注意してください
 
 3. **パフォーマンス**
