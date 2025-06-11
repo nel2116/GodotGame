@@ -44,6 +44,14 @@ namespace Systems.Player.Animation
             UpdateAnimationState();
         }
 
+        /// <summary>
+        /// 毎フレーム更新処理
+        /// </summary>
+        public void Update()
+        {
+            UpdateAnimation();
+        }
+
         public void HandleAnimation(string animationName)
         {
             _model.PlayAnimation(animationName);
