@@ -40,7 +40,7 @@ namespace Systems.Player.Combat
                 StateManager.RegisterTransition(
                     "Combat",
                     "Damaged",
-                    () => _current_health < _max_health * HEALTH_THRESHOLD_FOR_DAMAGED_STATE);
+                    () => _current_health <= _max_health * HEALTH_THRESHOLD_FOR_DAMAGED_STATE);
             }
             catch (Exception ex)
             {
