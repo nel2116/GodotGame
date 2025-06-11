@@ -11,6 +11,7 @@ namespace Core.Events
     public class GameEventBus : IGameEventBus, IDisposable
     {
         private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
+        private bool _disposed;
 
         /// <summary>
         /// イベントを発行
@@ -39,12 +40,18 @@ namespace Core.Events
         /// </summary>
         public void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             foreach (var subject in _subjects.Values)
             {
                 subject.OnCompleted();
                 subject.Dispose();
             }
             _subjects.Clear();
+            _disposed = true;
         }
     }
 }
