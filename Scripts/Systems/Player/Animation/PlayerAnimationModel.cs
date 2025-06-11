@@ -29,6 +29,8 @@ namespace Systems.Player.Animation
                 LoadAnimationClips();
                 _is_playing = true;
                 StateManager.RegisterState("Animation", new IdleState());
+                StateManager.RegisterState("Playing", new PlayingState());
+                StateManager.RegisterState("Paused", new PausedState());
                 StateManager.RegisterTransition("Animation", "Playing", () => _is_playing);
                 StateManager.RegisterTransition("Animation", "Paused", () => !_is_playing);
             }

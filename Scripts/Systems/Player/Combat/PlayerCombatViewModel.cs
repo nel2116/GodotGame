@@ -11,27 +11,27 @@ namespace Systems.Player.Combat
     public class PlayerCombatViewModel : ViewModelBase
     {
         private readonly PlayerCombatModel _model;
-        private readonly ReactiveProperty<float> _attack_power;
-        private readonly ReactiveProperty<float> _defense_power;
-        private readonly ReactiveProperty<float> _current_health;
-        private readonly ReactiveProperty<float> _max_health;
+        private readonly ReactiveProperty<float> _attackPower;
+        private readonly ReactiveProperty<float> _defensePower;
+        private readonly ReactiveProperty<float> _currentHealth;
+        private readonly ReactiveProperty<float> _maxHealth;
 
-        public ReactiveProperty<float> AttackPower => _attack_power;
-        public ReactiveProperty<float> DefensePower => _defense_power;
-        public ReactiveProperty<float> CurrentHealth => _current_health;
-        public ReactiveProperty<float> MaxHealth => _max_health;
+        public ReactiveProperty<float> AttackPower => _attackPower;
+        public ReactiveProperty<float> DefensePower => _defensePower;
+        public ReactiveProperty<float> CurrentHealth => _currentHealth;
+        public ReactiveProperty<float> MaxHealth => _maxHealth;
 
         public PlayerCombatViewModel(PlayerCombatModel model, IGameEventBus bus)
             : base(bus)
         {
             _model = model;
-            _attack_power = new ReactiveProperty<float>().AddTo(Disposables);
-            _defense_power = new ReactiveProperty<float>().AddTo(Disposables);
-            _current_health = new ReactiveProperty<float>().AddTo(Disposables);
-            _max_health = new ReactiveProperty<float>().AddTo(Disposables);
+            _attackPower = new ReactiveProperty<float>().AddTo(Disposables);
+            _defensePower = new ReactiveProperty<float>().AddTo(Disposables);
+            _currentHealth = new ReactiveProperty<float>().AddTo(Disposables);
+            _maxHealth = new ReactiveProperty<float>().AddTo(Disposables);
 
-            _current_health.Subscribe(OnHealthChanged).AddTo(Disposables);
-            _attack_power.Subscribe(OnAttackPowerChanged).AddTo(Disposables);
+            _currentHealth.Subscribe(OnHealthChanged).AddTo(Disposables);
+            _attackPower.Subscribe(OnAttackPowerChanged).AddTo(Disposables);
         }
 
         public void Initialize()
@@ -66,10 +66,10 @@ namespace Systems.Player.Combat
 
         private void UpdateCombatState()
         {
-            _attack_power.Value = _model.AttackPower;
-            _defense_power.Value = _model.DefensePower;
-            _current_health.Value = _model.CurrentHealth;
-            _max_health.Value = _model.MaxHealth;
+            _attackPower.Value = _model.AttackPower;
+            _defensePower.Value = _model.DefensePower;
+            _currentHealth.Value = _model.CurrentHealth;
+            _maxHealth.Value = _model.MaxHealth;
         }
 
         private void OnHealthChanged(float health)
