@@ -20,9 +20,9 @@ namespace Systems.Player.Events
     public class ExperienceChangedEvent : GameEvent
     {
         public int Experience { get; }
-        public ExperienceChangedEvent(int exp)
+        public ExperienceChangedEvent(int experience)
         {
-            Experience = exp;
+            Experience = experience;
         }
     }
 

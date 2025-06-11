@@ -15,7 +15,6 @@ namespace Systems.Player.Animation
     public class PlayerAnimationModel : PlayerSystemBase
     {
         private readonly Dictionary<string, Godot.Animation> _clips = new();
-        private float _transition_speed = 0.25f;
         private bool _is_playing;
         public string CurrentAnimation { get; private set; } = "Idle";
         public float Speed { get; private set; } = 1.0f;
