@@ -17,6 +17,7 @@ namespace Systems.Player.Combat
         private float _defense_power;
         private float _max_health;
         private float _current_health;
+        private const float HEALTH_THRESHOLD_FOR_DAMAGED_STATE = 0.5f;
 
         public float AttackPower => _attack_power;
         public float DefensePower => _defense_power;
@@ -36,7 +37,10 @@ namespace Systems.Player.Combat
                 _current_health = _max_health;
                 StateManager.RegisterState("Combat", new AttackingState());
                 StateManager.RegisterState("Damaged", new DamagedState());
-                StateManager.RegisterTransition("Combat", "Damaged", () => _current_health < _max_health * 0.5f);
+                StateManager.RegisterTransition(
+                    "Combat",
+                    "Damaged",
+                    () => _current_health < _max_health * HEALTH_THRESHOLD_FOR_DAMAGED_STATE);
             }
             catch (Exception ex)
             {
