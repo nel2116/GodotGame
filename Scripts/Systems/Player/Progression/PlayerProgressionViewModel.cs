@@ -67,6 +67,14 @@ namespace Systems.Player.Progression
             UpdateProgressionState();
         }
 
+        /// <summary>
+        /// 毎フレーム更新処理
+        /// </summary>
+        public void Update()
+        {
+            UpdateProgression();
+        }
+
         private void UpdateProgressionState()
         {
             _level.Value = _model.CurrentLevel;

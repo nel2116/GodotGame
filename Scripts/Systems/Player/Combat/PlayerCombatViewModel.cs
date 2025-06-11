@@ -46,6 +46,14 @@ namespace Systems.Player.Combat
             UpdateCombatState();
         }
 
+        /// <summary>
+        /// 毎フレーム更新処理
+        /// </summary>
+        public void Update()
+        {
+            UpdateCombat();
+        }
+
         public void Attack(string actionName)
         {
             _model.Attack(actionName);
