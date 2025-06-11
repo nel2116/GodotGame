@@ -20,6 +20,7 @@ public partial class Player : CharacterBody3D
     // 初期化処理で各サブシステムを生成する
     public override void _Ready()
     {
+        base._Ready();
         _bus = new GameEventBus();
 
         var input_model = new PlayerInputModel();
@@ -48,6 +49,7 @@ public partial class Player : CharacterBody3D
     }
 
     // 毎フレーム各サブシステムを更新する
+    // delta は現在の実装では未使用
     public override void _PhysicsProcess(double delta)
     {
         _input_vm.UpdateInput();
@@ -67,5 +69,6 @@ public partial class Player : CharacterBody3D
         _animation_vm.Dispose();
         _state_vm.Dispose();
         _progression_vm.Dispose();
+        base._ExitTree();
     }
 }
