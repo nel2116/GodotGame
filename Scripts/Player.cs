@@ -54,6 +54,8 @@ public partial class Player : CharacterBody3D
         _movement_vm.UpdateMovement();
         _combat_vm.UpdateCombat();
         _state_vm.UpdateState();
+        _animation_vm.UpdateAnimation();
+        _progression_vm.UpdateProgression();
     }
 
     // ノード削除時にリソースを解放する
