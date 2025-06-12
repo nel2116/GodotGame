@@ -12,7 +12,7 @@ namespace Tests.Core.Player.Input
         public void Initialize_DefaultState_IsEnabled()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            var model = new PlayerInputModel(bus);
             var viewModel = new PlayerInputViewModel(model, bus);
             viewModel.Initialize();
             Assert.That(viewModel.IsEnabled.Value, Is.True);
@@ -22,7 +22,7 @@ namespace Tests.Core.Player.Input
         public void UpdateInput_PublishesStateEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            var model = new PlayerInputModel(bus);
             var viewModel = new PlayerInputViewModel(model, bus);
             viewModel.Initialize();
 
@@ -39,7 +39,7 @@ namespace Tests.Core.Player.Input
         public void Initialize_PublishesEnabledEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            var model = new PlayerInputModel(bus);
             InputEnabledChangedEvent? enabled = null;
             bus.GetEventStream<InputEnabledChangedEvent>().Subscribe(e => enabled = e);
 

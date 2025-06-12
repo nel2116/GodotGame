@@ -1,8 +1,8 @@
 ---
 title: プレイヤー入力システム
-version: 0.1.0
+version: 0.1.1
 status: draft
-updated: 2024-03-21
+updated: 2025-06-12
 tags:
     - API
     - Player
@@ -237,4 +237,5 @@ public class PlayerInputObserver : MonoBehaviour
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.1.1      | 2025-06-12 | PlayerInputModel のユニットテストを追加 |
 | 0.1.0      | 2024-03-21 | 初版作成 |
