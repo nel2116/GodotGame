@@ -41,24 +41,43 @@ namespace Core.Events
         /// </summary>
         public void Dispose()
         {
-            lock (_dispose_lock)
-            {
-                if (_disposed)
-                {
-                    return;
-                }
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-                foreach (var subject in _subjects.Values)
-                {
-                    subject.OnCompleted();
-                    if (subject is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                    }
-                }
-                _subjects.Clear();
-                _disposed = true;
+        /// <summary>
+        /// リソース解放処理本体
+        /// </summary>
+        /// <param name="disposing">マネージドリソースを解放する場合 true</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
             }
+
+            if (disposing)
+            {
+                lock (_dispose_lock)
+                {
+                    if (_disposed)
+                    {
+                        return;
+                    }
+
+                    foreach (var subject in _subjects.Values)
+                    {
+                        subject.OnCompleted();
+                        if (subject is IDisposable disposable)
+                        {
+                            disposable.Dispose();
+                        }
+                    }
+                    _subjects.Clear();
+                }
+            }
+
+            _disposed = true;
         }
     }
 }
