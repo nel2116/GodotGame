@@ -46,6 +46,19 @@ linked_docs:
 
 ## リアクティブプロパティ
 
+### 状態遷移図
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created
+    Created --> Subscribed: Subscribe
+    Created --> Disposed: Dispose
+    Subscribed --> ValueChanged: SetValue
+    ValueChanged --> Subscribed: NotifyComplete
+    Subscribed --> Disposed: Dispose
+    Disposed --> [*]
+```
+
 ### IReactiveProperty<T>
 
 値の変更を通知するリアクティブプロパティのインターフェースです。
@@ -83,6 +96,22 @@ public class ReactiveProperty<T> : IReactiveProperty<T>
 -   リソース解放時の適切な処理
 
 ## イベントシステム
+
+### シーケンス図
+
+```mermaid
+sequenceDiagram
+    participant Publisher
+    participant EventBus
+    participant Subscriber1
+    participant Subscriber2
+
+    Publisher->>EventBus: Publish(Event)
+    EventBus->>Subscriber1: OnNext(Event)
+    EventBus->>Subscriber2: OnNext(Event)
+    Subscriber1-->>EventBus: Complete
+    Subscriber2-->>EventBus: Complete
+```
 
 ### IGameEvent
 
@@ -168,6 +197,43 @@ public class CompositeDisposable : IDisposable
 -   一括操作のサポート
 
 ## ViewModel
+
+### クラス図
+
+```mermaid
+classDiagram
+    class ViewModelBase {
+        <<abstract>>
+        #CompositeDisposable Disposables
+        #IGameEventBus EventBus
+        #ReactiveProperty<bool> IsBusy
+        +ReactiveProperty<ViewModelState> State
+        +Initialize()
+        +Dispose()
+        #AddDisposable()
+        #SubscribeToEvent()
+        #CreateCommand()
+        #ExecuteAsync()
+    }
+
+    class ViewModelState {
+        <<enumeration>>
+        Initial
+        Active
+        Inactive
+    }
+
+    class IReactiveProperty {
+        <<interface>>
+        +Value
+        +Subscribe()
+    }
+
+    ViewModelBase --> ViewModelState
+    ViewModelBase --> IReactiveProperty
+    ViewModelBase --> CompositeDisposable
+    ViewModelBase --> IGameEventBus
+```
 
 ### ViewModelBase
 

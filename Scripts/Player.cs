@@ -28,7 +28,7 @@ public partial class Player : CharacterBody3D
 		// InputMapの設定
 		PlayerInputConfig.Initialize();
 
-		_bus = new GameEventBus();
+		_bus = GameEventBus.Instance;
 
 		try
 		{
@@ -44,7 +44,7 @@ public partial class Player : CharacterBody3D
 
 	private void InitializeViewModels()
 	{
-		var input_model = new PlayerInputModel(_bus);
+		var input_model = new PlayerInputModel();
 		_input_vm = new PlayerInputViewModel(input_model, _bus);
 		_input_vm.Initialize();
 
@@ -115,7 +115,6 @@ public partial class Player : CharacterBody3D
 		_animation_vm.Dispose();
 		_state_vm.Dispose();
 		_progression_vm.Dispose();
-		_bus.Dispose();
 		base._ExitTree();
 	}
 }

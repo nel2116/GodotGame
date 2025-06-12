@@ -12,11 +12,37 @@ namespace Core.Events
 	/// </summary>
 	public class GameEventBus : IGameEventBus, IDisposable
 	{
+		private static GameEventBus? _instance;
+		private static readonly object _instanceLock = new();
+
+		/// <summary>
+		/// シングルトンインスタンスを取得
+		/// </summary>
+		public static GameEventBus Instance
+		{
+			get
+			{
+				if (_instance == null)
+				{
+					lock (_instanceLock)
+					{
+						_instance ??= new GameEventBus();
+					}
+				}
+				return _instance;
+			}
+		}
+
 		private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
 		private readonly object _dispose_lock = new();
 		// マルチスレッド環境での可視性を保証するため volatile を使用
 		private volatile bool _disposed;
 		private readonly int _maxEventQueueSize = 1000; // イベントキューサイズの上限
+
+		/// <summary>
+		/// プライベートコンストラクタ
+		/// </summary>
+		private GameEventBus() { _disposed = false; }
 
 		/// <summary>
 		/// イベントを発行
@@ -68,7 +94,6 @@ namespace Core.Events
 					.SelectMany(events => events)
 					.TakeUntil(Observable.Create<Unit>(observer =>
 					{
-						_disposed = true;
 						observer.OnCompleted();
 						return () => { };
 					}));
@@ -80,22 +105,31 @@ namespace Core.Events
 			}
 		}
 
-                private ISubject<GameEvent> GetOrCreateSubject(Type type)
-                {
-                        return _subjects.GetOrAdd(type, _ =>
-                        {
-                                var subject = new ReplaySubject<GameEvent>(_maxEventQueueSize);
-                                return Subject.Synchronize(subject);
-                        });
-                }
+		private ISubject<GameEvent> GetOrCreateSubject(Type type)
+		{
+			return _subjects.GetOrAdd(type, _ =>
+			{
+				var subject = new ReplaySubject<GameEvent>(_maxEventQueueSize);
+				return Subject.Synchronize(subject);
+			});
+		}
 
 		/// <summary>
-		/// バスが保持するリソースを解放する
+		/// バスが保持するリソースを解放する（テスト用）
 		/// </summary>
-		public void Dispose()
+		internal void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
+		/// IDisposableの明示的実装（アプリ本体からは何もしない）
+		/// </summary>
+		void IDisposable.Dispose()
+		{
+			// アプリ本体からはDisposeできないようにする
+			// 必要なら警告ログを出してもよい
 		}
 
 		/// <summary>
@@ -144,6 +178,7 @@ namespace Core.Events
 					finally
 					{
 						_disposed = true;
+						_instance = null;
 					}
 				}
 			}

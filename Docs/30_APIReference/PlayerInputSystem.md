@@ -1,241 +1,272 @@
 ---
-title: プレイヤー入力システム
-version: 0.1.1
-status: draft
-updated: 2025-06-12
+title: Player Input System
+version: 0.2.0
+status: approved
+updated: 2024-03-24
 tags:
-    - API
     - Player
     - Input
-    - Core
-    - Reactive
-    - Event
+    - System
+    - API
 linked_docs:
     - "[[PlayerSystem]]"
     - "[[PlayerStateSystem]]"
     - "[[PlayerMovementSystem]]"
     - "[[PlayerCombatSystem]]"
     - "[[PlayerAnimationSystem]]"
-    - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
-    - "[[CoreEventSystem]]"
-    - "[[CommonEventSystem]]"
 ---
 
-# プレイヤー入力システム
+# Player Input System
 
 ## 目次
 
 1. [概要](#概要)
-2. [入力定義](#入力定義)
+2. [システム構成](#システム構成)
 3. [主要コンポーネント](#主要コンポーネント)
-4. [使用例](#使用例)
-5. [制限事項](#制限事項)
-6. [変更履歴](#変更履歴)
+4. [イベントシステム](#イベントシステム)
+5. [エラー処理](#エラー処理)
+6. [使用例とベストプラクティス](#使用例とベストプラクティス)
+7. [関連システム](#関連システム)
+8. [変更履歴](#変更履歴)
 
 ## 概要
 
-プレイヤー入力システムは、プレイヤーの入力を制御するシステムです。以下の機能を提供します：
+PlayerInputSystem は、プレイヤーの入力を管理するシステムです。MVVM パターンに基づいて実装され、以下の主要な機能を提供します：
 
--   入力検出
--   入力マッピング
--   イベント通知
--   入力状態管理
+-   入力状態の管理
+-   入力イベントの発行
+-   入力の検証
+-   入力のマッピング
+-   キー設定の管理
 
-## 入力定義
+## システム構成
 
-### InputDefinition
+### 全体構成図
 
-入力の定義を管理するクラスです。
+```mermaid
+classDiagram
+    class PlayerInputViewModel {
+        -PlayerInputModel _model
+        +ReactiveProperty<InputState> CurrentState
+        +ReactiveProperty<bool> IsEnabled
+        +Initialize()
+        +UpdateInput()
+        -OnInputStateChanged()
+        -OnEnabledChanged()
+    }
 
-```csharp
-public class InputDefinition
-{
-    public string Name { get; set; }
-    public InputType Type { get; set; }
-    public string Key { get; set; }
-    public float DeadZone { get; set; } = 0.1f;
-    public bool Invert { get; set; } = false;
-    public float Sensitivity { get; set; } = 1.0f;
-}
+    class PlayerInputModel {
+        -CompositeDisposable _disposables
+        -Dictionary<string, InputAction> _actions
+        -InputState _currentState
+        -bool _isEnabled
+        -IGameEventBus _eventBus
+        +Initialize()
+        +UpdateInput()
+        -InitializeActions()
+        -ProcessInput()
+    }
 
-public enum InputType
-{
-    Button,
-    Axis,
-    Vector2,
-    Vector3
-}
+    class InputAction {
+        +string Name
+        +InputType Type
+        +Action ExecuteAction
+        +Execute()
+    }
+
+    class InputState {
+        +Vector2 MovementInput
+        +Dictionary<string, bool> ButtonStates
+        +Update()
+    }
+
+    PlayerInputViewModel --> PlayerInputModel
+    PlayerInputModel --> InputAction
+    PlayerInputModel --> InputState
+```
+
+### 状態遷移図
+
+```mermaid
+stateDiagram-v2
+    [*] --> Disabled
+    Disabled --> Enabled: Initialize
+    Enabled --> Processing: UpdateInput
+    Processing --> Enabled: Complete
+    Enabled --> Disabled: Dispose
+    Disabled --> [*]
+```
+
+### 入力処理シーケンス
+
+```mermaid
+sequenceDiagram
+    participant ViewModel as PlayerInputViewModel
+    participant Model as PlayerInputModel
+    participant Action as InputAction
+    participant EventBus as GameEventBus
+
+    ViewModel->>Model: UpdateInput
+    Model->>Model: ProcessInput
+    Model->>Action: Execute
+    Action->>EventBus: Publish Event
+    EventBus-->>ViewModel: Notify State Change
 ```
 
 ## 主要コンポーネント
 
-### PlayerInputController
+### PlayerInputViewModel
 
-プレイヤーの入力を制御するコンポーネントです。
+入力管理のビューモデルクラスです。
+
+#### 主要プロパティ
+
+| プロパティ名 | 型                           | 説明           |
+| ------------ | ---------------------------- | -------------- |
+| CurrentState | ReactiveProperty<InputState> | 現在の入力状態 |
+| IsEnabled    | ReactiveProperty<bool>       | 入力の有効状態 |
+
+#### 主要メソッド
+
+| メソッド名  | 説明             | パラメータ | 戻り値 |
+| ----------- | ---------------- | ---------- | ------ |
+| Initialize  | システムの初期化 | なし       | void   |
+| UpdateInput | 入力の更新       | なし       | void   |
+
+### PlayerInputModel
+
+入力管理のモデルクラスです。
+
+#### 主要メソッド
+
+| メソッド名        | 説明               | パラメータ | 戻り値 |
+| ----------------- | ------------------ | ---------- | ------ |
+| Initialize        | システムの初期化   | なし       | void   |
+| UpdateInput       | 入力の更新         | なし       | void   |
+| InitializeActions | アクションの初期化 | なし       | void   |
+| ProcessInput      | 入力の処理         | なし       | void   |
+
+### InputAction
+
+入力アクションを表すクラスです。
+
+#### 主要プロパティ
+
+| プロパティ名  | 型        | 説明           |
+| ------------- | --------- | -------------- |
+| Name          | string    | アクション名   |
+| Type          | InputType | 入力タイプ     |
+| ExecuteAction | Action    | 実行アクション |
+
+## イベントシステム
+
+## エラー処理
+
+## 使用例とベストプラクティス
+
+### 基本的な実装例
 
 ```csharp
-public class PlayerInputController
-{
-    private readonly ReactiveProperty<Vector2> _movementInput;
-    private readonly ReactiveProperty<bool> _jumpInput;
-    private readonly ReactiveProperty<bool> _attackInput;
-    private readonly ReactiveProperty<bool> _defendInput;
-    private readonly Dictionary<string, InputDefinition> _inputDefinitions;
-    private readonly IGameEventBus _eventBus;
+// ビューモデルの初期化
+var viewModel = new PlayerInputViewModel(model, eventBus);
+viewModel.Initialize();
 
-    public IReactiveProperty<Vector2> MovementInput => _movementInput;
-    public IReactiveProperty<bool> JumpInput => _jumpInput;
-    public IReactiveProperty<bool> AttackInput => _attackInput;
-    public IReactiveProperty<bool> DefendInput => _defendInput;
+// 入力の監視
+viewModel.Input.Subscribe(input => {
+    // 入力が変更された時の処理
+});
 
-    public void AddInputDefinition(InputDefinition definition);
-    public void RemoveInputDefinition(string inputName);
-    public void UpdateInput();
+// 入力状態の監視
+viewModel.State.Subscribe(state => {
+    // 入力状態が変更された時の処理
+});
+```
+
+### エラー処理
+
+```csharp
+try {
+    viewModel.HandleInput();
+} catch (PlayerInputException ex) {
+    // エラー処理
+    Debug.LogError($"入力処理に失敗: {ex.Message}");
 }
 ```
 
-### PlayerInputHandler
+## 関連システム
 
-プレイヤーの入力を処理するコンポーネントです。
+### プレイヤーシステム
 
-```csharp
-public class PlayerInputHandler : MonoBehaviour
-{
-    private readonly CompositeDisposable _disposables = new();
-    private readonly PlayerInputController _inputController;
+-   [PlayerSystem](PlayerSystem.md) - プレイヤー全体の管理を担当
+    -   サブシステムの初期化と管理
+    -   イベントバスの提供
+    -   エラー処理の一元管理
 
-    private void OnEnable();
-    private void OnDisable();
-    private void Update();
-    private void OnMovementInputChanged(Vector2 newInput);
-    private void OnJumpInputChanged(bool newInput);
-    private void OnAttackInputChanged(bool newInput);
-    private void OnDefendInputChanged(bool newInput);
-}
+### 状態システム
+
+-   [PlayerStateSystem](PlayerStateSystem.md) - 入力に基づく状態変更を担当
+    -   入力の有効性検証
+    -   状態遷移の制御
+    -   状態変更イベントの発生
+
+### 移動システム
+
+-   [PlayerMovementSystem](PlayerMovementSystem.md) - 移動入力の処理を担当
+    -   移動方向の計算
+    -   移動速度の制御
+    -   移動イベントの発生
+
+### 戦闘システム
+
+-   [PlayerCombatSystem](PlayerCombatSystem.md) - 戦闘入力の処理を担当
+    -   攻撃入力の検出
+    -   防御入力の検出
+    -   戦闘イベントの発生
+
+### アニメーションシステム
+
+-   [PlayerAnimationSystem](PlayerAnimationSystem.md) - 入力に応じたアニメーション制御を担当
+    -   入力状態に応じたアニメーション選択
+    -   アニメーション遷移の制御
+    -   アニメーションイベントの発生
+
+### システム間の連携
+
+1. **入力 → 状態**
+
+    - 入力システムが状態変更をトリガー
+    - 状態システムが入力の有効性を検証
+
+2. **入力 → 移動**
+
+    - 入力システムが移動方向と速度を計算
+    - 移動システムが入力に基づいて移動を実行
+
+3. **入力 → 戦闘**
+
+    - 入力システムが戦闘アクションを検出
+    - 戦闘システムが入力に基づいて戦闘を実行
+
+4. **入力 → アニメーション**
+    - 入力システムがアニメーション変更をトリガー
+    - アニメーションシステムが入力に応じたアニメーションを再生
+
+### イベントフロー
+
+```mermaid
+graph TD
+    Input[入力システム] -->|入力イベント| State[状態システム]
+    Input -->|移動入力| Movement[移動システム]
+    Input -->|戦闘入力| Combat[戦闘システム]
+    Input -->|アニメーション入力| Animation[アニメーションシステム]
+    State -->|状態変更イベント| Movement
+    State -->|状態変更イベント| Combat
+    State -->|状態変更イベント| Animation
 ```
-
-## 使用例
-
-### 入力の制御
-
-```csharp
-public class PlayerInputManager : MonoBehaviour
-{
-    [SerializeField] private PlayerInputController _inputController;
-
-    private void Start()
-    {
-        // 移動入力の定義
-        var movementInput = new InputDefinition
-        {
-            Name = "Movement",
-            Type = InputType.Vector2,
-            Key = "Horizontal,Vertical",
-            DeadZone = 0.1f,
-            Sensitivity = 1.0f
-        };
-        _inputController.AddInputDefinition(movementInput);
-
-        // ジャンプ入力の定義
-        var jumpInput = new InputDefinition
-        {
-            Name = "Jump",
-            Type = InputType.Button,
-            Key = "Space",
-            DeadZone = 0.0f
-        };
-        _inputController.AddInputDefinition(jumpInput);
-
-        // 攻撃入力の定義
-        var attackInput = new InputDefinition
-        {
-            Name = "Attack",
-            Type = InputType.Button,
-            Key = "Mouse0",
-            DeadZone = 0.0f
-        };
-        _inputController.AddInputDefinition(attackInput);
-
-        // 防御入力の定義
-        var defendInput = new InputDefinition
-        {
-            Name = "Defend",
-            Type = InputType.Button,
-            Key = "Mouse1",
-            DeadZone = 0.0f
-        };
-        _inputController.AddInputDefinition(defendInput);
-    }
-
-    private void Update()
-    {
-        _inputController.UpdateInput();
-    }
-}
-```
-
-### 入力状態の監視
-
-```csharp
-public class PlayerInputObserver : MonoBehaviour
-{
-    [SerializeField] private PlayerInputController _inputController;
-
-    private void OnEnable()
-    {
-        _inputController.MovementInput
-            .Subscribe(OnMovementInputChanged)
-            .AddTo(_disposables);
-
-        _inputController.JumpInput
-            .Subscribe(OnJumpInputChanged)
-            .AddTo(_disposables);
-
-        _inputController.AttackInput
-            .Subscribe(OnAttackInputChanged)
-            .AddTo(_disposables);
-
-        _inputController.DefendInput
-            .Subscribe(OnDefendInputChanged)
-            .AddTo(_disposables);
-    }
-
-    private void OnMovementInputChanged(Vector2 newInput)
-    {
-        Debug.Log($"Player movement input changed to: {newInput}");
-    }
-
-    private void OnJumpInputChanged(bool newInput)
-    {
-        Debug.Log($"Player jump input changed to: {newInput}");
-    }
-
-    private void OnAttackInputChanged(bool newInput)
-    {
-        Debug.Log($"Player attack input changed to: {newInput}");
-    }
-
-    private void OnDefendInputChanged(bool newInput)
-    {
-        Debug.Log($"Player defend input changed to: {newInput}");
-    }
-}
-```
-
-## 制限事項
-
--   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
--   リソースの解放は適切なタイミングで行ってください
--   イベントの購読は必要最小限に抑えてください
--   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
--   入力定義は、必ず`InputDefinition`を通じて設定してください
--   入力制御は、必ず`PlayerInputController`を通じて行ってください
--   入力処理は、必ず`PlayerInputHandler`を通じて行ってください
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.1      | 2025-06-12 | PlayerInputModel のユニットテストを追加 |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                                                                                     |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-24 | システム間の相互参照を追加<br>- 各サブシステムとの関連性を明確化<br>- イベントフロー図を追加 |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                     |

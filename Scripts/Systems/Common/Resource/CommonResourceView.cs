@@ -12,7 +12,7 @@ namespace Systems.Common.Resource
 
         public override void _Ready()
         {
-            var bus = new GameEventBus();
+            var bus = GameEventBus.Instance;
             var model = new CommonResourceModel();
             _view_model = new CommonResourceViewModel(model, bus);
             _view_model.Initialize();

@@ -11,7 +11,7 @@ namespace Systems.Common.Movement
         private readonly GameEventBus _bus;
         private CommonMovementViewModel _view_model = default!;
 
-        public CommonMovementView() : this(new GameEventBus())
+        public CommonMovementView() : this(GameEventBus.Instance)
         {
         }
 

@@ -1,212 +1,424 @@
 ---
-title: プレイヤー戦闘システム
-version: 0.1.0
-status: draft
-updated: 2024-03-21
+title: Player Combat System
+version: 0.2.0
+status: approved
+updated: 2024-03-24
 tags:
-    - API
     - Player
     - Combat
-    - Core
-    - Reactive
-    - Event
+    - System
+    - API
 linked_docs:
     - "[[PlayerSystem]]"
+    - "[[PlayerInputSystem]]"
     - "[[PlayerStateSystem]]"
-    - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
-    - "[[CoreEventSystem]]"
-    - "[[CommonEventSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerAnimationSystem]]"
 ---
 
-# プレイヤー戦闘システム
+# Player Combat System
 
 ## 目次
 
 1. [概要](#概要)
-2. [戦闘パラメータ](#戦闘パラメータ)
+2. [システム構成](#システム構成)
 3. [主要コンポーネント](#主要コンポーネント)
-4. [使用例](#使用例)
-5. [制限事項](#制限事項)
-6. [変更履歴](#変更履歴)
+4. [イベントシステム](#イベントシステム)
+5. [エラー処理](#エラー処理)
+6. [使用例とベストプラクティス](#使用例とベストプラクティス)
+7. [関連システム](#関連システム)
+8. [変更履歴](#変更履歴)
 
 ## 概要
 
-プレイヤー戦闘システムは、プレイヤーの戦闘を制御するシステムです。以下の機能を提供します：
+PlayerCombatSystem は、プレイヤーの戦闘関連の機能を管理するシステムです。MVVM パターンに基づいて実装され、以下の主要な機能を提供します：
 
+-   戦闘状態の管理
 -   攻撃処理
 -   ダメージ計算
--   スキル管理
--   イベント通知
+-   戦闘イベントの発行
+-   戦闘アニメーション制御
 
-## 戦闘パラメータ
+## システム構成
 
-### CombatParameters
+### 全体構成図
 
-戦闘に関するパラメータを定義するクラスです。
+```mermaid
+classDiagram
+    class PlayerCombatViewModel {
+        -PlayerCombatModel _model
+        -ReactiveProperty<CombatState> _state
+        -ReactiveProperty<float> _health
+        -ReactiveProperty<float> _stamina
+        +Initialize()
+        +UpdateCombat()
+        +HandleAttack()
+        -OnStateChanged()
+        -OnHealthChanged()
+        -OnStaminaChanged()
+    }
 
-```csharp
-public class CombatParameters
-{
-    public int MaxHealth { get; set; } = 100;
-    public int MaxMana { get; set; } = 100;
-    public float AttackPower { get; set; } = 10f;
-    public float DefensePower { get; set; } = 5f;
-    public float CriticalRate { get; set; } = 0.1f;
-    public float CriticalDamage { get; set; } = 1.5f;
-}
+    class PlayerCombatModel {
+        -IGameEventBus _eventBus
+        -CombatState _state
+        -float _health
+        -float _stamina
+        +Initialize()
+        +Update()
+        +ProcessAttack()
+        -UpdateCombatState()
+    }
+
+    class IUpdatable {
+        <<interface>>
+        +Update()
+    }
+
+    PlayerCombatViewModel --> PlayerCombatModel
+    PlayerCombatViewModel ..|> IUpdatable
+```
+
+### 戦闘状態遷移図
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Attacking: Attack
+    Idle --> Blocking: Block
+    Idle --> Dodging: Dodge
+    Attacking --> Idle: Complete
+    Attacking --> Blocking: Block
+    Blocking --> Idle: Release
+    Blocking --> Attacking: Attack
+    Dodging --> Idle: Complete
+```
+
+### 戦闘処理シーケンス
+
+```mermaid
+sequenceDiagram
+    participant ViewModel as PlayerCombatViewModel
+    participant Model as PlayerCombatModel
+    participant EventBus as GameEventBus
+
+    ViewModel->>Model: ProcessAttack
+    Model->>Model: UpdateCombatState
+    Model->>EventBus: Publish CombatStateChanged
+    EventBus-->>ViewModel: Notify State Change
 ```
 
 ## 主要コンポーネント
 
-### PlayerCombatController
+### PlayerCombatViewModel
 
-プレイヤーの戦闘を制御するコンポーネントです。
+戦闘管理のビューモデルクラスです。
+
+#### 主要プロパティ
+
+| プロパティ名 | 型                            | 説明       |
+| ------------ | ----------------------------- | ---------- |
+| State        | ReactiveProperty<CombatState> | 戦闘状態   |
+| Health       | ReactiveProperty<float>       | 体力値     |
+| Stamina      | ReactiveProperty<float>       | スタミナ値 |
+
+#### 主要メソッド
+
+| メソッド名   | 説明             | パラメータ | 戻り値 |
+| ------------ | ---------------- | ---------- | ------ |
+| Initialize   | システムの初期化 | なし       | void   |
+| UpdateCombat | 戦闘状態の更新   | なし       | void   |
+| HandleAttack | 攻撃処理         | なし       | void   |
+
+### PlayerCombatModel
+
+戦闘管理のモデルクラスです。
+
+#### 主要メソッド
+
+| メソッド名        | 説明             | パラメータ | 戻り値 |
+| ----------------- | ---------------- | ---------- | ------ |
+| Initialize        | システムの初期化 | なし       | void   |
+| Update            | 状態の更新       | なし       | void   |
+| ProcessAttack     | 攻撃処理         | なし       | void   |
+| UpdateCombatState | 状態の更新       | なし       | void   |
+
+## イベントシステム
+
+### 戦闘状態変更イベント
 
 ```csharp
-public class PlayerCombatController
+// 戦闘状態変更イベントの購読
+eventBus.GetEventStream<CombatStateChangedEvent>()
+    .Subscribe(evt => {
+        // 戦闘状態変更イベントの処理
+    })
+    .AddTo(disposables);
+```
+
+## エラー処理
+
+### 戦闘状態の変更は必ず State プロパティを通して行う必要があります
+
+### 攻撃処理は必ず HandleAttack メソッドを通して行う必要があります
+
+### 戦闘状態の更新は必ず UpdateCombat メソッドを通して行う必要があります
+
+### イベントの購読は必ず Disposables に追加する必要があります
+
+## 使用例とベストプラクティス
+
+### 戦闘状態の定義
+
+```csharp
+// 戦闘状態の定義
+public enum CombatState
 {
-    private readonly ReactiveProperty<int> _health;
-    private readonly ReactiveProperty<int> _mana;
-    private readonly ReactiveProperty<float> _attackPower;
-    private readonly ReactiveProperty<float> _defensePower;
-    private readonly CombatParameters _parameters;
-    private readonly IGameEventBus _eventBus;
+    Idle,
+    Attacking,
+    Blocking,
+    Dodging,
+    Stunned,
+    Dead
+}
 
-    public IReactiveProperty<int> Health => _health;
-    public IReactiveProperty<int> Mana => _mana;
-    public IReactiveProperty<float> AttackPower => _attackPower;
-    public IReactiveProperty<float> DefensePower => _defensePower;
-
-    public void TakeDamage(int damage);
-    public void Heal(int amount);
-    public void UseMana(int amount);
-    public void RestoreMana(int amount);
-    public void Attack(IDamageable target);
-    public void UseSkill(Skill skill, IDamageable target);
+// 戦闘パラメータの定義
+public class CombatParameters
+{
+    public static readonly float BaseAttackDamage = 10f;
+    public static readonly float BaseDefense = 5f;
+    public static readonly float BaseStamina = 100f;
+    public static readonly float StaminaRegenRate = 5f;
+    public static readonly float AttackStaminaCost = 20f;
+    public static readonly float BlockStaminaCost = 10f;
+    public static readonly float DodgeStaminaCost = 30f;
 }
 ```
 
-### PlayerCombatHandler
-
-プレイヤーの戦闘を処理するコンポーネントです。
+### 戦闘システムの初期化
 
 ```csharp
-public class PlayerCombatHandler : MonoBehaviour
-{
-    private readonly CompositeDisposable _disposables = new();
-    private readonly PlayerCombatController _combatController;
+// 戦闘モデルの作成
+var combatModel = new PlayerCombatModel(eventBus);
 
-    private void OnEnable();
-    private void OnDisable();
-    private void Update();
-    private void OnHealthChanged(int newHealth);
-    private void OnManaChanged(int newMana);
-    private void OnAttackPowerChanged(float newAttackPower);
-    private void OnDefensePowerChanged(float newDefensePower);
-}
-```
+// 戦闘ビューモデルの作成
+var combatViewModel = new PlayerCombatViewModel(combatModel, eventBus);
 
-## 使用例
+// 戦闘パラメータの設定
+combatViewModel.SetBaseStats(
+    CombatParameters.BaseAttackDamage,
+    CombatParameters.BaseDefense,
+    CombatParameters.BaseStamina
+);
 
-### 戦闘の制御
-
-```csharp
-public class PlayerCombatInput : MonoBehaviour
-{
-    [SerializeField] private PlayerCombatController _combatController;
-
-    private void Update()
-    {
-        // 通常攻撃
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            var target = GetTarget();
-            if (target != null)
-            {
-                _combatController.Attack(target);
-            }
-        }
-
-        // スキル使用
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            var target = GetTarget();
-            if (target != null)
-            {
-                _combatController.UseSkill(Skill.Fireball, target);
-            }
-        }
-    }
-
-    private IDamageable GetTarget()
-    {
-        // ターゲット取得の実装
-        return null;
-    }
-}
+// システムの初期化
+combatViewModel.Initialize();
 ```
 
 ### 戦闘状態の監視
 
 ```csharp
-public class PlayerCombatObserver : MonoBehaviour
-{
-    [SerializeField] private PlayerCombatController _combatController;
+// 現在の戦闘状態の監視
+combatViewModel.State
+    .Subscribe(state => {
+        switch (state)
+        {
+            case CombatState.Idle:
+                Debug.Log("Player is idle");
+                break;
+            case CombatState.Attacking:
+                Debug.Log("Player is attacking");
+                break;
+            case CombatState.Blocking:
+                Debug.Log("Player is blocking");
+                break;
+            case CombatState.Dodging:
+                Debug.Log("Player is dodging");
+                break;
+            case CombatState.Stunned:
+                Debug.Log("Player is stunned");
+                break;
+            case CombatState.Dead:
+                Debug.Log("Player is dead");
+                break;
+        }
+    })
+    .AddTo(_disposables);
 
-    private void OnEnable()
-    {
-        _combatController.Health
-            .Subscribe(OnHealthChanged)
-            .AddTo(_disposables);
+// 体力値の監視
+combatViewModel.Health
+    .Subscribe(health => {
+        Debug.Log($"Player health: {health}");
+    })
+    .AddTo(_disposables);
 
-        _combatController.Mana
-            .Subscribe(OnManaChanged)
-            .AddTo(_disposables);
-
-        _combatController.AttackPower
-            .Subscribe(OnAttackPowerChanged)
-            .AddTo(_disposables);
-
-        _combatController.DefensePower
-            .Subscribe(OnDefensePowerChanged)
-            .AddTo(_disposables);
-    }
-
-    private void OnHealthChanged(int newHealth)
-    {
-        Debug.Log($"Player health changed to: {newHealth}");
-    }
-
-    private void OnManaChanged(int newMana)
-    {
-        Debug.Log($"Player mana changed to: {newMana}");
-    }
-
-    private void OnAttackPowerChanged(float newAttackPower)
-    {
-        Debug.Log($"Player attack power changed to: {newAttackPower}");
-    }
-
-    private void OnDefensePowerChanged(float newDefensePower)
-    {
-        Debug.Log($"Player defense power changed to: {newDefensePower}");
-    }
-}
+// スタミナ値の監視
+combatViewModel.Stamina
+    .Subscribe(stamina => {
+        Debug.Log($"Player stamina: {stamina}");
+    })
+    .AddTo(_disposables);
 ```
 
-## 制限事項
+### 戦闘イベントの処理
 
--   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
--   リソースの解放は適切なタイミングで行ってください
--   イベントの購読は必要最小限に抑えてください
--   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
--   戦闘パラメータは、必ず`CombatParameters`を通じて設定してください
--   戦闘制御は、必ず`PlayerCombatController`を通じて行ってください
--   戦闘処理は、必ず`PlayerCombatHandler`を通じて行ってください
+```csharp
+// 戦闘状態変更イベントの処理
+eventBus.GetEventStream<CombatStateChangedEvent>()
+    .Subscribe(evt => {
+        Debug.Log($"Combat state changed from {evt.PreviousState} to {evt.NewState}");
+
+        // 状態に応じた処理
+        switch (evt.NewState)
+        {
+            case CombatState.Attacking:
+                // 攻撃開始時の処理
+                combatViewModel.Stamina.Value -= CombatParameters.AttackStaminaCost;
+                break;
+            case CombatState.Blocking:
+                // 防御開始時の処理
+                combatViewModel.Stamina.Value -= CombatParameters.BlockStaminaCost;
+                break;
+            case CombatState.Dodging:
+                // 回避開始時の処理
+                combatViewModel.Stamina.Value -= CombatParameters.DodgeStaminaCost;
+                break;
+            case CombatState.Stunned:
+                // スタン開始時の処理
+                break;
+            case CombatState.Dead:
+                // 死亡時の処理
+                break;
+        }
+    })
+    .AddTo(_disposables);
+
+// ダメージイベントの処理
+eventBus.GetEventStream<DamageEvent>()
+    .Subscribe(evt => {
+        Debug.Log($"Player took {evt.Damage} damage");
+
+        // ダメージ計算
+        var actualDamage = Mathf.Max(0, evt.Damage - CombatParameters.BaseDefense);
+        combatViewModel.Health.Value -= actualDamage;
+
+        // 死亡判定
+        if (combatViewModel.Health.Value <= 0)
+        {
+            combatViewModel.State.Value = CombatState.Dead;
+        }
+    })
+    .AddTo(_disposables);
+```
+
+### ベストプラクティス
+
+1. **戦闘状態の定義**
+
+    - 状態は明確な目的を持つ
+    - 状態の遷移条件は明確に定義する
+    - 状態の数は必要最小限に抑える
+
+2. **戦闘パラメータの管理**
+
+    - パラメータは適切な範囲に設定する
+    - パラメータの変更は一貫性を保つ
+    - パラメータのバランスは適切に調整する
+
+3. **イベントの購読**
+
+    - イベントの購読は必ず`CompositeDisposable`に追加する
+    - 不要になったイベントの購読は適切に解除する
+    - イベントハンドラー内での例外は適切に処理する
+
+4. **パフォーマンス**
+
+    - 不要な状態の更新を避ける
+    - ダメージ計算は効率的に行う
+    - リソースの使用は適切に管理する
+
+5. **エラー処理**
+
+    - 戦闘状態の遷移失敗は適切に処理する
+    - ダメージ計算中の例外は適切に処理する
+    - エラー状態の回復処理を実装する
+
+6. **テスト容易性**
+    - 戦闘状態はテスト可能な形で実装する
+    - ダメージ計算は単体テスト可能な形で実装する
+    - 戦闘パラメータはモック可能な形で実装する
+
+## 関連システム
+
+### プレイヤーシステム
+
+-   [PlayerSystem](PlayerSystem.md) - プレイヤー全体の管理を担当
+    -   サブシステムの初期化と管理
+    -   イベントバスの提供
+    -   エラー処理の一元管理
+
+### 入力システム
+
+-   [PlayerInputSystem](PlayerInputSystem.md) - 戦闘入力の処理を担当
+    -   攻撃入力の検出
+    -   防御入力の検出
+    -   戦闘入力イベントの発生
+
+### 状態システム
+
+-   [PlayerStateSystem](PlayerStateSystem.md) - 戦闘状態の管理を担当
+    -   戦闘可能状態の判定
+    -   状態遷移の制御
+    -   状態変更イベントの発生
+
+### 移動システム
+
+-   [PlayerMovementSystem](PlayerMovementSystem.md) - 戦闘中の移動制御を担当
+    -   戦闘中の移動制限
+    -   移動速度の調整
+    -   移動イベントの発生
+
+### アニメーションシステム
+
+-   [PlayerAnimationSystem](PlayerAnimationSystem.md) - 戦闘アニメーションの制御を担当
+    -   攻撃アニメーションの再生
+    -   防御アニメーションの再生
+    -   アニメーションイベントの発生
+
+### システム間の連携
+
+1. **戦闘 → 入力**
+
+    - 戦闘システムが入力の有効性を検証
+    - 入力システムが戦闘に必要な入力情報を提供
+
+2. **戦闘 → 状態**
+
+    - 戦闘システムが戦闘状態を通知
+    - 状態システムが戦闘状態に応じた状態遷移を制御
+
+3. **戦闘 → 移動**
+
+    - 戦闘システムが戦闘中の移動制限を通知
+    - 移動システムが戦闘状態に応じた移動制御を実行
+
+4. **戦闘 → アニメーション**
+    - 戦闘システムが戦闘状態を通知
+    - アニメーションシステムが戦闘状態に応じたアニメーションを再生
+
+### イベントフロー
+
+```mermaid
+graph TD
+    Combat[戦闘システム] -->|戦闘状態イベント| State[状態システム]
+    Combat -->|戦闘完了イベント| Animation[アニメーションシステム]
+    Input[入力システム] -->|戦闘入力| Combat
+    State -->|状態変更イベント| Combat
+    Movement[移動システム] -->|移動状態イベント| Combat
+```
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                                                                                     |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-24 | システム間の相互参照を追加<br>- 各サブシステムとの関連性を明確化<br>- イベントフロー図を追加 |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                     |

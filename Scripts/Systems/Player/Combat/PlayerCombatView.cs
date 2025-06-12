@@ -12,7 +12,7 @@ namespace Systems.Player.Combat
 
         public PlayerCombatView()
         {
-            var bus = new GameEventBus();
+            var bus = GameEventBus.Instance;
             var model = new PlayerCombatModel(bus);
             _view_model = new PlayerCombatViewModel(model, bus);
         }
@@ -24,6 +24,7 @@ namespace Systems.Player.Combat
 
         public override void _Ready()
         {
+            var bus = GameEventBus.Instance;
             _view_model.Initialize();
         }
 

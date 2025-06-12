@@ -1,193 +1,255 @@
 ---
-title: プレイヤー移動システム
-version: 0.1.0
-status: draft
-updated: 2024-03-21
+title: Player Movement System
+version: 0.2.0
+status: approved
+updated: 2024-03-24
 tags:
-    - API
     - Player
     - Movement
-    - Core
-    - Reactive
-    - Event
+    - System
+    - API
 linked_docs:
     - "[[PlayerSystem]]"
+    - "[[PlayerInputSystem]]"
     - "[[PlayerStateSystem]]"
-    - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
-    - "[[CoreEventSystem]]"
-    - "[[CommonEventSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[PlayerAnimationSystem]]"
 ---
 
-# プレイヤー移動システム
+# Player Movement System
 
 ## 目次
 
 1. [概要](#概要)
-2. [移動パラメータ](#移動パラメータ)
+2. [システム構成](#システム構成)
 3. [主要コンポーネント](#主要コンポーネント)
-4. [使用例](#使用例)
-5. [制限事項](#制限事項)
-6. [変更履歴](#変更履歴)
+4. [イベントシステム](#イベントシステム)
+5. [エラー処理](#エラー処理)
+6. [使用例とベストプラクティス](#使用例とベストプラクティス)
+7. [関連システム](#関連システム)
+8. [変更履歴](#変更履歴)
 
 ## 概要
 
-プレイヤー移動システムは、プレイヤーの移動を制御するシステムです。以下の機能を提供します：
+PlayerMovementSystem は、プレイヤーの移動関連の機能を管理するシステムです。MVVM パターンに基づいて実装され、以下の主要な機能を提供します：
 
--   移動制御
--   衝突判定
--   アニメーション連携
--   イベント通知
+-   移動状態の管理
+-   移動速度の制御
+-   移動方向の制御
+-   移動イベントの発行
+-   移動アニメーション制御
 
-## 移動パラメータ
+## システム構成
 
-### MovementParameters
+### 全体構成図
 
-移動に関するパラメータを定義するクラスです。
+```mermaid
+classDiagram
+    class PlayerMovementViewModel {
+        -PlayerMovementModel _model
+        -ReactiveProperty<MovementState> _state
+        -ReactiveProperty<Vector3> _velocity
+        -ReactiveProperty<float> _speed
+        +Initialize()
+        +UpdateMovement()
+        +HandleMovement()
+        -OnStateChanged()
+        -OnVelocityChanged()
+        -OnSpeedChanged()
+    }
 
-```csharp
-public class MovementParameters
-{
-    public float WalkSpeed { get; set; } = 5f;
-    public float RunSpeed { get; set; } = 8f;
-    public float JumpForce { get; set; } = 5f;
-    public float Gravity { get; set; } = 9.81f;
-    public float GroundCheckDistance { get; set; } = 0.1f;
-    public LayerMask GroundLayer { get; set; }
-}
+    class PlayerMovementModel {
+        -IGameEventBus _eventBus
+        -MovementState _state
+        -Vector3 _velocity
+        -float _speed
+        +Initialize()
+        +Update()
+        +ProcessMovement()
+        -UpdateMovementState()
+    }
+
+    class IUpdatable {
+        <<interface>>
+        +Update()
+    }
+
+    PlayerMovementViewModel --> PlayerMovementModel
+    PlayerMovementViewModel ..|> IUpdatable
+```
+
+### 移動状態遷移図
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Walking: Move
+    Idle --> Running: Run
+    Idle --> Jumping: Jump
+    Walking --> Idle: Stop
+    Walking --> Running: Run
+    Running --> Walking: Walk
+    Running --> Idle: Stop
+    Jumping --> Idle: Land
+```
+
+### 移動処理シーケンス
+
+```mermaid
+sequenceDiagram
+    participant ViewModel as PlayerMovementViewModel
+    participant Model as PlayerMovementModel
+    participant EventBus as GameEventBus
+
+    ViewModel->>Model: ProcessMovement
+    Model->>Model: UpdateMovementState
+    Model->>EventBus: Publish MovementStateChanged
+    EventBus-->>ViewModel: Notify State Change
 ```
 
 ## 主要コンポーネント
 
-### PlayerMovementController
+### PlayerMovementViewModel
 
-プレイヤーの移動を制御するコンポーネントです。
+移動管理のビューモデルクラスです。
+
+#### 主要プロパティ
+
+| プロパティ名 | 型                              | 説明             |
+| ------------ | ------------------------------- | ---------------- |
+| State        | ReactiveProperty<MovementState> | 移動状態         |
+| Velocity     | ReactiveProperty<Vector3>       | 移動速度ベクトル |
+| Speed        | ReactiveProperty<float>         | 移動速度         |
+
+#### 主要メソッド
+
+| メソッド名     | 説明             | パラメータ | 戻り値 |
+| -------------- | ---------------- | ---------- | ------ |
+| Initialize     | システムの初期化 | なし       | void   |
+| UpdateMovement | 移動状態の更新   | なし       | void   |
+| HandleMovement | 移動処理         | なし       | void   |
+
+### PlayerMovementModel
+
+移動管理のモデルクラスです。
+
+#### 主要メソッド
+
+| メソッド名          | 説明             | パラメータ | 戻り値 |
+| ------------------- | ---------------- | ---------- | ------ |
+| Initialize          | システムの初期化 | なし       | void   |
+| Update              | 状態の更新       | なし       | void   |
+| ProcessMovement     | 移動処理         | なし       | void   |
+| UpdateMovementState | 状態の更新       | なし       | void   |
+
+## 使用例とベストプラクティス
+
+### 基本的な実装例
 
 ```csharp
-public class PlayerMovementController
-{
-    private readonly ReactiveProperty<Vector3> _position;
-    private readonly ReactiveProperty<Vector3> _velocity;
-    private readonly ReactiveProperty<bool> _isGrounded;
-    private readonly MovementParameters _parameters;
-    private readonly IGameEventBus _eventBus;
+// ビューモデルの初期化
+var viewModel = new PlayerMovementViewModel(model, eventBus);
+viewModel.Initialize();
 
-    public IReactiveProperty<Vector3> Position => _position;
-    public IReactiveProperty<Vector3> Velocity => _velocity;
-    public IReactiveProperty<bool> IsGrounded => _isGrounded;
+// 移動の監視
+viewModel.Movement.Subscribe(movement => {
+    // 移動が変更された時の処理
+});
 
-    public void Move(Vector3 direction);
-    public void Stop();
-    public void Jump();
-    public void Update();
-}
+// 移動の実行
+viewModel.Move(new Vector2(1, 0));
 ```
 
-### PlayerMovementHandler
-
-プレイヤーの移動を処理するコンポーネントです。
+### エラー処理
 
 ```csharp
-public class PlayerMovementHandler : MonoBehaviour
-{
-    private readonly CompositeDisposable _disposables = new();
-    private readonly PlayerMovementController _movementController;
-
-    private void OnEnable();
-    private void OnDisable();
-    private void Update();
-    private void OnPositionChanged(Vector3 newPosition);
-    private void OnVelocityChanged(Vector3 newVelocity);
-    private void OnGroundedChanged(bool isGrounded);
-}
-```
-
-## 使用例
-
-### 移動の制御
-
-```csharp
-public class PlayerMovementInput : MonoBehaviour
-{
-    [SerializeField] private PlayerMovementController _movementController;
-
-    private void Update()
-    {
-        // 移動入力の取得
-        var horizontal = Input.GetAxisRaw("Horizontal");
-        var vertical = Input.GetAxisRaw("Vertical");
-        var direction = new Vector3(horizontal, 0, vertical).normalized;
-
-        // 移動の実行
-        if (direction != Vector3.zero)
-        {
-            _movementController.Move(direction);
-        }
-        else
-        {
-            _movementController.Stop();
-        }
-
-        // ジャンプの実行
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _movementController.Jump();
-        }
-    }
-}
-```
-
-### 移動状態の監視
-
-```csharp
-public class PlayerMovementObserver : MonoBehaviour
-{
-    [SerializeField] private PlayerMovementController _movementController;
-
-    private void OnEnable()
-    {
-        _movementController.Position
-            .Subscribe(OnPositionChanged)
-            .AddTo(_disposables);
-
-        _movementController.Velocity
-            .Subscribe(OnVelocityChanged)
-            .AddTo(_disposables);
-
-        _movementController.IsGrounded
-            .Subscribe(OnGroundedChanged)
-            .AddTo(_disposables);
-    }
-
-    private void OnPositionChanged(Vector3 newPosition)
-    {
-        Debug.Log($"Player position changed to: {newPosition}");
-    }
-
-    private void OnVelocityChanged(Vector3 newVelocity)
-    {
-        Debug.Log($"Player velocity changed to: {newVelocity}");
-    }
-
-    private void OnGroundedChanged(bool isGrounded)
-    {
-        Debug.Log($"Player grounded state changed to: {isGrounded}");
-    }
+try {
+    viewModel.Move(new Vector2(1, 0));
+} catch (PlayerMovementException ex) {
+    // エラー処理
+    Debug.LogError($"移動に失敗: {ex.Message}");
 }
 ```
 
 ## 制限事項
 
--   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
--   リソースの解放は適切なタイミングで行ってください
--   イベントの購読は必要最小限に抑えてください
--   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
--   移動パラメータは、必ず`MovementParameters`を通じて設定してください
--   移動制御は、必ず`PlayerMovementController`を通じて行ってください
--   移動処理は、必ず`PlayerMovementHandler`を通じて行ってください
+1. 移動状態の変更は必ず State プロパティを通して行う必要があります
+2. 移動処理は必ず HandleMovement メソッドを通して行う必要があります
+3. 移動状態の更新は必ず UpdateMovement メソッドを通して行う必要があります
+4. イベントの購読は必ず Disposables に追加する必要があります
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 更新日     | 変更内容                                                                                     |
+| ---------- | ---------- | -------------------------------------------------------------------------------------------- |
+| 0.2.0      | 2024-03-24 | システム間の相互参照を追加<br>- 各サブシステムとの関連性を明確化<br>- イベントフロー図を追加 |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                     |
+
+## 関連システム
+
+### プレイヤーシステム
+
+-   [PlayerSystem](PlayerSystem.md) - プレイヤー全体の管理を担当
+    -   サブシステムの初期化と管理
+    -   イベントバスの提供
+    -   エラー処理の一元管理
+
+### 入力システム
+
+-   [PlayerInputSystem](PlayerInputSystem.md) - 移動入力の処理を担当
+    -   移動方向の入力検出
+    -   移動速度の入力検出
+    -   移動入力イベントの発生
+
+### 状態システム
+
+-   [PlayerStateSystem](PlayerStateSystem.md) - 移動状態の管理を担当
+    -   移動可能状態の判定
+    -   状態遷移の制御
+    -   状態変更イベントの発生
+
+### 戦闘システム
+
+-   [PlayerCombatSystem](PlayerCombatSystem.md) - 移動中の戦闘制御を担当
+    -   移動中の攻撃制御
+    -   移動中の防御制御
+    -   戦闘イベントの発生
+
+### アニメーションシステム
+
+-   [PlayerAnimationSystem](PlayerAnimationSystem.md) - 移動アニメーションの制御を担当
+    -   移動アニメーションの再生
+    -   アニメーション遷移の制御
+    -   アニメーションイベントの発生
+
+### システム間の連携
+
+1. **移動 → 入力**
+
+    - 移動システムが入力の有効性を検証
+    - 入力システムが移動に必要な入力情報を提供
+
+2. **移動 → 状態**
+
+    - 移動システムが移動状態を通知
+    - 状態システムが移動状態に応じた状態遷移を制御
+
+3. **移動 → 戦闘**
+
+    - 移動システムが移動中の戦闘制限を通知
+    - 戦闘システムが移動状態に応じた戦闘制御を実行
+
+4. **移動 → アニメーション**
+    - 移動システムが移動状態を通知
+    - アニメーションシステムが移動状態に応じたアニメーションを再生
+
+### イベントフロー
+
+```mermaid
+graph TD
+    Movement[移動システム] -->|移動状態イベント| State[状態システム]
+    Movement -->|移動完了イベント| Animation[アニメーションシステム]
+    Input[入力システム] -->|移動入力| Movement
+    State -->|状態変更イベント| Movement
+    Combat[戦闘システム] -->|戦闘状態イベント| Movement
+```

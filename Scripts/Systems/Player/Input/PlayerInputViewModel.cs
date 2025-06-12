@@ -39,7 +39,7 @@ namespace Systems.Player.Input
         /// </summary>
         public void UpdateInput()
         {
-            _model.Update();
+            _model.UpdateInput();
             UpdateInputState();
         }
 

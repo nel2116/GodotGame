@@ -12,7 +12,7 @@ namespace Systems.Common.State
 
         public override void _Ready()
         {
-            var bus = new GameEventBus();
+            var bus = GameEventBus.Instance;
             var model = new CommonStateModel();
             _view_model = new CommonStateViewModel(model, bus);
             _view_model.Initialize();

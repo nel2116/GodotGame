@@ -12,7 +12,7 @@ namespace Systems.Player.State
 
         public override void _Ready()
         {
-            var bus = new GameEventBus();
+            var bus = GameEventBus.Instance;
             var model = new PlayerStateModel(bus);
             _view_model = new PlayerStateViewModel(model, bus);
             _view_model.Initialize();

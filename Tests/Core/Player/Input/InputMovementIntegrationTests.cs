@@ -25,7 +25,7 @@ namespace Tests.Core.Player.Input
         public void InputModel_Move_UpdatesMovementModel()
         {
             var bus = new GameEventBus();
-            var inputModel = new PlayerInputModel(bus);
+            var inputModel = new PlayerInputModel();
             var movementModel = new PlayerMovementModel(bus);
             movementModel.Initialize();
             inputModel.Initialize();

@@ -21,9 +21,11 @@ namespace Systems.Player.Input
         public InputState CurrentState => _currentState;
         public bool IsEnabled => _isEnabled;
 
-        public PlayerInputModel(IGameEventBus eventBus)
+        public PlayerInputModel()
         {
-            _eventBus = eventBus;
+            _eventBus = GameEventBus.Instance;
+            _isEnabled = false;
+            InitializeActions();
         }
 
         /// <summary>
@@ -31,21 +33,23 @@ namespace Systems.Player.Input
         /// </summary>
         public void Initialize()
         {
-            LoadInputActions();
             _isEnabled = true;
+            _eventBus.Publish(new InputEnabledChangedEvent(true));
         }
 
         /// <summary>
         /// 更新処理
         /// </summary>
-        public void Update()
+        public void UpdateInput()
         {
             if (!_isEnabled) return;
+
             _currentState.Update();
             ProcessInput();
+            _eventBus.Publish(new InputStateChangedEvent(_currentState));
         }
 
-        private void LoadInputActions()
+        private void InitializeActions()
         {
             _actions["Move"] = new InputAction("Move", InputType.Vector2);
             _actions["Move"].ExecuteAction = () => {

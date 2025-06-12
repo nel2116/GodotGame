@@ -12,8 +12,8 @@ namespace Systems.Player.Input
 
         public override void _Ready()
         {
-            var bus = new GameEventBus();
-            var model = new PlayerInputModel(bus);
+            var bus = GameEventBus.Instance;
+            var model = new PlayerInputModel();
             _viewModel = new PlayerInputViewModel(model, bus);
             _viewModel.Initialize();
         }

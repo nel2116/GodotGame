@@ -25,7 +25,7 @@ namespace Tests.Core.Player.Input
         public void Initialize_SetsEnabledTrue()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel(bus);
+            var model = new PlayerInputModel();
             model.Initialize();
             Assert.IsTrue(model.IsEnabled);
         }
@@ -34,7 +34,7 @@ namespace Tests.Core.Player.Input
         public void ProcessInput_Move_PublishesMovementEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel(bus);
+            var model = new PlayerInputModel();
             model.Initialize();
 
             var state = GetPrivateField<InputState>(model, "_currentState");
@@ -54,7 +54,7 @@ namespace Tests.Core.Player.Input
         public void ProcessInput_Buttons_PublishEvents()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel(bus);
+            var model = new PlayerInputModel();
             model.Initialize();
 
             var state = GetPrivateField<InputState>(model, "_currentState");

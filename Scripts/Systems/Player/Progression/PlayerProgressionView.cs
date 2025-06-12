@@ -13,7 +13,7 @@ namespace Systems.Player.Progression
         public override void _Ready()
         {
             var model = new PlayerProgressionModel();
-            var bus = new GameEventBus();
+            var bus = GameEventBus.Instance;
             _view_model = new PlayerProgressionViewModel(model, bus);
             _view_model.Initialize();
         }
