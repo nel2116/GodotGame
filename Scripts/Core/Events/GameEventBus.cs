@@ -51,6 +51,7 @@ namespace Core.Events
         /// <param name="disposing">マネージドリソースを解放する場合 true</param>
         protected virtual void Dispose(bool disposing)
         {
+            // 初回のDisposed判定はロックを避けるため。排他制御はこの後のロックで行う。
             if (_disposed)
             {
                 return;
