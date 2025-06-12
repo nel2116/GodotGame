@@ -146,5 +146,21 @@ namespace Tests.Core
             // 記録漏れがないことを確認するが、並列実行の揺らぎを考慮し下限のみ検証
             Assert.GreaterOrEqual(count, 20000);
         }
+
+        /// <summary>
+        /// Dispose が複数回呼ばれても例外を投げないことを確認
+        /// </summary>
+        [Test]
+        public void Dispose_Idempotent()
+        {
+            var bus = new GameEventBus();
+            int completed_count = 0;
+            bus.GetEventStream<DummyEvent>().Subscribe(_ => { }, () => Interlocked.Increment(ref completed_count));
+
+            bus.Dispose();
+            bus.Dispose();
+
+            Assert.AreEqual(1, completed_count);
+        }
     }
 }

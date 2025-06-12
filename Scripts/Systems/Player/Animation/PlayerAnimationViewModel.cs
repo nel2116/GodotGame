@@ -1,6 +1,7 @@
 using Core.Events;
 using Core.Reactive;
 using Core.ViewModels;
+using Core.Interfaces;
 using Systems.Player.Events;
 
 namespace Systems.Player.Animation
@@ -8,7 +9,7 @@ namespace Systems.Player.Animation
     /// <summary>
     /// プレイヤーアニメーションビューモデル
     /// </summary>
-    public class PlayerAnimationViewModel : ViewModelBase
+    public class PlayerAnimationViewModel : ViewModelBase, IUpdatable
     {
         private readonly PlayerAnimationModel _model;
         private readonly ReactiveProperty<string> _current_animation;

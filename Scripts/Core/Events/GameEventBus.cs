@@ -11,7 +11,9 @@ namespace Core.Events
     public class GameEventBus : IGameEventBus, IDisposable
     {
         private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
-        private bool _disposed;
+        private readonly object _dispose_lock = new();
+        // マルチスレッド環境での可視性を保証するため volatile を使用
+        private volatile bool _disposed;
 
         /// <summary>
         /// イベントを発行
@@ -40,18 +42,43 @@ namespace Core.Events
         /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// リソース解放処理本体
+        /// </summary>
+        /// <param name="disposing">マネージドリソースを解放する場合 true</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            // 初回のDisposed判定はロックを避けるため。volatile により値の可視性を確保し、排他制御はこの後のロックで行う。
             if (_disposed)
             {
                 return;
             }
 
-            foreach (var subject in _subjects.Values)
+            if (disposing)
             {
-                subject.OnCompleted();
-                subject.Dispose();
+                lock (_dispose_lock)
+                {
+                    if (_disposed)
+                    {
+                        return;
+                    }
+
+                    foreach (var subject in _subjects.Values)
+                    {
+                        subject.OnCompleted();
+                        if (subject is IDisposable disposable)
+                        {
+                            disposable.Dispose();
+                        }
+                    }
+                    _subjects.Clear();
+                    _disposed = true;
+                }
             }
-            _subjects.Clear();
-            _disposed = true;
         }
     }
 }
