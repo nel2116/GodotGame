@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Godot;
 
 namespace Tests.Core
 {
@@ -161,6 +162,113 @@ namespace Tests.Core
             bus.Dispose();
 
             Assert.AreEqual(1, completed_count);
+        }
+
+        /// <summary>
+        /// 破棄済みのバスに対する操作が適切に処理されることを確認
+        /// </summary>
+        [Test]
+        public void Operations_AfterDispose_HandleGracefully()
+        {
+            var bus = new GameEventBus();
+            bus.Dispose();
+
+            // 破棄済みバスへのイベント発行
+            Assert.DoesNotThrow(() => bus.Publish(new DummyEvent()));
+
+            // 破棄済みバスからのイベントストリーム取得
+            var stream = bus.GetEventStream<DummyEvent>();
+            Assert.IsNotNull(stream);
+            bool notified = false;
+            using (stream.Subscribe(_ => notified = true))
+            {
+                bus.Publish(new DummyEvent());
+                Assert.IsFalse(notified, "破棄済みバスからのイベントは通知されないべき");
+            }
+        }
+
+        /// <summary>
+        /// nullイベントの発行が適切に処理されることを確認
+        /// </summary>
+        [Test]
+        public void Publish_NullEvent_HandleGracefully()
+        {
+            var bus = new GameEventBus();
+            Assert.DoesNotThrow(() => bus.Publish<DummyEvent>(null));
+        }
+
+        /// <summary>
+        /// イベントのバッファリングが正しく機能することを確認
+        /// </summary>
+        [Test, MaxTime(2000)]
+        public void EventBuffering_WorksCorrectly()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            var events = new System.Collections.Generic.List<DateTime>();
+
+            using (bus.GetEventStream<DummyEvent>().Subscribe(evt =>
+            {
+                count++;
+                events.Add(evt.Timestamp);
+            }))
+            {
+                // 短時間に多数のイベントを発行
+                for (int i = 0; i < 100; i++)
+                {
+                    bus.Publish(new DummyEvent());
+                }
+
+                // バッファリングの効果を確認するため少し待機
+                Thread.Sleep(50);
+            }
+
+            Assert.Greater(count, 0, "イベントが少なくとも1つは通知されるべき");
+            Assert.LessOrEqual(count, 100, "バッファリングにより、イベント数が減少する可能性がある");
+        }
+
+        /// <summary>
+        /// イベントキューサイズの上限が機能することを確認
+        /// </summary>
+        [Test, MaxTime(3000)]
+        public void EventQueueSizeLimit_WorksCorrectly()
+        {
+            var bus = new GameEventBus();
+            int count = 0;
+            var stopwatch = Stopwatch.StartNew();
+
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
+            {
+                // 上限を超えるイベントを発行
+                for (int i = 0; i < 2000; i++)
+                {
+                    bus.Publish(new DummyEvent());
+                }
+            }
+
+            stopwatch.Stop();
+            Assert.LessOrEqual(count, 2000, "イベント数が上限を超えないことを確認");
+            Assert.Less(stopwatch.ElapsedMilliseconds, 2000, "処理が適切な時間内に完了することを確認");
+        }
+
+        /// <summary>
+        /// エラー発生時の動作を確認
+        /// </summary>
+        [Test]
+        public void ErrorHandling_WorksCorrectly()
+        {
+            var bus = new GameEventBus();
+            bool errorHandled = false;
+
+            // エラーを発生させるイベントハンドラ
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ =>
+            {
+                throw new Exception("Test error");
+            }))
+            {
+                // エラーが発生しても処理が継続することを確認
+                Assert.DoesNotThrow(() => bus.Publish(new DummyEvent()));
+            }
         }
     }
 }

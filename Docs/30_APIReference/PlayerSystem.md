@@ -1,156 +1,240 @@
 ---
-title: Player System
-version: 0.1
+title: プレイヤーシステム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
-    - System
     - Core
-    - Gameplay
+    - State
+    - Movement
+    - Combat
+    - Animation
+    - Input
+    - Progression
 linked_docs:
-    - "[[StateSystem]]"
-    - "[[MovementSystem]]"
-    - "[[CoreEventSystem]]"
+    - "[[PlayerStateSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[PlayerAnimationSystem]]"
+    - "[[PlayerInputSystem]]"
+    - "[[PlayerProgressionSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
 ---
 
-# Player System
+# プレイヤーシステム
 
 ## 目次
 
 1. [概要](#概要)
 2. [システム構成](#システム構成)
 3. [主要コンポーネント](#主要コンポーネント)
-4. [使用方法](#使用方法)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player System は、ゲーム内のプレイヤーキャラクターの動作と状態を管理する包括的なシステムです。以下の主要な機能を提供します：
+プレイヤーシステムは、ゲーム内のプレイヤーキャラクターを管理するための包括的なシステムです。以下の機能を提供します：
 
 -   プレイヤーの状態管理
--   移動システム
--   入力処理
+-   移動制御
+-   戦闘処理
 -   アニメーション制御
--   戦闘システム
--   進行度管理
--   イベント処理
+-   入力処理
+-   進行管理
 
 ## システム構成
 
-Player System は以下のサブシステムで構成されています：
+プレイヤーシステムは以下のサブシステムで構成されています：
 
-### 1. Base System
-
--   プレイヤーの基本機能と共通インターフェースを提供
--   初期化とライフサイクル管理
--   基本的なプロパティとメソッドの定義
-
-### 2. State System
-
--   プレイヤーの状態管理
--   状態遷移の制御
--   状態に応じた動作の制御
-
-### 3. Movement System
-
--   移動処理の実装
--   物理演算との連携
--   移動アニメーションの制御
-
-### 4. Input System
-
--   プレイヤー入力の処理
--   入力マッピング
--   入力イベントの発行
-
-### 5. Animation System
-
--   アニメーションの管理
--   状態に応じたアニメーション遷移
--   アニメーションイベントの処理
-
-### 6. Combat System
-
--   戦闘関連の機能
--   攻撃判定
--   ダメージ処理
-
-### 7. Progression System
-
--   プレイヤーの進行度管理
--   レベルアップ
--   スキルシステム
-
-### 8. Event System
-
--   プレイヤー関連イベントの管理
--   イベントの発行と購読
--   イベントハンドリング
+1. 状態管理システム（[[PlayerStateSystem|プレイヤー状態システム]]）
+2. 移動システム（[[PlayerMovementSystem|プレイヤー移動システム]]）
+3. 戦闘システム（[[PlayerCombatSystem|プレイヤー戦闘システム]]）
+4. アニメーションシステム（[[PlayerAnimationSystem|プレイヤーアニメーションシステム]]）
+5. 入力システム（[[PlayerInputSystem|プレイヤー入力システム]]）
+6. 進行システム（[[PlayerProgressionSystem|プレイヤー進行システム]]）
 
 ## 主要コンポーネント
 
-### PlayerSystem
+### PlayerController
 
-```gdscript
-class_name PlayerSystem
-extends Node
+プレイヤーの制御を担当するメインコンポーネントです。
 
-# プレイヤーシステムのメインクラス
-# 各サブシステムの初期化と管理を担当
+```csharp
+public class PlayerController : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly IGameEventBus _eventBus;
+    private readonly PlayerStateManager _stateManager;
+    private readonly PlayerMovementController _movementController;
+    private readonly PlayerCombatController _combatController;
+    private readonly PlayerAnimationController _animationController;
+    private readonly PlayerInputController _inputController;
+    private readonly PlayerProgressionController _progressionController;
+
+    public void Initialize();
+    public void Dispose();
+    protected virtual void OnEnable();
+    protected virtual void OnDisable();
+}
 ```
 
-### PlayerState
+### PlayerStateManager
 
-```gdscript
-class_name PlayerState
-extends Node
+プレイヤーの状態を管理するコンポーネントです。
 
-# プレイヤーの状態を管理するクラス
-# 状態遷移と状態に応じた動作を制御
+```csharp
+public class PlayerStateManager
+{
+    private readonly ReactiveProperty<PlayerState> _currentState;
+    public IReactiveProperty<PlayerState> CurrentState => _currentState;
+
+    public void ChangeState(PlayerState newState);
+    public bool CanChangeState(PlayerState newState);
+}
 ```
 
-### PlayerMovement
+### PlayerMovementController
 
-```gdscript
-class_name PlayerMovement
-extends Node
+プレイヤーの移動を制御するコンポーネントです。
 
-# プレイヤーの移動を制御するクラス
-# 移動処理と物理演算の連携を担当
+```csharp
+public class PlayerMovementController
+{
+    private readonly ReactiveProperty<Vector3> _position;
+    private readonly ReactiveProperty<Vector3> _velocity;
+    public IReactiveProperty<Vector3> Position => _position;
+    public IReactiveProperty<Vector3> Velocity => _velocity;
+
+    public void Move(Vector3 direction);
+    public void Stop();
+}
 ```
 
-## 使用方法
+### PlayerCombatController
 
-### 1. システムの初期化
+プレイヤーの戦闘を制御するコンポーネントです。
 
-```gdscript
-# プレイヤーシステムの初期化
-var player_system = PlayerSystem.new()
-add_child(player_system)
+```csharp
+public class PlayerCombatController
+{
+    private readonly ReactiveProperty<int> _health;
+    private readonly ReactiveProperty<int> _maxHealth;
+    public IReactiveProperty<int> Health => _health;
+    public IReactiveProperty<int> MaxHealth => _maxHealth;
+
+    public void TakeDamage(int damage);
+    public void Heal(int amount);
+}
 ```
 
-### 2. 状態の変更
+### PlayerAnimationController
 
-```gdscript
-# プレイヤーの状態を変更
-player_system.state_system.change_state("idle")
+プレイヤーのアニメーションを制御するコンポーネントです。
+
+```csharp
+public class PlayerAnimationController
+{
+    private readonly Animator _animator;
+    private readonly ReactiveProperty<string> _currentAnimation;
+    public IReactiveProperty<string> CurrentAnimation => _currentAnimation;
+
+    public void PlayAnimation(string animationName);
+    public void StopAnimation();
+}
 ```
 
-### 3. 移動の制御
+### PlayerInputController
 
-```gdscript
-# プレイヤーの移動を制御
-player_system.movement_system.move(direction)
+プレイヤーの入力を制御するコンポーネントです。
+
+```csharp
+public class PlayerInputController
+{
+    private readonly ReactiveProperty<Vector2> _moveInput;
+    private readonly ReactiveProperty<bool> _isAttacking;
+    public IReactiveProperty<Vector2> MoveInput => _moveInput;
+    public IReactiveProperty<bool> IsAttacking => _isAttacking;
+
+    public void UpdateInput();
+}
+```
+
+### PlayerProgressionController
+
+プレイヤーの進行を管理するコンポーネントです。
+
+```csharp
+public class PlayerProgressionController
+{
+    private readonly ReactiveProperty<int> _level;
+    private readonly ReactiveProperty<int> _experience;
+    public IReactiveProperty<int> Level => _level;
+    public IReactiveProperty<int> Experience => _experience;
+
+    public void AddExperience(int amount);
+    public void LevelUp();
+}
+```
+
+## 使用例
+
+### プレイヤーの初期化
+
+```csharp
+public class GameManager : MonoBehaviour
+{
+    private PlayerController _playerController;
+
+    private void Start()
+    {
+        _playerController = GetComponent<PlayerController>();
+        _playerController.Initialize();
+    }
+
+    private void OnDestroy()
+    {
+        _playerController?.Dispose();
+    }
+}
+```
+
+### プレイヤーの状態変更
+
+```csharp
+public class PlayerStateHandler : MonoBehaviour
+{
+    [SerializeField] private PlayerController _playerController;
+
+    private void OnEnable()
+    {
+        _playerController.StateManager.CurrentState
+            .Subscribe(OnStateChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnStateChanged(PlayerState newState)
+    {
+        Debug.Log($"Player state changed to: {newState}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 同時に複数の状態を持つことはできません
-2. 移動システムは 2D 空間での動作のみをサポート
-3. アニメーションは事前に定義されたもののみ使用可能
-4. イベントシステムは非同期処理をサポート
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   プレイヤーの状態変更は、必ず`PlayerStateManager`を通じて行ってください
+-   移動処理は、必ず`PlayerMovementController`を通じて行ってください
+-   戦闘処理は、必ず`PlayerCombatController`を通じて行ってください
+-   アニメーション処理は、必ず`PlayerAnimationController`を通じて行ってください
+-   入力処理は、必ず`PlayerInputController`を通じて行ってください
+-   進行処理は、必ず`PlayerProgressionController`を通じて行ってください
 
 ## 変更履歴
 

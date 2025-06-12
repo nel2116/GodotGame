@@ -11,6 +11,7 @@ namespace Systems.Common.Movement
     {
         private readonly CompositeDisposable _disposables = new();
         private Vector2 _velocity;
+        private float _verticalVelocity = 0f; // 3DのY軸（上下）用
         private bool _is_grounded;
         private bool _can_jump;
         private bool _can_dash;
@@ -31,9 +32,19 @@ namespace Systems.Common.Movement
         private const float VELOCITY_THRESHOLD = 0.001f;
 
         /// <summary>
+        /// 重力加速度
+        /// </summary>
+        private const float GRAVITY = 9.8f;
+
+        /// <summary>
         /// 現在の速度
         /// </summary>
         public Vector2 Velocity => _velocity;
+
+        /// <summary>
+        /// 垂直速度
+        /// </summary>
+        public float VerticalVelocity => _verticalVelocity;
 
         /// <summary>
         /// 接地しているか
@@ -54,6 +65,7 @@ namespace Systems.Common.Movement
         public void Initialize()
         {
             _velocity = Vector2.Zero;
+            _verticalVelocity = 0f;
             _is_grounded = true;
             _can_jump = true;
             _can_dash = true;
@@ -64,6 +76,7 @@ namespace Systems.Common.Movement
         {
             UpdateGroundedState();
             UpdateMovementState();
+            ApplyGravity();
         }
 
         /// <inheritdoc />
@@ -71,16 +84,26 @@ namespace Systems.Common.Movement
         {
             if (_is_grounded)
             {
-                _velocity = direction * GetMovementSpeed();
+                if (direction == Vector2.Zero)
+                {
+                    // しきい値以下なら完全にゼロにする
+                    if (Mathf.Abs(_velocity.X) < 0.01f) _velocity.X = 0;
+                    if (Mathf.Abs(_velocity.Y) < 0.01f) _velocity.Y = 0;
+                }
+                else
+                {
+                    _velocity = direction * GetMovementSpeed();
+                }
             }
         }
 
         /// <inheritdoc />
         public void Jump()
         {
-            if (_is_grounded && _can_jump)
+            if (_can_jump && _is_grounded)
             {
-                _velocity = new Vector2(_velocity.X, GetJumpForce());
+                _verticalVelocity = -GetJumpForce();
+                _is_grounded = false;
                 _can_jump = false;
             }
         }
@@ -97,29 +120,51 @@ namespace Systems.Common.Movement
 
         private void UpdateGroundedState()
         {
-            _is_grounded = Math.Abs(_velocity.Y) <= GROUNDED_THRESHOLD;
+            // 接地判定はCharacterBody3DのIsOnFloor()を使用
+            _is_grounded = Mathf.Abs(_verticalVelocity) < GROUNDED_THRESHOLD;
+            GD.Print($"Grounded state: {_is_grounded}, Y velocity: {_verticalVelocity}");
             if (_is_grounded)
             {
                 _can_jump = true;
                 _can_dash = true;
+                _verticalVelocity = 0f;
             }
         }
 
         private void UpdateMovementState()
         {
-            // 速度減衰の簡易処理
-            _velocity *= DAMPING_FACTOR;
-            if (_velocity.LengthSquared() < VELOCITY_THRESHOLD)
+            if (_is_grounded)
             {
-                _velocity = Vector2.Zero;
+                _velocity.X *= DAMPING_FACTOR;
+                _velocity.Y *= DAMPING_FACTOR;
+                if (Mathf.Abs(_velocity.X) < 0.01f) _velocity.X = 0;
+                if (Mathf.Abs(_velocity.Y) < 0.01f) _velocity.Y = 0;
             }
         }
 
-        private float GetMovementSpeed() => 5.0f;
+        private void ApplyGravity()
+        {
+            if (!_is_grounded)
+            {
+                _verticalVelocity += GRAVITY * 0.016f; // 約60FPSを想定
+                GD.Print($"Applying gravity, new Y velocity: {_verticalVelocity}");
+            }
+        }
 
-        private float GetJumpForce() => 10.0f;
+        private float GetMovementSpeed()
+        {
+            return 5.0f; // 基本移動速度
+        }
 
-        private float GetDashMultiplier() => 2.0f;
+        private float GetJumpForce()
+        {
+            return 10.0f; // ジャンプ力
+        }
+
+        private float GetDashMultiplier()
+        {
+            return 2.0f; // ダッシュ時の速度倍率
+        }
 
         /// <inheritdoc />
         public void Dispose()

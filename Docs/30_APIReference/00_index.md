@@ -1,6 +1,6 @@
 ---
 title: APIリファレンス
-version: 0.1.8
+version: 0.2.0
 status: draft
 updated: 2024-03-21
 tags:
@@ -13,6 +13,13 @@ tags:
     - Resource
     - Property
     - ViewModel
+    - Player
+    - State
+    - Movement
+    - Combat
+    - Animation
+    - Input
+    - Progression
 linked_docs:
     - "[[DocumentManagementRules]]"
     - "[[10_CoreDocs/00_index]]"
@@ -22,6 +29,13 @@ linked_docs:
     - "[[CoreEventSystem]]"
     - "[[CommonEventSystem]]"
     - "[[CompositeDisposable]]"
+    - "[[PlayerSystem]]"
+    - "[[PlayerStateSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[PlayerAnimationSystem]]"
+    - "[[PlayerInputSystem]]"
+    - "[[PlayerProgressionSystem]]"
 ---
 
 # API リファレンス
@@ -42,10 +56,6 @@ linked_docs:
 
 ### コアシステム
 
--   [[CoreSystemAPI|コアシステムAPI]]
-    -   ゲームエンジン関連
-    -   システム管理
-    -   ユーティリティ機能
 -   [[ReactiveSystem|リアクティブシステム]]
     -   リアクティブプロパティ
     -   イベントシステム
@@ -66,32 +76,41 @@ linked_docs:
     -   MVVM パターン
     -   データバインディング
     -   コマンドパターン
--   [[MainScriptAPI|Main.cs API]]
-    -   ゲーム開始処理
--   [[EventBusAPI|EventBus.cs API]]
-    -   イベント通知
--   [[InputBufferAPI|InputBuffer.cs API]]
-    -   入力バッファ
--   [[InputObserverAPI|InputObserver.cs API]]
-    -   入力監視
--   [[PlayerStateMachineAPI|PlayerStateMachine.cs API]]
-    -   プレイヤー状態管理
--   [[StateManagerAPI|StateManager.cs API]]
-    -   ゲーム状態管理
+-   [[CompositeDisposable|複合リソース管理]]
+    -   リソースの自動解放
+    -   スレッドセーフな実装
+    -   効率的なメモリ管理
 
-### ゲームプレイ
+### プレイヤーシステム
 
--   [[GameplayAPI|ゲームプレイAPI]]
+-   [[PlayerSystem|プレイヤーシステム]]
     -   プレイヤー管理
-    -   スキルシステム
-    -   戦闘システム
-
-### データ管理
-
--   [[DataManagementAPI|データ管理API]]
-    -   セーブ/ロード
-    -   設定管理
-    -   リソース管理
+    -   状態管理
+    -   イベント処理
+-   [[PlayerStateSystem|プレイヤー状態システム]]
+    -   状態遷移
+    -   状態管理
+    -   イベント処理
+-   [[PlayerMovementSystem|プレイヤー移動システム]]
+    -   移動制御
+    -   衝突判定
+    -   アニメーション連携
+-   [[PlayerCombatSystem|プレイヤー戦闘システム]]
+    -   攻撃処理
+    -   ダメージ計算
+    -   スキル管理
+-   [[PlayerAnimationSystem|プレイヤーアニメーションシステム]]
+    -   アニメーション制御
+    -   状態連携
+    -   イベント処理
+-   [[PlayerInputSystem|プレイヤー入力システム]]
+    -   入力処理
+    -   キー設定
+    -   イベント発行
+-   [[PlayerProgressionSystem|プレイヤー進行システム]]
+    -   レベル管理
+    -   経験値計算
+    -   スキル解放
 
 ## 使用方法
 
@@ -101,17 +120,22 @@ API の使用にあたっては、以下の点に注意してください：
 1. バージョン互換性の確認
 2. エラーハンドリングの実装
 3. パフォーマンスへの影響の考慮
+4. リソース管理の適切な実装
+5. スレッドセーフな実装の確認
 
 ## 制限事項
 
 -   API の仕様は予告なく変更される可能性があります
 -   非推奨の API は将来のバージョンで削除される可能性があります
 -   パフォーマンスに影響を与える可能性のある API の使用は慎重に行ってください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
 
 ## 変更履歴
 
 | バージョン | 更新日     | 変更内容                                                                 |
 | ---------- | ---------- | ------------------------------------------------------------------------ |
+| 0.2.0      | 2024-03-21 | プレイヤーシステム関連のドキュメントを追加                               |
 | 0.1.8      | 2024-03-21 | ViewModel システムのドキュメントを更新                                   |
 | 0.1.7      | 2024-03-21 | リアクティブプロパティのドキュメントを更新                               |
 | 0.1.6      | 2024-03-21 | 複合リソース管理システムのドキュメントを追加                             |

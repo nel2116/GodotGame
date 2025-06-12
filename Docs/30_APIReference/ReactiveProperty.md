@@ -10,9 +10,9 @@ tags:
     - Property
 linked_docs:
     - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
     - "[[CompositeDisposable]]"
-    - "[[00_index]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
 # リアクティブプロパティ
@@ -20,154 +20,137 @@ linked_docs:
 ## 目次
 
 1. [概要](#概要)
-2. [インターフェース](#インターフェース)
-3. [実装詳細](#実装詳細)
-4. [使用方法](#使用方法)
+2. [プロパティ定義](#プロパティ定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-リアクティブプロパティは、値の変更を監視し、変更時に通知を行う機能を提供します。主に以下の機能を提供します：
+リアクティブプロパティは、値の変更を監視し、変更時に通知を行うプロパティシステムです。以下の機能を提供します：
 
 -   値の変更通知
 -   値の検証
 -   値の変換
--   値の永続化
--   値の同期
+-   値のバッファリング
 
-## インターフェース
+## プロパティ定義
 
 ### IReactiveProperty
 
+リアクティブプロパティのインターフェースです。
+
 ```csharp
-public interface IReactiveProperty<T> : IObservable<T>, IDisposable
+public interface IReactiveProperty<T>
 {
     T Value { get; set; }
+    IObservable<T> OnValueChanged { get; }
     bool HasValue { get; }
-    void ForceNotify();
+    void SetValueAndForceNotify(T value);
 }
 ```
 
-## 実装詳細
-
 ### ReactiveProperty
+
+リアクティブプロパティの基本クラスです。
 
 ```csharp
 public class ReactiveProperty<T> : IReactiveProperty<T>
 {
     private T _value;
-    private readonly Subject<T> _subject = new();
-    private readonly CompositeDisposable _disposables = new();
-    private readonly object _sync_lock = new();
+    private readonly Subject<T> _valueChangedSubject;
 
     public T Value
     {
         get => _value;
         set
         {
-            if (EqualityComparer<T>.Default.Equals(_value, value))
-                return;
-
-            _value = value;
-            _subject.OnNext(value);
+            if (!EqualityComparer<T>.Default.Equals(_value, value))
+            {
+                _value = value;
+                _valueChangedSubject.OnNext(value);
+            }
         }
     }
 
-    public bool HasValue { get; private set; }
-    public IDisposable Subscribe(IObserver<T> observer);
-    public void ForceNotify();
-    public void Dispose();
-}
-```
+    public IObservable<T> OnValueChanged => _valueChangedSubject;
+    public bool HasValue => _value != null;
 
-主な特徴：
-
--   スレッドセーフな実装
-    -   ロックベースの同期化
-    -   アトミックな操作保証
--   効率的な通知
-    -   値の変更時のみ通知
-    -   強制通知のサポート
--   メモリ管理
-    -   自動的なリソース解放
-    -   循環参照の防止
--   拡張性
-    -   カスタム検証のサポート
-    -   値の変換機能
-
-## 使用方法
-
-### 基本的な使用例
-
-```csharp
-// プロパティの作成
-var health = new ReactiveProperty<int>(100);
-
-// 値の変更
-health.Value = 80;
-
-// 値の監視
-var subscription = health.Subscribe(value =>
-{
-    Console.WriteLine($"Health changed: {value}");
-});
-
-// 強制通知
-health.ForceNotify();
-
-// リソースの解放
-subscription.Dispose();
-```
-
-### ViewModel での使用例
-
-```csharp
-public class PlayerViewModel : ViewModelBase
-{
-    private readonly ReactiveProperty<int> _health;
-    public IReactiveProperty<int> Health => _health;
-
-    private readonly ReactiveProperty<string> _name;
-    public IReactiveProperty<string> Name => _name;
-
-    public PlayerViewModel(IGameEventBus eventBus) : base(eventBus)
+    public ReactiveProperty(T initialValue = default)
     {
-        _health = new ReactiveProperty<int>(100)
-            .AddTo(Disposables);
+        _value = initialValue;
+        _valueChangedSubject = new Subject<T>();
+    }
 
-        _name = new ReactiveProperty<string>("Player")
-            .AddTo(Disposables);
-
-        // 値の変更を監視
-        _health.Subscribe(value =>
-        {
-            if (value <= 0)
-            {
-                // プレイヤーの死亡処理
-                eventBus.Publish(new PlayerDiedEvent());
-            }
-        }).AddTo(Disposables);
+    public void SetValueAndForceNotify(T value)
+    {
+        _value = value;
+        _valueChangedSubject.OnNext(value);
     }
 }
 ```
 
-### 値の検証と変換
+## 主要コンポーネント
+
+### ReactivePropertyExtensions
+
+リアクティブプロパティの拡張メソッドを提供するクラスです。
+
+```csharp
+public static class ReactivePropertyExtensions
+{
+    public static IDisposable Subscribe<T>(this IReactiveProperty<T> property, Action<T> onNext);
+    public static IDisposable Subscribe<T>(this IReactiveProperty<T> property, Action<T> onNext, Action<Exception> onError);
+    public static IDisposable Subscribe<T>(this IReactiveProperty<T> property, Action<T> onNext, Action onCompleted);
+    public static IDisposable Subscribe<T>(this IReactiveProperty<T> property, Action<T> onNext, Action<Exception> onError, Action onCompleted);
+}
+```
+
+## 使用例
+
+### 基本的な使用
+
+```csharp
+public class PlayerStats : MonoBehaviour
+{
+    private readonly ReactiveProperty<int> _health = new(100);
+    private readonly CompositeDisposable _disposables = new();
+
+    private void Start()
+    {
+        _health.Subscribe(OnHealthChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnHealthChanged(int newHealth)
+    {
+        Debug.Log($"Health changed to: {newHealth}");
+    }
+
+    public void TakeDamage(int damage)
+    {
+        _health.Value = Mathf.Max(0, _health.Value - damage);
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
+    }
+}
+```
+
+### 値の検証
 
 ```csharp
 public class ValidatedReactiveProperty<T> : ReactiveProperty<T>
 {
     private readonly Func<T, bool> _validator;
-    private readonly Func<T, T> _converter;
 
-    public ValidatedReactiveProperty(
-        T initialValue,
-        Func<T, bool> validator,
-        Func<T, T> converter = null)
+    public ValidatedReactiveProperty(T initialValue, Func<T, bool> validator)
         : base(initialValue)
     {
         _validator = validator;
-        _converter = converter;
     }
 
     public new T Value
@@ -175,48 +158,38 @@ public class ValidatedReactiveProperty<T> : ReactiveProperty<T>
         get => base.Value;
         set
         {
-            var convertedValue = _converter?.Invoke(value) ?? value;
-            if (_validator(convertedValue))
+            if (_validator(value))
             {
-                base.Value = convertedValue;
+                base.Value = value;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid value");
             }
         }
     }
 }
 
-// 使用例
-var health = new ValidatedReactiveProperty<int>(
-    initialValue: 100,
-    validator: value => value >= 0 && value <= 100,
-    converter: value => Mathf.Clamp(value, 0, 100)
-);
+public class PlayerStats : MonoBehaviour
+{
+    private readonly ValidatedReactiveProperty<int> _health;
+
+    public PlayerStats()
+    {
+        _health = new ValidatedReactiveProperty<int>(100, value => value >= 0 && value <= 100);
+    }
+}
 ```
 
 ## 制限事項
 
-1. **スレッドセーフ**
-
-    - 値の変更と通知はスレッドセーフです
-    - 複数のスレッドからの同時操作は避けてください
-    - 通知ハンドラ内での処理は適切に同期化してください
-
-2. **メモリ管理**
-
-    - 購読は明示的に解除する必要があります
-    - `CompositeDisposable`を使用して複数の購読を管理することを推奨
-    - 循環参照に注意してください
-
-3. **パフォーマンス**
-
-    - 大量の通知時は注意が必要です
-    - 不要な購読は早期に解除してください
-    - 通知ハンドラは軽量に保ってください
-
-4. **例外処理**
-
-    - 値の検証時の例外は適切に処理してください
-    - 通知ハンドラ内での例外は購読者で処理してください
-    - 値の変換時の例外は呼び出し元で処理してください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   値の変更通知は必要最小限に抑えてください
+-   値の検証は、必ず`ValidatedReactiveProperty`を使用してください
+-   値の変換は、必ず`Select`メソッドを使用してください
+-   値のバッファリングは、必ず`Buffer`メソッドを使用してください
+-   値の購読は、必ず`IDisposable`を保持して適切に解放してください
 
 ## 変更履歴
 

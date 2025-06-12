@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://d2b2ehk6kx115"]
+[gd_scene load_steps=10 format=3 uid="uid://d2b2ehk6kx115"]
 
 [ext_resource type="Script" uid="uid://bajdhg7jonp8p" path="res://Scripts/Main.cs" id="1"]
 [ext_resource type="Script" uid="uid://84ab2a4017e5" path="res://Scripts/Player.cs" id="2"]
@@ -7,10 +7,33 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_idj7w"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_idj7w"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_idj7w"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_idj7w"]
+
+[sub_resource type="Sky" id="Sky_kln2b"]
+sky_material = SubResource("ProceduralSkyMaterial_idj7w")
+
+[sub_resource type="Environment" id="Environment_rgh2o"]
+background_mode = 2
+sky = SubResource("Sky_kln2b")
+ambient_light_color = Color(0.67451, 0.584314, 0.313726, 1)
+ambient_light_energy = 2.0
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.620652, 0.65314, 0.704186, 1)
+fog_density = 1.0
+fog_depth_begin = 0.1
+fog_depth_end = 1000.0
+
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1")
 
 [node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+floor_snap_length = 0.3
 script = ExtResource("2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
@@ -19,6 +42,24 @@ mesh = SubResource("CapsuleMesh_r150o")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_idj7w")
 
-[node name="Camera3D" type="Camera3D" parent="Player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.8093)
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 20, 0, 0, 0)
+shape = SubResource("BoxShape3D_idj7w")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 0, 0.5, 0)
+mesh = SubResource("PlaneMesh_idj7w")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999962, 0.00872654, 0, -0.00872654, 0.999962, 0, 5, 10)
 current = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rgh2o")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+light_color = Color(1, 0.972549, 0.882353, 1)
+shadow_enabled = true

@@ -1,154 +1,190 @@
 ---
-title: Player Movement System
-version: 0.1
+title: プレイヤー移動システム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - Movement
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
-    - "[[MovementSystem]]"
     - "[[PlayerSystem]]"
+    - "[[PlayerStateSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player Movement System
+# プレイヤー移動システム
 
 ## 目次
 
 1. [概要](#概要)
-2. [移動タイプ](#移動タイプ)
-3. [物理演算](#物理演算)
-4. [使用方法](#使用方法)
+2. [移動パラメータ](#移動パラメータ)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player Movement System は、プレイヤーキャラクターの移動を制御するシステムです。このシステムは以下の機能を提供します：
+プレイヤー移動システムは、プレイヤーの移動を制御するシステムです。以下の機能を提供します：
 
--   基本的な移動制御
--   物理演算との連携
--   移動アニメーションの制御
--   移動状態の管理
+-   移動制御
+-   衝突判定
+-   アニメーション連携
+-   イベント通知
 
-## 移動タイプ
+## 移動パラメータ
 
-### 1. 地上移動
+### MovementParameters
 
--   **通常移動**
+移動に関するパラメータを定義するクラスです。
 
-    -   速度: 5.0 units/sec
-    -   加速度: 10.0 units/sec²
-    -   減速度: 15.0 units/sec²
-
--   **走り移動**
-    -   速度: 8.0 units/sec
-    -   加速度: 12.0 units/sec²
-    -   減速度: 18.0 units/sec²
-
-### 2. 空中移動
-
--   **ジャンプ**
-
-    -   初速: 10.0 units/sec
-    -   重力: 20.0 units/sec²
-    -   最大高さ: 5.0 units
-
--   **二段ジャンプ**
-    -   初速: 8.0 units/sec
-    -   重力: 20.0 units/sec²
-    -   最大高さ: 3.0 units
-
-### 3. 特殊移動
-
--   **ダッシュ**
-
-    -   速度: 15.0 units/sec
-    -   持続時間: 0.5 sec
-    -   クールダウン: 1.0 sec
-
--   **ウォールジャンプ**
-    -   初速: 8.0 units/sec
-    -   角度: 45 度
-    -   最大回数: 1 回
-
-## 物理演算
-
-### 1. 衝突判定
-
--   プレイヤーのコリジョン形状
-    -   幅: 1.0 units
-    -   高さ: 2.0 units
-    -   形状: カプセル
-
-### 2. 物理レイヤー
-
--   プレイヤーレイヤー: 1
--   地面レイヤー: 2
--   敵レイヤー: 3
--   アイテムレイヤー: 4
-
-### 3. 物理マテリアル
-
--   摩擦係数: 0.3
--   反発係数: 0.0
--   密度: 1.0
-
-## 使用方法
-
-### 1. 移動の制御
-
-```gdscript
-# 基本的な移動
-player_movement_system.move(direction)
-
-# 走り移動
-player_movement_system.run(direction)
-
-# ジャンプ
-player_movement_system.jump()
-
-# ダッシュ
-player_movement_system.dash()
+```csharp
+public class MovementParameters
+{
+    public float WalkSpeed { get; set; } = 5f;
+    public float RunSpeed { get; set; } = 8f;
+    public float JumpForce { get; set; } = 5f;
+    public float Gravity { get; set; } = 9.81f;
+    public float GroundCheckDistance { get; set; } = 0.1f;
+    public LayerMask GroundLayer { get; set; }
+}
 ```
 
-### 2. 移動状態の確認
+## 主要コンポーネント
 
-```gdscript
-# 移動速度の取得
-var speed = player_movement_system.get_speed()
+### PlayerMovementController
 
-# 地面接地判定
-var is_grounded = player_movement_system.is_grounded()
+プレイヤーの移動を制御するコンポーネントです。
 
-# 壁接触判定
-var is_wall_sliding = player_movement_system.is_wall_sliding()
+```csharp
+public class PlayerMovementController
+{
+    private readonly ReactiveProperty<Vector3> _position;
+    private readonly ReactiveProperty<Vector3> _velocity;
+    private readonly ReactiveProperty<bool> _isGrounded;
+    private readonly MovementParameters _parameters;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<Vector3> Position => _position;
+    public IReactiveProperty<Vector3> Velocity => _velocity;
+    public IReactiveProperty<bool> IsGrounded => _isGrounded;
+
+    public void Move(Vector3 direction);
+    public void Stop();
+    public void Jump();
+    public void Update();
+}
 ```
 
-### 3. 移動イベントの購読
+### PlayerMovementHandler
 
-```gdscript
-# 移動開始イベント
-player_movement_system.movement_started.connect(_on_movement_started)
+プレイヤーの移動を処理するコンポーネントです。
 
-# 移動終了イベント
-player_movement_system.movement_ended.connect(_on_movement_ended)
+```csharp
+public class PlayerMovementHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerMovementController _movementController;
 
-func _on_movement_started() -> void:
-    print("Movement started")
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnPositionChanged(Vector3 newPosition);
+    private void OnVelocityChanged(Vector3 newVelocity);
+    private void OnGroundedChanged(bool isGrounded);
+}
+```
 
-func _on_movement_ended() -> void:
-    print("Movement ended")
+## 使用例
+
+### 移動の制御
+
+```csharp
+public class PlayerMovementInput : MonoBehaviour
+{
+    [SerializeField] private PlayerMovementController _movementController;
+
+    private void Update()
+    {
+        // 移動入力の取得
+        var horizontal = Input.GetAxisRaw("Horizontal");
+        var vertical = Input.GetAxisRaw("Vertical");
+        var direction = new Vector3(horizontal, 0, vertical).normalized;
+
+        // 移動の実行
+        if (direction != Vector3.zero)
+        {
+            _movementController.Move(direction);
+        }
+        else
+        {
+            _movementController.Stop();
+        }
+
+        // ジャンプの実行
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _movementController.Jump();
+        }
+    }
+}
+```
+
+### 移動状態の監視
+
+```csharp
+public class PlayerMovementObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerMovementController _movementController;
+
+    private void OnEnable()
+    {
+        _movementController.Position
+            .Subscribe(OnPositionChanged)
+            .AddTo(_disposables);
+
+        _movementController.Velocity
+            .Subscribe(OnVelocityChanged)
+            .AddTo(_disposables);
+
+        _movementController.IsGrounded
+            .Subscribe(OnGroundedChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnPositionChanged(Vector3 newPosition)
+    {
+        Debug.Log($"Player position changed to: {newPosition}");
+    }
+
+    private void OnVelocityChanged(Vector3 newVelocity)
+    {
+        Debug.Log($"Player velocity changed to: {newVelocity}");
+    }
+
+    private void OnGroundedChanged(bool isGrounded)
+    {
+        Debug.Log($"Player grounded state changed to: {isGrounded}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 移動システムは 2D 空間での動作のみをサポート
-2. 同時に複数の特殊移動を実行することはできない
-3. 物理演算は Godot の組み込み物理エンジンに依存
-4. 移動速度は状態に応じて自動的に調整される
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   移動パラメータは、必ず`MovementParameters`を通じて設定してください
+-   移動制御は、必ず`PlayerMovementController`を通じて行ってください
+-   移動処理は、必ず`PlayerMovementHandler`を通じて行ってください
 
 ## 変更履歴
 

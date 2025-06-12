@@ -1,160 +1,187 @@
 ---
-title: Common Event System API Reference
-version: 0.1
+title: 共通イベントシステム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
     - API
-    - Common
     - Event
-    - Systems
-    - Reference
+    - Core
+    - Reactive
+linked_docs:
+    - "[[CoreEventSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ReactiveProperty]]"
+    - "[[CompositeDisposable]]"
 ---
 
-# Common Event System API Reference
+# 共通イベントシステム
 
 ## 目次
 
 1. [概要](#概要)
-2. [イベントクラス](#イベントクラス)
-3. [使用方法](#使用方法)
-4. [制限事項](#制限事項)
-5. [変更履歴](#変更履歴)
+2. [イベント定義](#イベント定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
+5. [制限事項](#制限事項)
+6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Common Event System は、ゲームの各サブシステムで使用される具体的なイベントを定義するシステムです。Core Event System を基盤として、各システム固有のイベント処理を提供します。
+共通イベントシステムは、ゲーム内で共通して使用されるイベントを定義・管理するシステムです。以下の機能を提供します：
 
-## イベントクラス
+-   共通イベントの定義
+-   イベントの発行と購読
+-   イベントのフィルタリング
+-   イベントのバッファリング
 
-### StateEvents
+## イベント定義
 
-状態変更に関するイベントを定義するクラスです。
+### GameStateEvent
+
+ゲームの状態変更を通知するイベントです。
 
 ```csharp
-public static class StateEvents
+public class GameStateEvent : GameEventBase
 {
-    // 状態変更イベント
-    public static event Action<StateChangeEventArgs> OnStateChanged;
+    public GameState PreviousState { get; }
+    public GameState CurrentState { get; }
 
-    // 状態初期化イベント
-    public static event Action<StateInitEventArgs> OnStateInitialized;
+    public GameStateEvent(object source, GameState previousState, GameState currentState)
+        : base("GameStateChanged", source)
+    {
+        PreviousState = previousState;
+        CurrentState = currentState;
+    }
+}
+
+public enum GameState
+{
+    None,
+    Title,
+    Playing,
+    Paused,
+    GameOver
 }
 ```
 
-### ResourceEvents
+### SceneEvent
 
-リソース操作に関するイベントを定義するクラスです。
+シーンの変更を通知するイベントです。
 
 ```csharp
-public static class ResourceEvents
+public class SceneEvent : GameEventBase
 {
-    // リソース取得イベント
-    public static event Action<ResourceAcquireEventArgs> OnResourceAcquired;
+    public string PreviousScene { get; }
+    public string CurrentScene { get; }
 
-    // リソース解放イベント
-    public static event Action<ResourceReleaseEventArgs> OnResourceReleased;
+    public SceneEvent(object source, string previousScene, string currentScene)
+        : base("SceneChanged", source)
+    {
+        PreviousScene = previousScene;
+        CurrentScene = currentScene;
+    }
 }
 ```
 
-### MovementEvents
+## 主要コンポーネント
 
-移動に関するイベントを定義するクラスです。
+### ICommonEventBus
+
+共通イベントバスのインターフェースです。
 
 ```csharp
-public static class MovementEvents
+public interface ICommonEventBus : IGameEventBus
 {
-    // 移動開始イベント
-    public static event Action<MovementStartEventArgs> OnMovementStarted;
-
-    // 移動停止イベント
-    public static event Action<MovementStopEventArgs> OnMovementStopped;
-
-    // 位置変更イベント
-    public static event Action<PositionChangeEventArgs> OnPositionChanged;
+    void PublishGameStateChanged(GameState previousState, GameState currentState);
+    void PublishSceneChanged(string previousScene, string currentScene);
 }
 ```
 
-### CombatEvents
+### CommonEventBus
 
-戦闘に関するイベントを定義するクラスです。
+共通イベントバスの実装クラスです。
 
 ```csharp
-public static class CombatEvents
+public class CommonEventBus : GameEventBus, ICommonEventBus
 {
-    // 攻撃イベント
-    public static event Action<AttackEventArgs> OnAttack;
-
-    // ダメージイベント
-    public static event Action<DamageEventArgs> OnDamage;
+    public void PublishGameStateChanged(GameState previousState, GameState currentState);
+    public void PublishSceneChanged(string previousScene, string currentScene);
 }
 ```
 
-### AnimationEvents
+## 使用例
 
-アニメーションに関するイベントを定義するクラスです。
+### ゲーム状態の変更
 
 ```csharp
-public static class AnimationEvents
+public class GameManager : MonoBehaviour
 {
-    // アニメーション開始イベント
-    public static event Action<AnimationStartEventArgs> OnAnimationStarted;
+    [SerializeField] private ICommonEventBus _eventBus;
+    private GameState _currentState = GameState.None;
 
-    // アニメーション終了イベント
-    public static event Action<AnimationEndEventArgs> OnAnimationEnded;
+    public void ChangeState(GameState newState)
+    {
+        var previousState = _currentState;
+        _currentState = newState;
+        _eventBus.PublishGameStateChanged(previousState, _currentState);
+    }
 }
 ```
 
-## 使用方法
-
-### 1. イベントの購読
+### シーンの変更
 
 ```csharp
-// 状態変更イベントの購読
-StateEvents.OnStateChanged += HandleStateChanged;
+public class SceneManager : MonoBehaviour
+{
+    [SerializeField] private ICommonEventBus _eventBus;
+    private string _currentScene;
 
-// 移動イベントの購読
-MovementEvents.OnMovementStarted += HandleMovementStarted;
+    public void LoadScene(string sceneName)
+    {
+        var previousScene = _currentScene;
+        _currentScene = sceneName;
+        _eventBus.PublishSceneChanged(previousScene, _currentScene);
+    }
+}
 ```
 
-### 2. イベントの発行
+### イベントの購読
 
 ```csharp
-// 状態変更イベントの発行
-StateEvents.OnStateChanged?.Invoke(new StateChangeEventArgs(newState));
+public class GameUI : MonoBehaviour
+{
+    [SerializeField] private ICommonEventBus _eventBus;
+    [SerializeField] private GameObject _pauseMenu;
+    private readonly CompositeDisposable _disposables = new();
 
-// 移動イベントの発行
-MovementEvents.OnMovementStarted?.Invoke(new MovementStartEventArgs(direction, speed));
-```
+    private void Start()
+    {
+        _eventBus.Subscribe<GameStateEvent>(OnGameStateChanged)
+            .AddTo(_disposables);
+    }
 
-### 3. イベントの購読解除
+    private void OnGameStateChanged(GameStateEvent evt)
+    {
+        _pauseMenu.SetActive(evt.CurrentState == GameState.Paused);
+    }
 
-```csharp
-// イベントの購読解除
-StateEvents.OnStateChanged -= HandleStateChanged;
-MovementEvents.OnMovementStarted -= HandleMovementStarted;
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
+    }
+}
 ```
 
 ## 制限事項
 
-1. **イベントハンドラの管理**
-
-    - イベントハンドラは適切なタイミングで購読解除する必要があります
-    - 複数のイベントを購読する場合は、`CompositeDisposable` を使用して管理することを推奨
-
-2. **null チェック**
-
-    - イベントの発行時は必ず null チェックを行う必要があります
-    - 購読者が存在しない場合のエラーを防ぐため
-
-3. **例外処理**
-
-    - イベントハンドラ内での例外は適切に処理する必要があります
-    - イベントの発行元で例外をキャッチし、適切に処理してください
-
-4. **パフォーマンス**
-    - 頻繁に発生するイベントは、適切な間隔で発行する必要があります
-    - 不要なイベントの発行は避けてください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`PublishAsync`メソッドを使用してください
+-   イベントは、必ず`IGameEvent`インターフェースを実装してください
+-   イベントの発行は、必ず`IGameEventBus`を通じて行ってください
+-   イベントの購読は、必ず`IDisposable`を保持して適切に解放してください
 
 ## 変更履歴
 

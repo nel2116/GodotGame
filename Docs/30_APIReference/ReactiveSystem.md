@@ -1,6 +1,6 @@
 ---
 title: リアクティブシステム
-version: 0.4.0
+version: 0.5.0
 status: draft
 updated: 2024-03-21
 tags:
@@ -9,10 +9,15 @@ tags:
     - Events
     - Core
     - Tests
+    - Property
+    - Resource
+    - ViewModel
 linked_docs:
-    - "[[01_reactive_property]]"
-    - "[[02_composite_disposable]]"
-    - "[[03_event_bus]]"
+    - "[[ReactiveProperty]]"
+    - "[[CompositeDisposable]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
+    - "[[ViewModelSystem]]"
     - "[[ReactiveSystemTestResults]]"
 ---
 
@@ -250,144 +255,33 @@ public class PlayerViewModel : ViewModelBase
 }
 ```
 
-### リアクティブプロパティの使用例
-
-```csharp
-// プロパティの作成
-var health = new ReactiveProperty<int>(100);
-
-// 値の変更を購読
-var subscription = health.Subscribe(newValue =>
-{
-    Debug.Log($"Health changed to: {newValue}");
-});
-
-// 値の変更
-health.Value = 80; // 購読者に通知される
-
-// リソースの解放
-subscription.Dispose();
-```
-
-### イベントシステムの使用例
-
-```csharp
-// イベントの定義
-public class PlayerDamagedEvent : GameEvent
-{
-    public int Damage { get; }
-    public PlayerDamagedEvent(int damage) => Damage = damage;
-}
-
-// イベントバスの使用
-var eventBus = new GameEventBus();
-
-// イベントの購読
-var subscription = eventBus.GetEventStream<PlayerDamagedEvent>()
-    .Subscribe(evt => Debug.Log($"Player took {evt.Damage} damage"));
-
-// イベントの発行
-eventBus.Publish(new PlayerDamagedEvent(10));
-
-// リソースの解放
-subscription.Dispose();
-```
-
 ## 制限事項
 
-1. スレッドセーフ
-
-    - `GameEventBus`は`ConcurrentDictionary`と`Subject.Synchronize`でスレッドセーフに実装
-    - `ReactiveProperty<T>`は`Subject.Synchronize`でスレッドセーフに実装
-    - `CompositeDisposable`はロックベースでスレッドセーフに実装
-
-2. メモリ管理
-
-    - 購読は明示的に解除する必要があります
-    - `CompositeDisposable`を使用して複数の購読を管理することを推奨
-    - イベントバスは型ごとにストリームを管理
-
-3. パフォーマンス
-    - 大量のイベント発行時は注意が必要
-    - 不要な購読は早期に解除
-    - 同一値設定時の通知制御で不要な通知を防止
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
 
 ## テスト
 
-### テストカバレッジ
+### テスト結果
 
-各コンポーネントに対して、以下のテストケースが実装されています：
+詳細なテスト結果は[[ReactiveSystemTestResults|リアクティブシステムテスト結果]]を参照してください。
 
-#### ReactiveProperty<T>
+主なテスト項目：
 
-1. 値の変更通知
-
-    - 初期値の設定と検証
-    - 値変更時の購読者への通知
-    - 複数回の値変更時の通知順序
-    - 同一値設定時の通知制御
-    - リソース解放後の動作
-
-2. スレッドセーフ性
-    - 複数スレッドからの値変更
-    - 複数購読者への同時通知
-    - アトミックな値更新
-
-#### GameEventBus
-
-1. イベント発行・購読
-
-    - イベント発行時の購読者への通知
-    - 複数タイプのイベント処理
-    - 未購読タイプのイベント処理
-    - イベントストリームの取得と購読
-
-2. パフォーマンス
-    - 大量イベント発行時の処理
-    - 購読者への通知速度
-
-#### CompositeDisposable
-
-1. リソース管理
-
-    - 複数リソースの追加と解放
-    - 一括追加（AddRange）の動作
-    - 個別リソースの削除
-    - 全リソースの一括解放（Clear）
-
-2. スレッドセーフ性
-
-    - 複数スレッドからのリソース追加
-    - 並行処理時の整合性
-
-3. エッジケース
-    - 大量リソースの処理
-    - 循環参照の安全な処理
-    - 削除されたリソースの解放状態
-
-### テスト実行方法
-
-```bash
-# テストの実行
-dotnet test Tests/Core/CoreTests.csproj
-```
-
-### テストの追加
-
-新しいテストケースを追加する場合は、以下の点に注意してください：
-
-1. テストクラスは`Tests.Core`名前空間に配置
-2. テストメソッドには`[Test]`属性を付与
-3. テスト名は`対象_条件_期待結果`の形式で命名
-4. アサーションは NUnit の`Assert`クラスを使用
-5. スレッドセーフ性のテストには`Parallel.For`を使用
-6. パフォーマンステストには`[MaxTime]`属性を付与
+-   リアクティブプロパティの値変更通知
+-   イベントの発行と購読
+-   リソースの解放
+-   スレッドセーフな実装
+-   パフォーマンス
 
 ## 変更履歴
 
-| バージョン | 更新日     | 変更内容                               |
-| ---------- | ---------- | -------------------------------------- |
-| 0.4.0      | 2024-03-21 | ViewModel 機能の追加とドキュメント更新 |
-| 0.3.0      | 2024-03-21 | リアクティブプロパティの機能拡張       |
-| 0.2.0      | 2024-03-20 | イベントシステムの実装追加             |
-| 0.1.0      | 2024-03-19 | 初版作成                               |
+| バージョン | 更新日     | 変更内容                                                     |
+| ---------- | ---------- | ------------------------------------------------------------ |
+| 0.5.0      | 2024-03-21 | ドキュメントの構造を更新し、制限事項とテストセクションを追加 |
+| 0.4.0      | 2024-03-21 | ViewModel 機能の追加と使用例の更新                           |
+| 0.3.0      | 2024-03-21 | イベントシステムの実装を更新                                 |
+| 0.2.0      | 2024-03-21 | リソース管理機能の追加                                       |
+| 0.1.0      | 2024-03-21 | 初版作成                                                     |

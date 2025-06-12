@@ -1,192 +1,236 @@
 ---
-title: Player Progression System
-version: 0.1
+title: プレイヤー進行システム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - Progression
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
     - "[[PlayerSystem]]"
-    - "[[ResourceSystem]]"
+    - "[[PlayerStateSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[PlayerAnimationSystem]]"
+    - "[[PlayerInputSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player Progression System
+# プレイヤー進行システム
 
 ## 目次
 
 1. [概要](#概要)
-2. [レベルシステム](#レベルシステム)
-3. [スキルシステム](#スキルシステム)
-4. [成長システム](#成長システム)
-5. [使用方法](#使用方法)
-6. [制限事項](#制限事項)
-7. [変更履歴](#変更履歴)
+2. [進行定義](#進行定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
+5. [制限事項](#制限事項)
+6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player Progression System は、プレイヤーの成長と進行を管理するシステムです。このシステムは以下の機能を提供します：
+プレイヤー進行システムは、プレイヤーの進行を制御するシステムです。以下の機能を提供します：
 
--   レベルアップの管理
--   スキルの習得と成長
--   能力値の成長
--   進行度の管理
+-   レベル管理
+-   経験値管理
+-   スキル管理
+-   イベント通知
 
-## レベルシステム
+## 進行定義
 
-### 1. 基本パラメータ
+### ProgressionDefinition
 
--   **レベル**
+進行の定義を管理するクラスです。
 
-    -   最大レベル: 50
-    -   初期レベル: 1
-    -   レベルアップ条件: 経験値
+```csharp
+public class ProgressionDefinition
+{
+    public int Level { get; set; }
+    public int Experience { get; set; }
+    public int MaxExperience { get; set; }
+    public List<Skill> UnlockedSkills { get; set; }
+    public Dictionary<string, int> Stats { get; set; }
+}
 
--   **経験値**
-
-    -   基本獲得量: 100
-    -   成長率: 1.2 倍/レベル
-    -   上限: 1,000,000
-
--   **スキルポイント**
-    -   獲得量: 1/レベル
-    -   最大保持数: 50
-    -   リセット不可
-
-### 2. レベルアップ効果
-
--   **能力値上昇**
-
-    -   体力: +10
-    -   攻撃力: +5
-    -   防御力: +3
-    -   スタミナ: +5
-
--   **スキル解放**
-    -   レベル 5: スキル 1
-    -   レベル 10: スキル 2
-    -   レベル 15: スキル 3
-    -   レベル 20: スキル 4
-
-## スキルシステム
-
-### 1. スキルタイプ
-
--   **アクティブスキル**
-
-    -   クールダウン: 5-30 秒
-    -   スタミナ消費: 20-100
-    -   効果時間: 0-10 秒
-
--   **パッシブスキル**
-    -   常時効果
-    -   レベル依存
-    -   スタック可能
-
-### 2. スキル成長
-
--   **レベル上限**
-
-    -   アクティブ: 5
-    -   パッシブ: 10
-
--   **成長効果**
-    -   ダメージ: +20%/レベル
-    -   持続時間: +1 秒/レベル
-    -   クールダウン: -1 秒/レベル
-
-### 3. スキルツリー
-
--   **戦闘系**
-
-    -   攻撃力強化
-    -   防御力強化
-    -   特殊攻撃
-
--   **移動系**
-    -   移動速度強化
-    -   ジャンプ力強化
-    -   回避能力強化
-
-## 成長システム
-
-### 1. 能力値成長
-
--   **基本能力値**
-
-    -   体力: 100
-    -   攻撃力: 10
-    -   防御力: 5
-    -   スタミナ: 100
-
--   **成長率**
-    -   体力: 1.1 倍/レベル
-    -   攻撃力: 1.2 倍/レベル
-    -   防御力: 1.1 倍/レベル
-    -   スタミナ: 1.1 倍/レベル
-
-### 2. 特殊成長
-
--   **称号システム**
-
-    -   獲得条件: 特定の実績
-    -   効果: 能力値上昇
-    -   最大数: 10
-
--   **装備成長**
-    -   強化上限: +10
-    -   成功率: 80%
-    -   コスト: 素材
-
-## 使用方法
-
-### 1. レベルアップ
-
-```gdscript
-# 経験値の追加
-player_progression_system.add_experience(1000)
-
-# レベルアップの確認
-var can_level_up = player_progression_system.can_level_up()
-
-# レベルアップの実行
-player_progression_system.level_up()
+public class Skill
+{
+    public string Name { get; set; }
+    public int RequiredLevel { get; set; }
+    public int RequiredExperience { get; set; }
+    public Dictionary<string, int> Requirements { get; set; }
+}
 ```
 
-### 2. スキル管理
+## 主要コンポーネント
 
-```gdscript
-# スキルの習得
-player_progression_system.learn_skill("skill_1")
+### PlayerProgressionController
 
-# スキルの強化
-player_progression_system.upgrade_skill("skill_1")
+プレイヤーの進行を制御するコンポーネントです。
 
-# スキルの使用
-player_progression_system.use_skill("skill_1")
+```csharp
+public class PlayerProgressionController
+{
+    private readonly ReactiveProperty<int> _level;
+    private readonly ReactiveProperty<int> _experience;
+    private readonly ReactiveProperty<int> _maxExperience;
+    private readonly ReactiveProperty<List<Skill>> _unlockedSkills;
+    private readonly ReactiveProperty<Dictionary<string, int>> _stats;
+    private readonly ProgressionDefinition _definition;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<int> Level => _level;
+    public IReactiveProperty<int> Experience => _experience;
+    public IReactiveProperty<int> MaxExperience => _maxExperience;
+    public IReactiveProperty<List<Skill>> UnlockedSkills => _unlockedSkills;
+    public IReactiveProperty<Dictionary<string, int>> Stats => _stats;
+
+    public void AddExperience(int amount);
+    public void LevelUp();
+    public void UnlockSkill(Skill skill);
+    public void UpdateStat(string statName, int value);
+}
 ```
 
-### 3. 進行度管理
+### PlayerProgressionHandler
 
-```gdscript
-# 進行度の保存
-player_progression_system.save_progress()
+プレイヤーの進行を処理するコンポーネントです。
 
-# 進行度の読み込み
-player_progression_system.load_progress()
+```csharp
+public class PlayerProgressionHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerProgressionController _progressionController;
 
-# 進行度のリセット
-player_progression_system.reset_progress()
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnLevelChanged(int newLevel);
+    private void OnExperienceChanged(int newExperience);
+    private void OnMaxExperienceChanged(int newMaxExperience);
+    private void OnUnlockedSkillsChanged(List<Skill> newSkills);
+    private void OnStatsChanged(Dictionary<string, int> newStats);
+}
+```
+
+## 使用例
+
+### 進行の制御
+
+```csharp
+public class PlayerProgressionManager : MonoBehaviour
+{
+    [SerializeField] private PlayerProgressionController _progressionController;
+
+    private void Start()
+    {
+        // 初期レベル設定
+        _progressionController.Level.Value = 1;
+        _progressionController.Experience.Value = 0;
+        _progressionController.MaxExperience.Value = 100;
+
+        // 初期スキル設定
+        var initialSkills = new List<Skill>
+        {
+            new Skill
+            {
+                Name = "Basic Attack",
+                RequiredLevel = 1,
+                RequiredExperience = 0,
+                Requirements = new Dictionary<string, int>()
+            }
+        };
+        _progressionController.UnlockedSkills.Value = initialSkills;
+
+        // 初期ステータス設定
+        var initialStats = new Dictionary<string, int>
+        {
+            { "Strength", 10 },
+            { "Dexterity", 10 },
+            { "Intelligence", 10 }
+        };
+        _progressionController.Stats.Value = initialStats;
+    }
+
+    public void OnEnemyDefeated(int experienceReward)
+    {
+        _progressionController.AddExperience(experienceReward);
+    }
+}
+```
+
+### 進行状態の監視
+
+```csharp
+public class PlayerProgressionObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerProgressionController _progressionController;
+
+    private void OnEnable()
+    {
+        _progressionController.Level
+            .Subscribe(OnLevelChanged)
+            .AddTo(_disposables);
+
+        _progressionController.Experience
+            .Subscribe(OnExperienceChanged)
+            .AddTo(_disposables);
+
+        _progressionController.MaxExperience
+            .Subscribe(OnMaxExperienceChanged)
+            .AddTo(_disposables);
+
+        _progressionController.UnlockedSkills
+            .Subscribe(OnUnlockedSkillsChanged)
+            .AddTo(_disposables);
+
+        _progressionController.Stats
+            .Subscribe(OnStatsChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnLevelChanged(int newLevel)
+    {
+        Debug.Log($"Player level changed to: {newLevel}");
+    }
+
+    private void OnExperienceChanged(int newExperience)
+    {
+        Debug.Log($"Player experience changed to: {newExperience}");
+    }
+
+    private void OnMaxExperienceChanged(int newMaxExperience)
+    {
+        Debug.Log($"Player max experience changed to: {newMaxExperience}");
+    }
+
+    private void OnUnlockedSkillsChanged(List<Skill> newSkills)
+    {
+        Debug.Log($"Player unlocked skills changed to: {string.Join(", ", newSkills.Select(s => s.Name))}");
+    }
+
+    private void OnStatsChanged(Dictionary<string, int> newStats)
+    {
+        Debug.Log($"Player stats changed to: {string.Join(", ", newStats.Select(kvp => $"{kvp.Key}: {kvp.Value}"))}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. レベルアップは自動的に実行される
-2. スキルポイントはリセット不可
-3. 装備強化は失敗時に素材を消費
-4. 進行度の保存は自動的に行われる
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   進行定義は、必ず`ProgressionDefinition`を通じて設定してください
+-   進行制御は、必ず`PlayerProgressionController`を通じて行ってください
+-   進行処理は、必ず`PlayerProgressionHandler`を通じて行ってください
 
 ## 変更履歴
 

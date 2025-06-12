@@ -15,6 +15,7 @@ namespace Systems.Player.Movement
         public ReactiveProperty<Vector2> Velocity { get; }
         public ReactiveProperty<bool> IsGrounded { get; }
         public ReactiveProperty<bool> IsDashing { get; }
+        public PlayerMovementModel Model => _model;
 
         public PlayerMovementViewModel(PlayerMovementModel model, IGameEventBus bus)
             : base(bus)

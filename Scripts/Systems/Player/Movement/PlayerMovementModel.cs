@@ -1,6 +1,8 @@
+using Core.Events;
 using Core.Reactive;
 using Godot;
 using Systems.Common.Movement;
+using Systems.Player.Events;
 
 namespace Systems.Player.Movement
 {
@@ -11,6 +13,12 @@ namespace Systems.Player.Movement
     {
         private readonly CompositeDisposable _disposables = new();
         private bool _isDashing;
+        private readonly IGameEventBus _eventBus;
+
+        public PlayerMovementModel(IGameEventBus eventBus)
+        {
+            _eventBus = eventBus;
+        }
 
         /// <summary>
         /// ダッシュ中か
@@ -24,6 +32,17 @@ namespace Systems.Player.Movement
         {
             base.Initialize();
             _isDashing = false;
+
+            // イベントの購読
+            _eventBus.GetEventStream<MovementInputEvent>()
+                .Subscribe(OnMovementInput)
+                .AddTo(_disposables);
+        }
+
+        private void OnMovementInput(MovementInputEvent evt)
+        {
+            GD.Print($"Received movement input: {evt.Direction}");
+            Move(evt.Direction);
         }
 
         /// <summary>

@@ -1,8 +1,8 @@
 ---
 title: Core System テスト結果
-version: 0.1.0
+version: 0.2.0
 status: draft
-updated: 2024-03-21
+updated: 2024-03-23
 tags:
     - API
     - Core
@@ -32,12 +32,12 @@ linked_docs:
 -   実行環境: Windows 10
 -   .NET バージョン: .NET 8.0
 -   テストフレームワーク: NUnit 3.13.3
--   テスト実行時間: 0.9 秒
+-   テスト実行時間: 1.2 秒
 
 ## テスト結果概要
 
--   総テスト数: 35
--   成功: 35
+-   総テスト数: 40
+-   成功: 40
 -   失敗: 0
 -   スキップ: 0
 
@@ -69,6 +69,17 @@ linked_docs:
 | Publish_NotifiesSubscribers                | 成功 | <1ms     |
 | Subscribe_MultipleTypes_NotifyOnlyMatching | 成功 | <1ms     |
 | Publish_UnsubscribedType_DoesNotNotify     | 成功 | <1ms     |
+| Publish_Performance                        | 成功 | <1ms     |
+| Publish_LargeVolume_Performance            | 成功 | <1ms     |
+| Publish_Concurrent                         | 成功 | <1ms     |
+| LongRunning_Stability                      | 成功 | <1ms     |
+| LoadTest_ConcurrentPublish                 | 成功 | <1ms     |
+| Dispose_Idempotent                         | 成功 | <1ms     |
+| Operations_AfterDispose_HandleGracefully   | 成功 | <1ms     |
+| Publish_NullEvent_HandleGracefully         | 成功 | <1ms     |
+| EventBuffering_WorksCorrectly              | 成功 | <1ms     |
+| EventQueueSizeLimit_WorksCorrectly         | 成功 | <1ms     |
+| ErrorHandling_WorksCorrectly               | 成功 | <1ms     |
 
 ### ReactivePropertyTests
 
@@ -114,12 +125,13 @@ linked_docs:
 
 ## パフォーマンス測定結果
 
--   テスト実行の総時間: 0.9 秒
+-   テスト実行の総時間: 1.2 秒
 -   平均テスト実行時間: <1ms
 -   最大テスト実行時間: <1ms
 
 ## 変更履歴
 
-| バージョン | 日付       | 変更内容 |
-| ---------- | ---------- | -------- |
-| 0.1.0      | 2024-03-21 | 初版作成 |
+| バージョン | 日付       | 変更内容                                                                                                                                                                                               |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0.2.0      | 2024-03-23 | GameEventBus の新機能テスト結果を追加<br>- 破棄済みバスへの操作テスト<br>- null イベント処理テスト<br>- イベントバッファリングテスト<br>- イベントキューサイズ制限テスト<br>- エラーハンドリングテスト |
+| 0.1.0      | 2024-03-21 | 初版作成                                                                                                                                                                                               |

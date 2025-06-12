@@ -1,266 +1,201 @@
 ---
-title: ViewModelシステム
+title: ビューモデルシステム
 version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
     - API
-    - Core
     - ViewModel
+    - Core
     - Reactive
+    - Event
 linked_docs:
     - "[[ReactiveSystem]]"
     - "[[ReactiveProperty]]"
-    - "[[CoreEventSystem]]"
     - "[[CompositeDisposable]]"
-    - "[[00_index]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# ViewModel システム
+# ビューモデルシステム
 
 ## 目次
 
 1. [概要](#概要)
-2. [インターフェース](#インターフェース)
-3. [実装詳細](#実装詳細)
-4. [使用方法](#使用方法)
+2. [ビューモデル定義](#ビューモデル定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-ViewModel システムは、プレゼンテーションロジックとビジネスロジックを分離し、UI とデータの双方向バインディングを実現するための基盤を提供します。主に以下の機能を提供します：
+ビューモデルシステムは、UI とビジネスロジックの間のデータバインディングを管理するシステムです。以下の機能を提供します：
 
 -   データバインディング
 -   コマンド実行
--   イベント処理
--   リソース管理
+-   イベント通知
 -   状態管理
 
-## インターフェース
-
-### IViewModel
-
-```csharp
-public interface IViewModel : IDisposable
-{
-    void Initialize();
-    void Cleanup();
-    IDisposable SubscribeToEvent<TEvent>(Action<TEvent> handler) where TEvent : IGameEvent;
-}
-```
-
-## 実装詳細
+## ビューモデル定義
 
 ### ViewModelBase
 
-```csharp
-public abstract class ViewModelBase : IViewModel
-{
-    protected readonly IGameEventBus _eventBus;
-    protected readonly CompositeDisposable _disposables = new();
-    private readonly object _sync_lock = new();
-    private bool _is_initialized;
-    private bool _is_disposed;
-
-    protected ViewModelBase(IGameEventBus eventBus)
-    {
-        _eventBus = eventBus;
-    }
-
-    public virtual void Initialize()
-    {
-        lock (_sync_lock)
-        {
-            if (_is_initialized)
-                return;
-
-            OnInitialize();
-            _is_initialized = true;
-        }
-    }
-
-    public virtual void Cleanup()
-    {
-        lock (_sync_lock)
-        {
-            if (!_is_initialized)
-                return;
-
-            OnCleanup();
-            _is_initialized = false;
-        }
-    }
-
-    protected virtual void OnInitialize() { }
-    protected virtual void OnCleanup() { }
-
-    protected IDisposable SubscribeToEvent<TEvent>(Action<TEvent> handler)
-        where TEvent : IGameEvent
-    {
-        var subscription = _eventBus.Subscribe(handler);
-        _disposables.Add(subscription);
-        return subscription;
-    }
-
-    public void Dispose()
-    {
-        if (_is_disposed)
-            return;
-
-        Cleanup();
-        _disposables.Dispose();
-        _is_disposed = true;
-    }
-}
-```
-
-主な特徴：
-
--   スレッドセーフな実装
-    -   ロックベースの同期化
-    -   アトミックな操作保証
--   リソース管理
-    -   自動的なリソース解放
-    -   循環参照の防止
--   イベント処理
-    -   イベントの購読管理
-    -   自動的な購読解除
--   状態管理
-    -   初期化状態の追跡
+ビューモデルの基本クラスです。
 
 ```csharp
 public abstract class ViewModelBase : IDisposable
 {
-    protected readonly CompositeDisposable Disposables = new();
-    protected readonly IGameEventBus EventBus;
-    protected ReactiveProperty<bool> IsBusy { get; }
-    public ReactiveProperty<ViewModelState> State { get; }
+    protected readonly CompositeDisposable _disposables = new();
+    protected readonly IGameEventBus _eventBus;
 
-    protected ViewModelBase(IGameEventBus eventBus);
-    public virtual void Dispose();
-    protected void AddDisposable(IDisposable disposable);
-    protected IDisposable SubscribeToEvent<T>(Action<T> onNext) where T : GameEvent;
-    protected ReactiveCommand CreateCommand();
-    protected ReactiveCommand<T> CreateCommand<T>();
-    protected async Task ExecuteAsync(Func<Task> action);
-    protected T GetValue<T>(IReactiveProperty<T> property);
-    protected void SetValue<T>(IReactiveProperty<T> property, T value);
-    public virtual void Activate();
-    public virtual void Deactivate();
-    protected virtual void OnActivate();
-    protected virtual void OnDeactivate();
+    public void Dispose()
+    {
+        _disposables.Dispose();
+    }
+
+    protected void AddDisposable(IDisposable disposable)
+    {
+        _disposables.Add(disposable);
+    }
 }
 ```
 
-主な特徴：
+### ICommand
 
--   リソース管理の自動化
--   イベント購読の簡易化
--   コマンド生成のヘルパーメソッド
--   非同期処理のサポート
--   アクティブ/非アクティブ状態の管理
-
-### ViewModelState
+コマンドのインターフェースです。
 
 ```csharp
-public enum ViewModelState
+public interface ICommand
 {
-    Initial,
-    Active,
-    Inactive
+    bool CanExecute { get; }
+    void Execute();
+    event EventHandler CanExecuteChanged;
 }
 ```
 
-## 使用方法
+## 主要コンポーネント
 
-### 基本的な ViewModel の実装
+### ViewModelController
+
+ビューモデルを制御するコンポーネントです。
+
+```csharp
+public class ViewModelController<T> where T : ViewModelBase
+{
+    private readonly ReactiveProperty<T> _currentViewModel;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<T> CurrentViewModel => _currentViewModel;
+
+    public void SetViewModel(T viewModel);
+    public void ClearViewModel();
+    public void UpdateViewModel(Action<T> updateAction);
+}
+```
+
+### ViewModelHandler
+
+ビューモデルを処理するコンポーネントです。
+
+```csharp
+public class ViewModelHandler<T> : MonoBehaviour where T : ViewModelBase
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly ViewModelController<T> _viewModelController;
+
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnViewModelChanged(T newViewModel);
+}
+```
+
+## 使用例
+
+### ビューモデルの実装
 
 ```csharp
 public class PlayerViewModel : ViewModelBase
 {
+    private readonly ReactiveProperty<string> _name;
     private readonly ReactiveProperty<int> _health;
+    private readonly ReactiveProperty<int> _level;
+    private readonly ReactiveCommand _attackCommand;
+
+    public IReactiveProperty<string> Name => _name;
     public IReactiveProperty<int> Health => _health;
+    public IReactiveProperty<int> Level => _level;
+    public ICommand AttackCommand => _attackCommand;
 
     public PlayerViewModel(IGameEventBus eventBus) : base(eventBus)
     {
-        _health = new ReactiveProperty<int>(100).AddTo(Disposables);
-        SubscribeToEvent<PlayerDamagedEvent>(OnPlayerDamaged);
+        _name = new ReactiveProperty<string>();
+        _health = new ReactiveProperty<int>();
+        _level = new ReactiveProperty<int>();
+        _attackCommand = new ReactiveCommand();
+
+        _attackCommand.Subscribe(ExecuteAttack)
+            .AddTo(_disposables);
     }
 
-    private void OnPlayerDamaged(PlayerDamagedEvent evt)
+    private void ExecuteAttack()
     {
-        _health.Value -= evt.Damage;
-    }
-
-    protected override void OnActivate()
-    {
-        base.OnActivate();
-        // アクティブ化時の処理
-    }
-
-    protected override void OnDeactivate()
-    {
-        base.OnDeactivate();
-        // 非アクティブ化時の処理
+        _eventBus.Publish(new PlayerAttackEvent());
     }
 }
 ```
 
-### コマンドの実装
+### ビューモデルの使用
 
 ```csharp
-public class GameViewModel : ViewModelBase
+public class PlayerView : MonoBehaviour
 {
-    public ReactiveCommand SaveCommand { get; }
-    public ReactiveCommand<int> LoadLevelCommand { get; }
+    [SerializeField] private ViewModelController<PlayerViewModel> _viewModelController;
+    [SerializeField] private Text _nameText;
+    [SerializeField] private Text _healthText;
+    [SerializeField] private Text _levelText;
+    [SerializeField] private Button _attackButton;
 
-    public GameViewModel(IGameEventBus eventBus) : base(eventBus)
+    private readonly CompositeDisposable _disposables = new();
+
+    private void Start()
     {
-        SaveCommand = CreateCommand();
-        LoadLevelCommand = CreateCommand<int>();
+        var viewModel = new PlayerViewModel(GameEventBus.Instance);
+        _viewModelController.SetViewModel(viewModel);
 
-        SaveCommand.Subscribe(async () =>
-        {
-            await ExecuteAsync(async () =>
-            {
-                // セーブ処理
-                await SaveGameAsync();
-            });
-        });
+        viewModel.Name
+            .Subscribe(name => _nameText.text = name)
+            .AddTo(_disposables);
 
-        LoadLevelCommand.Subscribe(async levelId =>
-        {
-            await ExecuteAsync(async () =>
-            {
-                // レベル読み込み処理
-                await LoadLevelAsync(levelId);
-            });
-        });
+        viewModel.Health
+            .Subscribe(health => _healthText.text = $"HP: {health}")
+            .AddTo(_disposables);
+
+        viewModel.Level
+            .Subscribe(level => _levelText.text = $"Lv: {level}")
+            .AddTo(_disposables);
+
+        _attackButton.onClick.AddListener(() => viewModel.AttackCommand.Execute());
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
     }
 }
 ```
 
 ## 制限事項
 
-1. **リソース管理**
-
-    - すべての IDisposable リソースは Disposables に追加する必要があります
-    - 明示的な Dispose 呼び出しは避けてください
-
-2. **スレッドセーフ**
-
-    - すべてのプロパティアクセスはスレッドセーフです
-    - 非同期処理は ExecuteAsync を使用してください
-
-3. **イベント処理**
-
-    - イベントの購読は SubscribeToEvent を使用してください
-    - イベントハンドラ内での例外は適切に処理してください
-
-4. **状態管理**
-    - 状態の変更は Activate/Deactivate メソッドを使用してください
-    - 状態に依存する処理は適切な状態チェックを行ってください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   ビューモデルは、必ず`ViewModelBase`を継承してください
+-   コマンドは、必ず`ICommand`インターフェースを実装してください
+-   ビューモデルの制御は、必ず`ViewModelController`を通じて行ってください
+-   ビューモデルの処理は、必ず`ViewModelHandler`を通じて行ってください
 
 ## 変更履歴
 

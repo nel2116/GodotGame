@@ -1,166 +1,237 @@
 ---
-title: Player Input System
-version: 0.1
+title: プレイヤー入力システム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - Input
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
     - "[[PlayerSystem]]"
+    - "[[PlayerStateSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[PlayerAnimationSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
     - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player Input System
+# プレイヤー入力システム
 
 ## 目次
 
 1. [概要](#概要)
-2. [入力マッピング](#入力マッピング)
-3. [入力処理](#入力処理)
-4. [使用方法](#使用方法)
+2. [入力定義](#入力定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player Input System は、プレイヤーの入力処理を管理するシステムです。このシステムは以下の機能を提供します：
+プレイヤー入力システムは、プレイヤーの入力を制御するシステムです。以下の機能を提供します：
 
--   キーボードとゲームパッドの入力処理
--   入力マッピングの管理
--   入力イベントの発行
--   入力状態の管理
+-   入力検出
+-   入力マッピング
+-   イベント通知
+-   入力状態管理
 
-## 入力マッピング
+## 入力定義
 
-### 1. 基本操作
+### InputDefinition
 
--   **移動**
+入力の定義を管理するクラスです。
 
-    -   キーボード: WASD / 矢印キー
-    -   ゲームパッド: 左スティック
-    -   デッドゾーン: 0.2
+```csharp
+public class InputDefinition
+{
+    public string Name { get; set; }
+    public InputType Type { get; set; }
+    public string Key { get; set; }
+    public float DeadZone { get; set; } = 0.1f;
+    public bool Invert { get; set; } = false;
+    public float Sensitivity { get; set; } = 1.0f;
+}
 
--   **ジャンプ**
-
-    -   キーボード: スペース
-    -   ゲームパッド: A ボタン
-    -   長押し判定: 0.1 秒
-
--   **ダッシュ**
-    -   キーボード: Shift
-    -   ゲームパッド: B ボタン
-    -   長押し判定: 0.2 秒
-
-### 2. 戦闘操作
-
--   **通常攻撃**
-
-    -   キーボード: J
-    -   ゲームパッド: X ボタン
-    -   連続入力: 0.3 秒
-
--   **強攻撃**
-
-    -   キーボード: K
-    -   ゲームパッド: Y ボタン
-    -   チャージ時間: 1.0 秒
-
--   **防御**
-    -   キーボード: L
-    -   ゲームパッド: LB ボタン
-    -   長押し判定: 0.1 秒
-
-### 3. 特殊操作
-
--   **スキル 1**
-
-    -   キーボード: Q
-    -   ゲームパッド: RB ボタン
-    -   クールダウン: 5.0 秒
-
--   **スキル 2**
-    -   キーボード: E
-    -   ゲームパッド: RT ボタン
-    -   クールダウン: 8.0 秒
-
-## 入力処理
-
-### 1. 入力検出
-
--   **即時入力**
-
-    -   キー押下: フレーム単位
-    -   キー解放: フレーム単位
-    -   キー長押し: 時間ベース
-
--   **組み合わせ入力**
-    -   同時押し: 2 キーまで
-    -   順次押し: 0.5 秒以内
-    -   キャンセル: 0.2 秒以内
-
-### 2. 入力バッファ
-
--   **バッファサイズ**: 4 フレーム
--   **有効時間**: 0.2 秒
--   **優先順位**: 最新の入力
-
-### 3. 入力フィルタリング
-
--   **デッドゾーン**
-
-    -   アナログスティック: 0.2
-    -   トリガー: 0.1
-    -   方向キー: 0.0
-
--   **入力スムージング**
-    -   移動: 0.8
-    -   回転: 0.6
-    -   カメラ: 0.4
-
-## 使用方法
-
-### 1. 入力の取得
-
-```gdscript
-# 移動入力の取得
-var movement_input = player_input_system.get_movement_input()
-
-# ジャンプ入力の取得
-var jump_pressed = player_input_system.is_jump_pressed()
-
-# 攻撃入力の取得
-var attack_pressed = player_input_system.is_attack_pressed()
+public enum InputType
+{
+    Button,
+    Axis,
+    Vector2,
+    Vector3
+}
 ```
 
-### 2. 入力イベントの購読
+## 主要コンポーネント
 
-```gdscript
-# 入力イベントの購読
-player_input_system.input_received.connect(_on_input_received)
+### PlayerInputController
 
-func _on_input_received(input_type: String, value: float) -> void:
-    print("Input received: ", input_type, " with value: ", value)
+プレイヤーの入力を制御するコンポーネントです。
+
+```csharp
+public class PlayerInputController
+{
+    private readonly ReactiveProperty<Vector2> _movementInput;
+    private readonly ReactiveProperty<bool> _jumpInput;
+    private readonly ReactiveProperty<bool> _attackInput;
+    private readonly ReactiveProperty<bool> _defendInput;
+    private readonly Dictionary<string, InputDefinition> _inputDefinitions;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<Vector2> MovementInput => _movementInput;
+    public IReactiveProperty<bool> JumpInput => _jumpInput;
+    public IReactiveProperty<bool> AttackInput => _attackInput;
+    public IReactiveProperty<bool> DefendInput => _defendInput;
+
+    public void AddInputDefinition(InputDefinition definition);
+    public void RemoveInputDefinition(string inputName);
+    public void UpdateInput();
+}
 ```
 
-### 3. 入力マッピングの変更
+### PlayerInputHandler
 
-```gdscript
-# 入力マッピングの変更
-player_input_system.remap_input("jump", "space", "gamepad_a")
+プレイヤーの入力を処理するコンポーネントです。
 
-# 入力マッピングの保存
-player_input_system.save_input_mapping()
+```csharp
+public class PlayerInputHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerInputController _inputController;
+
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnMovementInputChanged(Vector2 newInput);
+    private void OnJumpInputChanged(bool newInput);
+    private void OnAttackInputChanged(bool newInput);
+    private void OnDefendInputChanged(bool newInput);
+}
+```
+
+## 使用例
+
+### 入力の制御
+
+```csharp
+public class PlayerInputManager : MonoBehaviour
+{
+    [SerializeField] private PlayerInputController _inputController;
+
+    private void Start()
+    {
+        // 移動入力の定義
+        var movementInput = new InputDefinition
+        {
+            Name = "Movement",
+            Type = InputType.Vector2,
+            Key = "Horizontal,Vertical",
+            DeadZone = 0.1f,
+            Sensitivity = 1.0f
+        };
+        _inputController.AddInputDefinition(movementInput);
+
+        // ジャンプ入力の定義
+        var jumpInput = new InputDefinition
+        {
+            Name = "Jump",
+            Type = InputType.Button,
+            Key = "Space",
+            DeadZone = 0.0f
+        };
+        _inputController.AddInputDefinition(jumpInput);
+
+        // 攻撃入力の定義
+        var attackInput = new InputDefinition
+        {
+            Name = "Attack",
+            Type = InputType.Button,
+            Key = "Mouse0",
+            DeadZone = 0.0f
+        };
+        _inputController.AddInputDefinition(attackInput);
+
+        // 防御入力の定義
+        var defendInput = new InputDefinition
+        {
+            Name = "Defend",
+            Type = InputType.Button,
+            Key = "Mouse1",
+            DeadZone = 0.0f
+        };
+        _inputController.AddInputDefinition(defendInput);
+    }
+
+    private void Update()
+    {
+        _inputController.UpdateInput();
+    }
+}
+```
+
+### 入力状態の監視
+
+```csharp
+public class PlayerInputObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerInputController _inputController;
+
+    private void OnEnable()
+    {
+        _inputController.MovementInput
+            .Subscribe(OnMovementInputChanged)
+            .AddTo(_disposables);
+
+        _inputController.JumpInput
+            .Subscribe(OnJumpInputChanged)
+            .AddTo(_disposables);
+
+        _inputController.AttackInput
+            .Subscribe(OnAttackInputChanged)
+            .AddTo(_disposables);
+
+        _inputController.DefendInput
+            .Subscribe(OnDefendInputChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnMovementInputChanged(Vector2 newInput)
+    {
+        Debug.Log($"Player movement input changed to: {newInput}");
+    }
+
+    private void OnJumpInputChanged(bool newInput)
+    {
+        Debug.Log($"Player jump input changed to: {newInput}");
+    }
+
+    private void OnAttackInputChanged(bool newInput)
+    {
+        Debug.Log($"Player attack input changed to: {newInput}");
+    }
+
+    private void OnDefendInputChanged(bool newInput)
+    {
+        Debug.Log($"Player defend input changed to: {newInput}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 同時に入力可能なキーの数は 4 つまで
-2. 入力バッファは 4 フレームまで保持
-3. 入力マッピングの変更は実行時のみ可能
-4. ゲームパッドの接続/切断は自動検出
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   入力定義は、必ず`InputDefinition`を通じて設定してください
+-   入力制御は、必ず`PlayerInputController`を通じて行ってください
+-   入力処理は、必ず`PlayerInputHandler`を通じて行ってください
 
 ## 変更履歴
 

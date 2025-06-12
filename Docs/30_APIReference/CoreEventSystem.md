@@ -1,169 +1,175 @@
 ---
-title: Core Event System API Reference
-version: 0.1
+title: コアイベントシステム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
     - API
-    - Core
     - Event
-    - Systems
-    - Reference
+    - Core
+    - Reactive
+linked_docs:
+    - "[[ReactiveSystem]]"
+    - "[[CommonEventSystem]]"
+    - "[[ReactiveProperty]]"
+    - "[[CompositeDisposable]]"
 ---
 
-# Core Event System API Reference
+# コアイベントシステム
 
 ## 目次
 
 1. [概要](#概要)
-2. [インターフェース](#インターフェース)
-3. [主要クラス](#主要クラス)
-4. [使用方法](#使用方法)
+2. [イベント定義](#イベント定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Core Event System は、ゲーム全体で使用される基本的なイベント処理の基盤を提供するシステムです。スレッドセーフな実装と型安全なイベント処理を特徴とし、システム間の疎結合な通信を実現します。
+コアイベントシステムは、ゲーム内のイベントを管理する基盤となるシステムです。以下の機能を提供します：
 
-## インターフェース
+-   イベント発行
+-   イベント購読
+-   イベントフィルタリング
+-   イベントバッファリング
+
+## イベント定義
 
 ### IGameEvent
+
+ゲームイベントのインターフェースです。
 
 ```csharp
 public interface IGameEvent
 {
+    string EventType { get; }
     DateTime Timestamp { get; }
+    object Source { get; }
 }
 ```
 
-#### プロパティ
+### GameEventBase
 
--   `Timestamp`: イベントが発生した時刻（UTC）
+ゲームイベントの基本クラスです。
+
+```csharp
+public abstract class GameEventBase : IGameEvent
+{
+    public string EventType { get; }
+    public DateTime Timestamp { get; }
+    public object Source { get; }
+
+    protected GameEventBase(string eventType, object source)
+    {
+        EventType = eventType;
+        Timestamp = DateTime.UtcNow;
+        Source = source;
+    }
+}
+```
+
+## 主要コンポーネント
 
 ### IGameEventBus
+
+イベントバスのインターフェースです。
 
 ```csharp
 public interface IGameEventBus
 {
-    void Publish<T>(T evt) where T : GameEvent;
-    IObservable<T> GetEventStream<T>() where T : GameEvent;
-}
-```
-
-#### メソッド
-
--   `Publish<T>`: イベントを発行します
--   `GetEventStream<T>`: イベントの購読ストリームを取得します
-
-## 主要クラス
-
-### GameEvent
-
-```csharp
-public abstract class GameEvent : IGameEvent
-{
-    public DateTime Timestamp { get; } = DateTime.UtcNow;
+    IDisposable Subscribe<T>(Action<T> onNext) where T : IGameEvent;
+    void Publish<T>(T gameEvent) where T : IGameEvent;
+    void PublishAsync<T>(T gameEvent) where T : IGameEvent;
+    void Clear();
 }
 ```
 
 ### GameEventBus
 
+イベントバスの実装クラスです。
+
 ```csharp
 public class GameEventBus : IGameEventBus
 {
-    private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
+    private readonly Subject<IGameEvent> _eventSubject;
+    private readonly CompositeDisposable _disposables;
 
-    public void Publish<T>(T evt) where T : GameEvent;
-    public IObservable<T> GetEventStream<T>() where T : GameEvent;
+    public IDisposable Subscribe<T>(Action<T> onNext) where T : IGameEvent;
+    public void Publish<T>(T gameEvent) where T : IGameEvent;
+    public void PublishAsync<T>(T gameEvent) where T : IGameEvent;
+    public void Clear();
 }
 ```
 
-## 使用方法
+## 使用例
 
-### 1. イベントの定義
+### イベントの定義と発行
 
 ```csharp
-public class PlayerDamagedEvent : GameEvent
+public class PlayerDamagedEvent : GameEventBase
 {
     public int Damage { get; }
-    public PlayerDamagedEvent(int damage) => Damage = damage;
-}
+    public int RemainingHealth { get; }
 
-public class PlayerHealedEvent : GameEvent
-{
-    public int Amount { get; }
-    public PlayerHealedEvent(int amount) => Amount = amount;
-}
-```
-
-### 2. イベントの発行と購読
-
-```csharp
-// イベントバスの作成
-var eventBus = new GameEventBus();
-
-// イベントの購読
-var subscription = eventBus.GetEventStream<PlayerDamagedEvent>()
-    .Subscribe(evt => Debug.Log($"Player took {evt.Damage} damage"));
-
-// イベントの発行
-eventBus.Publish(new PlayerDamagedEvent(10));
-
-// リソースの解放
-subscription.Dispose();
-```
-
-### 3. ViewModel での使用例
-
-```csharp
-public class PlayerViewModel : ViewModelBase
-{
-    public PlayerViewModel(IGameEventBus eventBus) : base(eventBus)
+    public PlayerDamagedEvent(object source, int damage, int remainingHealth)
+        : base("PlayerDamaged", source)
     {
-        // イベントの購読
-        SubscribeToEvent<PlayerDamagedEvent>(OnPlayerDamaged);
-        SubscribeToEvent<PlayerHealedEvent>(OnPlayerHealed);
+        Damage = damage;
+        RemainingHealth = remainingHealth;
+    }
+}
+
+public class PlayerController : MonoBehaviour
+{
+    [SerializeField] private IGameEventBus _eventBus;
+    private int _health = 100;
+
+    public void TakeDamage(int damage)
+    {
+        _health -= damage;
+        _eventBus.Publish(new PlayerDamagedEvent(this, damage, _health));
+    }
+}
+```
+
+### イベントの購読
+
+```csharp
+public class PlayerUI : MonoBehaviour
+{
+    [SerializeField] private IGameEventBus _eventBus;
+    [SerializeField] private Text _healthText;
+    private readonly CompositeDisposable _disposables = new();
+
+    private void Start()
+    {
+        _eventBus.Subscribe<PlayerDamagedEvent>(OnPlayerDamaged)
+            .AddTo(_disposables);
     }
 
     private void OnPlayerDamaged(PlayerDamagedEvent evt)
     {
-        // ダメージ処理
-        Health.Value -= evt.Damage;
+        _healthText.text = $"HP: {evt.RemainingHealth}";
     }
 
-    private void OnPlayerHealed(PlayerHealedEvent evt)
+    private void OnDestroy()
     {
-        // 回復処理
-        Health.Value += evt.Amount;
+        _disposables.Dispose();
     }
 }
 ```
 
 ## 制限事項
 
-1. **スレッドセーフ**
-
-    - イベントの発行と購読はスレッドセーフです
-    - イベントハンドラ内での処理は適切に同期化してください
-    - 長時間実行されるイベントハンドラは避けてください
-
-2. **メモリ管理**
-
-    - 購読は明示的に解除する必要があります
-    - `CompositeDisposable` を使用して複数の購読を管理することを推奨
-    - 循環参照に注意してください
-
-3. **パフォーマンス**
-
-    - 大量のイベント発行時は注意が必要です
-    - 不要な購読は早期に解除してください
-    - イベントハンドラは軽量に保ってください
-
-4. **例外処理**
-    - イベントハンドラ内での例外は適切に処理してください
-    - イベント発行時の例外は発行元で処理してください
-    - 購読処理内での例外は購読者で処理してください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`PublishAsync`メソッドを使用してください
+-   イベントは、必ず`IGameEvent`インターフェースを実装してください
+-   イベントの発行は、必ず`IGameEventBus`を通じて行ってください
+-   イベントの購読は、必ず`IDisposable`を保持して適切に解放してください
 
 ## 変更履歴
 

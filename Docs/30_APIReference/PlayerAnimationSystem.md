@@ -1,190 +1,191 @@
 ---
-title: Player Animation System
-version: 0.1
+title: プレイヤーアニメーションシステム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - Animation
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
     - "[[PlayerSystem]]"
     - "[[PlayerStateSystem]]"
+    - "[[PlayerMovementSystem]]"
+    - "[[PlayerCombatSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player Animation System
+# プレイヤーアニメーションシステム
 
 ## 目次
 
 1. [概要](#概要)
-2. [アニメーションタイプ](#アニメーションタイプ)
-3. [アニメーション遷移](#アニメーション遷移)
-4. [使用方法](#使用方法)
+2. [アニメーション定義](#アニメーション定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player Animation System は、プレイヤーキャラクターのアニメーションを管理するシステムです。このシステムは以下の機能を提供します：
+プレイヤーアニメーションシステムは、プレイヤーのアニメーションを制御するシステムです。以下の機能を提供します：
 
--   アニメーションの再生制御
--   アニメーション遷移の管理
--   アニメーションイベントの処理
--   アニメーション状態の管理
+-   アニメーション再生
+-   アニメーション遷移
+-   イベント通知
+-   アニメーション同期
 
-## アニメーションタイプ
+## アニメーション定義
 
-### 1. 基本アニメーション
+### AnimationDefinition
 
--   **Idle（待機）**
+アニメーションの定義を管理するクラスです。
 
-    -   フレーム数: 8
-    -   再生速度: 1.0
-    -   ループ: 有効
-    -   優先度: 低
+```csharp
+public class AnimationDefinition
+{
+    public string Name { get; set; }
+    public string ClipName { get; set; }
+    public float Speed { get; set; } = 1.0f;
+    public bool Loop { get; set; } = true;
+    public float TransitionTime { get; set; } = 0.25f;
+    public AnimationEvent[] Events { get; set; }
+}
 
--   **Walk（歩行）**
-
-    -   フレーム数: 12
-    -   再生速度: 1.2
-    -   ループ: 有効
-    -   優先度: 中
-
--   **Run（走行）**
-    -   フレーム数: 12
-    -   再生速度: 1.5
-    -   ループ: 有効
-    -   優先度: 中
-
-### 2. 戦闘アニメーション
-
--   **Attack（攻撃）**
-
-    -   フレーム数: 16
-    -   再生速度: 1.0
-    -   ループ: 無効
-    -   優先度: 高
-
--   **Defend（防御）**
-
-    -   フレーム数: 8
-    -   再生速度: 1.0
-    -   ループ: 有効
-    -   優先度: 高
-
--   **Hit（被弾）**
-    -   フレーム数: 6
-    -   再生速度: 1.0
-    -   ループ: 無効
-    -   優先度: 最高
-
-### 3. 特殊アニメーション
-
--   **Jump（ジャンプ）**
-
-    -   フレーム数: 8
-    -   再生速度: 1.0
-    -   ループ: 無効
-    -   優先度: 高
-
--   **Dash（ダッシュ）**
-
-    -   フレーム数: 6
-    -   再生速度: 1.5
-    -   ループ: 無効
-    -   優先度: 高
-
--   **Death（死亡）**
-    -   フレーム数: 12
-    -   再生速度: 0.8
-    -   ループ: 無効
-    -   優先度: 最高
-
-## アニメーション遷移
-
-### 1. 遷移ルール
-
--   **即時遷移**
-
-    -   条件: 優先度が高い
-    -   ブレンド時間: 0.0 秒
-    -   適用: 被弾、死亡
-
--   **通常遷移**
-
-    -   条件: 優先度が同じ
-    -   ブレンド時間: 0.1 秒
-    -   適用: 移動、攻撃
-
--   **スムーズ遷移**
-    -   条件: 優先度が低い
-    -   ブレンド時間: 0.2 秒
-    -   適用: 待機、歩行
-
-### 2. 遷移制限
-
--   **遷移不可**
-
-    -   死亡中は他のアニメーションに遷移不可
-    -   被弾中は移動アニメーションに遷移不可
-    -   攻撃中は防御アニメーションに遷移不可
-
--   **遷移条件**
-    -   移動速度が 0 以上で歩行アニメーション
-    -   移動速度が 5 以上で走行アニメーション
-    -   ジャンプ中は落下アニメーション
-
-## 使用方法
-
-### 1. アニメーションの再生
-
-```gdscript
-# アニメーションの再生
-player_animation_system.play_animation("idle")
-
-# アニメーションの停止
-player_animation_system.stop_animation()
-
-# アニメーションの一時停止
-player_animation_system.pause_animation()
+public class AnimationEvent
+{
+    public string Name { get; set; }
+    public float Time { get; set; }
+    public object Data { get; set; }
+}
 ```
 
-### 2. アニメーション状態の確認
+## 主要コンポーネント
 
-```gdscript
-# 現在のアニメーションを取得
-var current_animation = player_animation_system.get_current_animation()
+### PlayerAnimationController
 
-# アニメーションの再生状態を確認
-var is_playing = player_animation_system.is_playing()
+プレイヤーのアニメーションを制御するコンポーネントです。
 
-# アニメーションのループ状態を確認
-var is_looping = player_animation_system.is_looping()
+```csharp
+public class PlayerAnimationController
+{
+    private readonly ReactiveProperty<string> _currentAnimation;
+    private readonly ReactiveProperty<float> _animationSpeed;
+    private readonly Dictionary<string, AnimationDefinition> _animations;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<string> CurrentAnimation => _currentAnimation;
+    public IReactiveProperty<float> AnimationSpeed => _animationSpeed;
+
+    public void PlayAnimation(string animationName);
+    public void StopAnimation();
+    public void SetAnimationSpeed(float speed);
+    public void AddAnimation(AnimationDefinition definition);
+    public void RemoveAnimation(string animationName);
+}
 ```
 
-### 3. アニメーションイベントの購読
+### PlayerAnimationHandler
 
-```gdscript
-# アニメーション開始イベント
-player_animation_system.animation_started.connect(_on_animation_started)
+プレイヤーのアニメーションを処理するコンポーネントです。
 
-# アニメーション終了イベント
-player_animation_system.animation_finished.connect(_on_animation_finished)
+```csharp
+public class PlayerAnimationHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerAnimationController _animationController;
+    private readonly Animator _animator;
 
-func _on_animation_started(animation_name: String) -> void:
-    print("Animation started: ", animation_name)
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnAnimationChanged(string newAnimation);
+    private void OnAnimationSpeedChanged(float newSpeed);
+    private void OnAnimationEvent(AnimationEvent animationEvent);
+}
+```
 
-func _on_animation_finished(animation_name: String) -> void:
-    print("Animation finished: ", animation_name)
+## 使用例
+
+### アニメーションの制御
+
+```csharp
+public class PlayerAnimationInput : MonoBehaviour
+{
+    [SerializeField] private PlayerAnimationController _animationController;
+
+    private void Update()
+    {
+        // 移動アニメーション
+        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+        {
+            _animationController.PlayAnimation("Walk");
+        }
+        else
+        {
+            _animationController.PlayAnimation("Idle");
+        }
+
+        // 攻撃アニメーション
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            _animationController.PlayAnimation("Attack");
+        }
+
+        // ジャンプアニメーション
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _animationController.PlayAnimation("Jump");
+        }
+    }
+}
+```
+
+### アニメーション状態の監視
+
+```csharp
+public class PlayerAnimationObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerAnimationController _animationController;
+
+    private void OnEnable()
+    {
+        _animationController.CurrentAnimation
+            .Subscribe(OnAnimationChanged)
+            .AddTo(_disposables);
+
+        _animationController.AnimationSpeed
+            .Subscribe(OnAnimationSpeedChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnAnimationChanged(string newAnimation)
+    {
+        Debug.Log($"Player animation changed to: {newAnimation}");
+    }
+
+    private void OnAnimationSpeedChanged(float newSpeed)
+    {
+        Debug.Log($"Player animation speed changed to: {newSpeed}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 同時に再生可能なアニメーションは 1 つまで
-2. アニメーションの優先度は固定
-3. アニメーションの遷移は自動的に制御
-4. アニメーションイベントは非同期で発行
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   アニメーション定義は、必ず`AnimationDefinition`を通じて設定してください
+-   アニメーション制御は、必ず`PlayerAnimationController`を通じて行ってください
+-   アニメーション処理は、必ず`PlayerAnimationHandler`を通じて行ってください
 
 ## 変更履歴
 

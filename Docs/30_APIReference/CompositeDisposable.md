@@ -1,176 +1,181 @@
 ---
-title: 複合リソース管理
+title: 複合ディスポーザブル
 version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
     - API
-    - Resource
-    - Core
     - Reactive
+    - Core
+    - Disposable
 linked_docs:
     - "[[ReactiveSystem]]"
-    - "[[ViewModelSystem]]"
-    - "[[00_index]]"
+    - "[[ReactiveProperty]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# 複合リソース管理
+# 複合ディスポーザブル
 
 ## 目次
 
 1. [概要](#概要)
-2. [インターフェース](#インターフェース)
-3. [実装詳細](#実装詳細)
-4. [使用方法](#使用方法)
+2. [クラス定義](#クラス定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-複合リソース管理は、複数の`IDisposable`リソースをまとめて管理するための基盤を提供します。主に以下の機能を提供します：
+複合ディスポーザブルは、複数の`IDisposable`リソースをまとめて管理するためのクラスです。以下の機能を提供します：
 
--   複数リソースの一括管理
--   スレッドセーフな実装
--   リソースの自動解放
--   循環参照の防止
--   効率的なメモリ管理
+-   リソースの追加
+-   リソースの削除
+-   リソースの一括解放
+-   リソースの状態管理
 
-## インターフェース
-
-### IDisposable
-
-```csharp
-public interface IDisposable
-{
-    void Dispose();
-}
-```
-
-## 実装詳細
+## クラス定義
 
 ### CompositeDisposable
+
+複合ディスポーザブルの基本クラスです。
 
 ```csharp
 public class CompositeDisposable : IDisposable
 {
-    private readonly List<IDisposable> _disposables = new();
-    private bool _is_disposed;
-    private readonly object _sync_lock = new();
+    private readonly List<IDisposable> _disposables;
+    private bool _isDisposed;
 
-    public int DisposableCount { get; }
-    public void Add(IDisposable disposable);
-    public void AddRange(IEnumerable<IDisposable> disposables);
-    public bool Remove(IDisposable disposable);
-    public void Clear();
-    public void Dispose();
-}
-```
-
-主な特徴：
-
--   スレッドセーフな実装
-    -   ロックベースの同期化
-    -   アトミックな操作保証
--   効率的なリソース管理
-    -   一括操作のサポート
-    -   個別リソースの制御
--   メモリリーク防止
-    -   循環参照の検出
-    -   リソースの確実な解放
--   拡張性
-    -   カスタムリソースのサポート
-    -   柔軟な管理機能
-
-## 使用方法
-
-### 基本的な使用例
-
-```csharp
-// 複合リソースの作成
-var disposables = new CompositeDisposable();
-
-// リソースの追加
-var subscription1 = observable1.Subscribe(x => { });
-var subscription2 = observable2.Subscribe(x => { });
-
-disposables.Add(subscription1);
-disposables.Add(subscription2);
-
-// 複数リソースの一括追加
-var subscriptions = new[]
-{
-    observable3.Subscribe(x => { }),
-    observable4.Subscribe(x => { })
-};
-disposables.AddRange(subscriptions);
-
-// リソースの解放
-disposables.Dispose();
-```
-
-### ViewModel での使用例
-
-```csharp
-public class PlayerViewModel : ViewModelBase
-{
-    private readonly ReactiveProperty<int> _health;
-    public IReactiveProperty<int> Health => _health;
-
-    public PlayerViewModel(IGameEventBus eventBus) : base(eventBus)
+    public CompositeDisposable()
     {
-        _health = new ReactiveProperty<int>(100)
-            .AddTo(Disposables); // 自動的にDisposablesに追加
-
-        // イベントの購読も自動的に管理
-        SubscribeToEvent<PlayerDamagedEvent>(OnPlayerDamaged);
+        _disposables = new List<IDisposable>();
+        _isDisposed = false;
     }
 
-    private void OnPlayerDamaged(PlayerDamagedEvent evt)
+    public void Add(IDisposable disposable)
     {
-        _health.Value -= evt.Damage;
+        if (_isDisposed)
+        {
+            disposable.Dispose();
+            return;
+        }
+
+        _disposables.Add(disposable);
+    }
+
+    public void Remove(IDisposable disposable)
+    {
+        if (_isDisposed)
+            return;
+
+        _disposables.Remove(disposable);
+    }
+
+    public void Clear()
+    {
+        if (_isDisposed)
+            return;
+
+        foreach (var disposable in _disposables)
+        {
+            disposable.Dispose();
+        }
+
+        _disposables.Clear();
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+            return;
+
+        Clear();
+        _isDisposed = true;
     }
 }
 ```
 
-### 拡張メソッドの使用例
+## 主要コンポーネント
+
+### CompositeDisposableExtensions
+
+複合ディスポーザブルの拡張メソッドを提供するクラスです。
 
 ```csharp
-public static class DisposableExtensions
+public static class CompositeDisposableExtensions
 {
-    public static T AddTo<T>(this T disposable, CompositeDisposable disposables)
-        where T : IDisposable
+    public static T AddTo<T>(this T disposable, CompositeDisposable composite) where T : IDisposable;
+    public static void AddRange(this CompositeDisposable composite, IEnumerable<IDisposable> disposables);
+    public static void RemoveRange(this CompositeDisposable composite, IEnumerable<IDisposable> disposables);
+}
+```
+
+## 使用例
+
+### 基本的な使用
+
+```csharp
+public class PlayerController : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+
+    private void Start()
     {
-        disposables.Add(disposable);
-        return disposable;
+        // イベントの購読
+        _eventBus.Subscribe<PlayerDamagedEvent>(OnPlayerDamaged)
+            .AddTo(_disposables);
+
+        // プロパティの監視
+        _health.Subscribe(OnHealthChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
+    }
+}
+```
+
+### リソースの管理
+
+```csharp
+public class ResourceManager : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+
+    public void LoadResources()
+    {
+        // リソースの読み込み
+        var resource1 = LoadResource("resource1");
+        var resource2 = LoadResource("resource2");
+
+        // リソースの追加
+        _disposables.AddRange(new[] { resource1, resource2 });
+    }
+
+    public void UnloadResources()
+    {
+        _disposables.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
     }
 }
 ```
 
 ## 制限事項
 
-1. **スレッドセーフ**
-
-    - リソースの追加と削除はスレッドセーフです
-    - リソースの解放中は新しいリソースを追加できません
-    - 複数のスレッドからの同時操作は避けてください
-
-2. **メモリ管理**
-
-    - リソースは明示的に追加する必要があります
-    - 不要なリソースは早期に解放してください
-    - 循環参照に注意してください
-
-3. **パフォーマンス**
-
-    - 大量のリソース管理時は注意が必要です
-    - 不要なリソースは早期に解放してください
-    - リソースの追加/削除は最小限に抑えてください
-
-4. **例外処理**
-
-    - リソース解放時の例外は適切に処理してください
-    - 解放済みリソースへの操作は`ObjectDisposedException`をスロー
-    - リソース追加時の例外は呼び出し元で処理してください
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   リソースの追加は必要最小限に抑えてください
+-   リソースの削除は、必ず`Remove`メソッドを使用してください
+-   リソースの一括解放は、必ず`Clear`メソッドを使用してください
+-   リソースの状態管理は、必ず`IsDisposed`プロパティを使用してください
+-   リソースの追加は、必ず`AddTo`メソッドを使用してください
 
 ## 変更履歴
 

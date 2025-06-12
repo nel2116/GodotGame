@@ -13,7 +13,7 @@ namespace Systems.Player.Movement
         public override void _Ready()
         {
             var bus = new GameEventBus();
-            var model = new PlayerMovementModel();
+            var model = new PlayerMovementModel(bus);
             _viewModel = new PlayerMovementViewModel(model, bus);
             _viewModel.Initialize();
         }

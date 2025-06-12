@@ -1,153 +1,200 @@
 ---
-title: Player State System
-version: 0.1
+title: プレイヤー状態システム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - State
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
-    - "[[StateSystem]]"
     - "[[PlayerSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player State System
+# プレイヤー状態システム
 
 ## 目次
 
 1. [概要](#概要)
-2. [状態一覧](#状態一覧)
-3. [状態遷移](#状態遷移)
-4. [使用方法](#使用方法)
+2. [状態定義](#状態定義)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
 5. [制限事項](#制限事項)
 6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player State System は、プレイヤーキャラクターの状態を管理し、状態に応じた動作を制御するシステムです。このシステムは以下の機能を提供します：
+プレイヤー状態システムは、プレイヤーの状態を管理し、状態遷移を制御するシステムです。以下の機能を提供します：
 
 -   プレイヤーの状態管理
 -   状態遷移の制御
 -   状態に応じた動作の制御
--   状態変更イベントの発行
+-   イベント通知
 
-## 状態一覧
+## 状態定義
 
-### 基本状態
+### PlayerState
 
-1. **Idle（待機）**
+プレイヤーの状態を表す列挙型です。
 
-    - プレイヤーが何もしていない状態
-    - 入力待ち状態
-    - デフォルトの状態
-
-2. **Moving（移動）**
-
-    - プレイヤーが移動している状態
-    - 方向キー入力中
-    - 移動アニメーション再生中
-
-3. **Jumping（ジャンプ）**
-
-    - プレイヤーがジャンプしている状態
-    - ジャンプアニメーション再生中
-    - 着地判定待ち
-
-4. **Falling（落下）**
-    - プレイヤーが落下している状態
-    - 落下アニメーション再生中
-    - 着地判定待ち
-
-### 戦闘状態
-
-1. **Attacking（攻撃）**
-
-    - プレイヤーが攻撃している状態
-    - 攻撃アニメーション再生中
-    - 攻撃判定発生中
-
-2. **Defending（防御）**
-
-    - プレイヤーが防御している状態
-    - 防御アニメーション再生中
-    - ダメージ軽減効果発生中
-
-3. **Stunned（気絶）**
-    - プレイヤーが気絶している状態
-    - 気絶アニメーション再生中
-    - 入力無効化中
-
-## 状態遷移
-
-### 遷移ルール
-
-1. **Idle → Moving**
-
-    - 条件: 方向キー入力
-    - 優先度: 中
-
-2. **Moving → Idle**
-
-    - 条件: 方向キー入力解除
-    - 優先度: 中
-
-3. **Idle/Moving → Jumping**
-
-    - 条件: ジャンプキー入力
-    - 優先度: 高
-
-4. **Jumping → Falling**
-
-    - 条件: 上昇速度が 0 以下
-    - 優先度: 中
-
-5. **Falling → Idle**
-    - 条件: 着地判定
-    - 優先度: 高
-
-### 遷移制限
-
-1. 気絶中は他の状態に遷移できない
-2. 攻撃中は移動状態に遷移できない
-3. 防御中はジャンプ状態に遷移できない
-
-## 使用方法
-
-### 1. 状態の変更
-
-```gdscript
-# 状態の変更
-player_state_system.change_state("idle")
+```csharp
+public enum PlayerState
+{
+    Idle,
+    Walking,
+    Running,
+    Jumping,
+    Falling,
+    Attacking,
+    Damaged,
+    Dead
+}
 ```
 
-### 2. 状態の確認
+### PlayerStateTransition
 
-```gdscript
-# 現在の状態を取得
-var current_state = player_state_system.get_current_state()
+状態遷移の条件を定義するクラスです。
 
-# 特定の状態かどうかを確認
-var is_moving = player_state_system.is_state("moving")
+```csharp
+public class PlayerStateTransition
+{
+    public PlayerState FromState { get; }
+    public PlayerState ToState { get; }
+    public Func<bool> Condition { get; }
+    public Action OnTransition { get; }
+
+    public PlayerStateTransition(
+        PlayerState fromState,
+        PlayerState toState,
+        Func<bool> condition,
+        Action onTransition = null)
+    {
+        FromState = fromState;
+        ToState = toState;
+        Condition = condition;
+        OnTransition = onTransition;
+    }
+}
 ```
 
-### 3. 状態変更イベントの購読
+## 主要コンポーネント
 
-```gdscript
-# 状態変更イベントの購読
-player_state_system.state_changed.connect(_on_state_changed)
+### PlayerStateManager
 
-func _on_state_changed(new_state: String) -> void:
-    print("State changed to: ", new_state)
+プレイヤーの状態を管理するコンポーネントです。
+
+```csharp
+public class PlayerStateManager
+{
+    private readonly ReactiveProperty<PlayerState> _currentState;
+    private readonly List<PlayerStateTransition> _transitions;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<PlayerState> CurrentState => _currentState;
+
+    public void ChangeState(PlayerState newState);
+    public bool CanChangeState(PlayerState newState);
+    public void AddTransition(PlayerStateTransition transition);
+    public void RemoveTransition(PlayerStateTransition transition);
+    public void Update();
+}
+```
+
+### PlayerStateHandler
+
+プレイヤーの状態変更を処理するコンポーネントです。
+
+```csharp
+public class PlayerStateHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerStateManager _stateManager;
+
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnStateChanged(PlayerState newState);
+}
+```
+
+## 使用例
+
+### 状態遷移の定義
+
+```csharp
+public class PlayerStateInitializer : MonoBehaviour
+{
+    [SerializeField] private PlayerStateManager _stateManager;
+
+    private void Start()
+    {
+        // アイドル状態から歩行状態への遷移
+        _stateManager.AddTransition(new PlayerStateTransition(
+            PlayerState.Idle,
+            PlayerState.Walking,
+            () => Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0
+        ));
+
+        // 歩行状態から走行状態への遷移
+        _stateManager.AddTransition(new PlayerStateTransition(
+            PlayerState.Walking,
+            PlayerState.Running,
+            () => Input.GetKey(KeyCode.LeftShift)
+        ));
+
+        // 地上状態からジャンプ状態への遷移
+        _stateManager.AddTransition(new PlayerStateTransition(
+            PlayerState.Idle,
+            PlayerState.Jumping,
+            () => Input.GetKeyDown(KeyCode.Space) && IsGrounded()
+        ));
+    }
+
+    private bool IsGrounded()
+    {
+        // 接地判定の実装
+        return true;
+    }
+}
+```
+
+### 状態変更の監視
+
+```csharp
+public class PlayerStateObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerStateManager _stateManager;
+
+    private void OnEnable()
+    {
+        _stateManager.CurrentState
+            .Subscribe(OnStateChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnStateChanged(PlayerState newState)
+    {
+        Debug.Log($"Player state changed to: {newState}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 同時に複数の状態を持つことはできません
-2. 状態遷移は優先度に基づいて決定されます
-3. 一部の状態は特定の条件下でのみ遷移可能です
-4. 状態変更イベントは非同期で発行されます
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   状態遷移の条件は、必ず`PlayerStateTransition`を通じて定義してください
+-   状態変更は、必ず`PlayerStateManager`を通じて行ってください
+-   状態変更時の処理は、必ず`PlayerStateHandler`を通じて行ってください
 
 ## 変更履歴
 

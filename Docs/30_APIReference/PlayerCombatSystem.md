@@ -1,198 +1,209 @@
 ---
-title: Player Combat System
-version: 0.1
+title: プレイヤー戦闘システム
+version: 0.1.0
 status: draft
 updated: 2024-03-21
 tags:
+    - API
     - Player
     - Combat
-    - System
-    - Gameplay
+    - Core
+    - Reactive
+    - Event
 linked_docs:
     - "[[PlayerSystem]]"
     - "[[PlayerStateSystem]]"
+    - "[[ReactiveSystem]]"
+    - "[[ViewModelSystem]]"
+    - "[[CoreEventSystem]]"
+    - "[[CommonEventSystem]]"
 ---
 
-# Player Combat System
+# プレイヤー戦闘システム
 
 ## 目次
 
 1. [概要](#概要)
-2. [戦闘システム](#戦闘システム)
-3. [攻撃システム](#攻撃システム)
-4. [防御システム](#防御システム)
-5. [使用方法](#使用方法)
-6. [制限事項](#制限事項)
-7. [変更履歴](#変更履歴)
+2. [戦闘パラメータ](#戦闘パラメータ)
+3. [主要コンポーネント](#主要コンポーネント)
+4. [使用例](#使用例)
+5. [制限事項](#制限事項)
+6. [変更履歴](#変更履歴)
 
 ## 概要
 
-Player Combat System は、プレイヤーの戦闘関連の機能を管理するシステムです。このシステムは以下の機能を提供します：
+プレイヤー戦闘システムは、プレイヤーの戦闘を制御するシステムです。以下の機能を提供します：
 
--   攻撃の実行と判定
--   防御の管理
--   ダメージの計算
--   戦闘状態の管理
+-   攻撃処理
+-   ダメージ計算
+-   スキル管理
+-   イベント通知
 
-## 戦闘システム
+## 戦闘パラメータ
 
-### 1. 基本パラメータ
+### CombatParameters
 
--   **体力（HP）**
+戦闘に関するパラメータを定義するクラスです。
 
-    -   最大値: 100
-    -   回復速度: 1.0/秒
-    -   回復条件: 非戦闘時
-
--   **スタミナ**
-
-    -   最大値: 100
-    -   回復速度: 5.0/秒
-    -   回復条件: 非戦闘時
-
--   **攻撃力**
-    -   基本値: 10
-    -   成長率: 1.0/レベル
-    -   上限: 100
-
-### 2. 戦闘状態
-
--   **通常状態**
-
-    -   移動可能
-    -   攻撃可能
-    -   防御可能
-
--   **戦闘状態**
-
-    -   移動速度低下
-    -   攻撃力上昇
-    -   防御力上昇
-
--   **気絶状態**
-    -   移動不可
-    -   攻撃不可
-    -   防御不可
-
-## 攻撃システム
-
-### 1. 通常攻撃
-
--   **連続攻撃**
-
-    -   最大コンボ: 3
-    -   コンボ間隔: 0.5 秒
-    -   ダメージ倍率: 1.0, 1.2, 1.5
-
--   **強攻撃**
-    -   チャージ時間: 1.0 秒
-    -   ダメージ倍率: 2.0
-    -   スタミナ消費: 20
-
-### 2. 特殊攻撃
-
--   **スキル攻撃**
-
-    -   クールダウン: 5.0 秒
-    -   ダメージ倍率: 3.0
-    -   スタミナ消費: 50
-
--   **必殺技**
-    -   クールダウン: 30.0 秒
-    -   ダメージ倍率: 5.0
-    -   スタミナ消費: 100
-
-### 3. 攻撃判定
-
--   **判定範囲**
-
-    -   前方: 2.0 units
-    -   左右: 1.0 units
-    -   高さ: 2.0 units
-
--   **判定タイミング**
-    -   開始: アニメーションフレーム 5
-    -   終了: アニメーションフレーム 10
-    -   持続時間: 0.2 秒
-
-## 防御システム
-
-### 1. 通常防御
-
--   **防御姿勢**
-
-    -   ダメージ軽減: 50%
-    -   スタミナ消費: 5/秒
-    -   移動速度: 50%
-
--   **パリィ**
-    -   判定時間: 0.1 秒
-    -   成功時: 無敵時間 0.5 秒
-    -   スタミナ消費: 20
-
-### 2. 特殊防御
-
--   **カウンター**
-
-    -   判定時間: 0.2 秒
-    -   成功時: ダメージ 2 倍
-    -   スタミナ消費: 30
-
--   **回避**
-    -   無敵時間: 0.3 秒
-    -   移動距離: 2.0 units
-    -   スタミナ消費: 15
-
-## 使用方法
-
-### 1. 攻撃の実行
-
-```gdscript
-# 通常攻撃
-player_combat_system.attack()
-
-# 強攻撃
-player_combat_system.strong_attack()
-
-# スキル攻撃
-player_combat_system.skill_attack()
+```csharp
+public class CombatParameters
+{
+    public int MaxHealth { get; set; } = 100;
+    public int MaxMana { get; set; } = 100;
+    public float AttackPower { get; set; } = 10f;
+    public float DefensePower { get; set; } = 5f;
+    public float CriticalRate { get; set; } = 0.1f;
+    public float CriticalDamage { get; set; } = 1.5f;
+}
 ```
 
-### 2. 防御の実行
+## 主要コンポーネント
 
-```gdscript
-# 通常防御
-player_combat_system.defend()
+### PlayerCombatController
 
-# パリィ
-player_combat_system.parry()
+プレイヤーの戦闘を制御するコンポーネントです。
 
-# 回避
-player_combat_system.dodge()
+```csharp
+public class PlayerCombatController
+{
+    private readonly ReactiveProperty<int> _health;
+    private readonly ReactiveProperty<int> _mana;
+    private readonly ReactiveProperty<float> _attackPower;
+    private readonly ReactiveProperty<float> _defensePower;
+    private readonly CombatParameters _parameters;
+    private readonly IGameEventBus _eventBus;
+
+    public IReactiveProperty<int> Health => _health;
+    public IReactiveProperty<int> Mana => _mana;
+    public IReactiveProperty<float> AttackPower => _attackPower;
+    public IReactiveProperty<float> DefensePower => _defensePower;
+
+    public void TakeDamage(int damage);
+    public void Heal(int amount);
+    public void UseMana(int amount);
+    public void RestoreMana(int amount);
+    public void Attack(IDamageable target);
+    public void UseSkill(Skill skill, IDamageable target);
+}
 ```
 
-### 3. 戦闘イベントの購読
+### PlayerCombatHandler
 
-```gdscript
-# ダメージイベント
-player_combat_system.damage_taken.connect(_on_damage_taken)
+プレイヤーの戦闘を処理するコンポーネントです。
 
-# 攻撃ヒットイベント
-player_combat_system.attack_hit.connect(_on_attack_hit)
+```csharp
+public class PlayerCombatHandler : MonoBehaviour
+{
+    private readonly CompositeDisposable _disposables = new();
+    private readonly PlayerCombatController _combatController;
 
-func _on_damage_taken(amount: float) -> void:
-    print("Damage taken: ", amount)
+    private void OnEnable();
+    private void OnDisable();
+    private void Update();
+    private void OnHealthChanged(int newHealth);
+    private void OnManaChanged(int newMana);
+    private void OnAttackPowerChanged(float newAttackPower);
+    private void OnDefensePowerChanged(float newDefensePower);
+}
+```
 
-func _on_attack_hit(target: Node, damage: float) -> void:
-    print("Hit target: ", target, " with damage: ", damage)
+## 使用例
+
+### 戦闘の制御
+
+```csharp
+public class PlayerCombatInput : MonoBehaviour
+{
+    [SerializeField] private PlayerCombatController _combatController;
+
+    private void Update()
+    {
+        // 通常攻撃
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            var target = GetTarget();
+            if (target != null)
+            {
+                _combatController.Attack(target);
+            }
+        }
+
+        // スキル使用
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            var target = GetTarget();
+            if (target != null)
+            {
+                _combatController.UseSkill(Skill.Fireball, target);
+            }
+        }
+    }
+
+    private IDamageable GetTarget()
+    {
+        // ターゲット取得の実装
+        return null;
+    }
+}
+```
+
+### 戦闘状態の監視
+
+```csharp
+public class PlayerCombatObserver : MonoBehaviour
+{
+    [SerializeField] private PlayerCombatController _combatController;
+
+    private void OnEnable()
+    {
+        _combatController.Health
+            .Subscribe(OnHealthChanged)
+            .AddTo(_disposables);
+
+        _combatController.Mana
+            .Subscribe(OnManaChanged)
+            .AddTo(_disposables);
+
+        _combatController.AttackPower
+            .Subscribe(OnAttackPowerChanged)
+            .AddTo(_disposables);
+
+        _combatController.DefensePower
+            .Subscribe(OnDefensePowerChanged)
+            .AddTo(_disposables);
+    }
+
+    private void OnHealthChanged(int newHealth)
+    {
+        Debug.Log($"Player health changed to: {newHealth}");
+    }
+
+    private void OnManaChanged(int newMana)
+    {
+        Debug.Log($"Player mana changed to: {newMana}");
+    }
+
+    private void OnAttackPowerChanged(float newAttackPower)
+    {
+        Debug.Log($"Player attack power changed to: {newAttackPower}");
+    }
+
+    private void OnDefensePowerChanged(float newDefensePower)
+    {
+        Debug.Log($"Player defense power changed to: {newDefensePower}");
+    }
+}
 ```
 
 ## 制限事項
 
-1. 同時に実行可能な攻撃は 1 つまで
-2. 防御中は攻撃不可
-3. スタミナが 0 の場合は特殊技使用不可
-4. 戦闘状態は自動的に切り替わる
+-   スレッドセーフな実装が必要な箇所では、必ず提供されている同期メカニズムを使用してください
+-   リソースの解放は適切なタイミングで行ってください
+-   イベントの購読は必要最小限に抑えてください
+-   非同期処理の実行時は、必ず`ExecuteAsync`メソッドを使用してください
+-   戦闘パラメータは、必ず`CombatParameters`を通じて設定してください
+-   戦闘制御は、必ず`PlayerCombatController`を通じて行ってください
+-   戦闘処理は、必ず`PlayerCombatHandler`を通じて行ってください
 
 ## 変更履歴
 
