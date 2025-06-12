@@ -1,8 +1,8 @@
 ---
 title: 共通ユーティリティ実装詳細
-version: 0.2.6
+version: 0.2.7
 status: draft
-updated: 2025-06-09
+updated: 2025-06-12
 tags:
     - Core
     - Utility
@@ -432,6 +432,33 @@ public class ValidationRule<T>
 }
 ```
 
+### 5.3 AsyncValidator
+
+```csharp
+public class AsyncValidator<T>
+{
+    private readonly List<AsyncValidationRule<T>> _rules = new();
+
+    public void AddRule(AsyncValidationRule<T> rule)
+    {
+        _rules.Add(rule);
+    }
+
+    public async Task<ValidationResult> ValidateAsync(T value)
+    {
+        var errors = new List<string>();
+        foreach (var rule in _rules)
+        {
+            if (!await rule.ValidateAsync(value))
+            {
+                errors.Add(rule.ErrorMessage);
+            }
+        }
+        return new ValidationResult(errors);
+    }
+}
+```
+
 ## 6. 非同期処理ユーティリティ
 
 ### 6.1 AsyncCommand
@@ -576,6 +603,7 @@ public static class TaskExtensions
 
 | バージョン | 更新日     | 変更内容                                                                                                               |
 | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 0.2.7      | 2025-06-12 | AsyncValidator の実装<br>ReplaySubject 採用によるメモリ管理改善 |
 | 0.2.6      | 2025-06-09 | ReactiveCollection のインデクサ追加<br>ReactiveCommand<T> の検証追加<br>WithRetry の例外処理改善 |
 | 0.2.5      | 2025-06-09 | EventAggregator の Publish 改善<br>WithRetry の null 許容型更新 |
 | 0.2.4      | 2025-06-09 | AsyncCommand の CanExecuteChanged 実装 |

@@ -24,7 +24,7 @@ namespace Tests.Core.Player.Performance
         public void Movement_Update_Performance()
         {
             var bus = new GameEventBus();
-            var model = new PlayerMovementModel();
+            var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
             for (int i = 0; i < 1000; i++)

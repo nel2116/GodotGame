@@ -12,7 +12,7 @@ namespace Tests.Core.Player.Movement
         public void UpdateMovement_DefaultVelocity_Zero()
         {
             var bus = new GameEventBus();
-            var model = new PlayerMovementModel();
+            var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
             viewModel.UpdateMovement();
@@ -23,7 +23,7 @@ namespace Tests.Core.Player.Movement
         public void Dash_PublishesDashingEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerMovementModel();
+            var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
 
@@ -41,7 +41,7 @@ namespace Tests.Core.Player.Movement
         public void Jump_Update_PublishesGroundedEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerMovementModel();
+            var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
 

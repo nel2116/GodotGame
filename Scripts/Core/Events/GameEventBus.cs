@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive;
 using Godot;
 
 namespace Core.Events
@@ -79,14 +80,14 @@ namespace Core.Events
 			}
 		}
 
-		private ISubject<GameEvent> GetOrCreateSubject(Type type)
-		{
-			return _subjects.GetOrAdd(type, _ =>
-			{
-				var subject = new Subject<GameEvent>();
-				return Subject.Synchronize(subject);
-			});
-		}
+                private ISubject<GameEvent> GetOrCreateSubject(Type type)
+                {
+                        return _subjects.GetOrAdd(type, _ =>
+                        {
+                                var subject = new ReplaySubject<GameEvent>(_maxEventQueueSize);
+                                return Subject.Synchronize(subject);
+                        });
+                }
 
 		/// <summary>
 		/// バスが保持するリソースを解放する
