@@ -12,7 +12,8 @@ namespace Core.Events
     {
         private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
         private readonly object _dispose_lock = new();
-        private bool _disposed;
+        // マルチスレッド環境での可視性を保証するため volatile を使用
+        private volatile bool _disposed;
 
         /// <summary>
         /// イベントを発行
@@ -51,7 +52,7 @@ namespace Core.Events
         /// <param name="disposing">マネージドリソースを解放する場合 true</param>
         protected virtual void Dispose(bool disposing)
         {
-            // 初回のDisposed判定はロックを避けるため。排他制御はこの後のロックで行う。
+            // 初回のDisposed判定はロックを避けるため。volatile により値の可視性を確保し、排他制御はこの後のロックで行う。
             if (_disposed)
             {
                 return;
@@ -75,10 +76,9 @@ namespace Core.Events
                         }
                     }
                     _subjects.Clear();
+                    _disposed = true;
                 }
             }
-
-            _disposed = true;
         }
     }
 }
