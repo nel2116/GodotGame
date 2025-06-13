@@ -8,7 +8,7 @@ tags:
     - Plan
     - Development
 linked_docs:
-    - "[[11_10_prototype_summary|プロトタイプ要素まとめ]]"
+    - "[[11_10_prototype_guidelines|プロトタイプ制作要素まとめ]]"
     - "[[00_index|計画ドキュメント]]"
     - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
     - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"

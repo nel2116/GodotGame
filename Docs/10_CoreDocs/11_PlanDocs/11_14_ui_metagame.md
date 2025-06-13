@@ -8,7 +8,7 @@ tags:
     - Plan
     - Development
 linked_docs:
-    - "[[11_10_prototype_summary|プロトタイプ要素まとめ]]"
+    - "[[11_10_prototype_guidelines|プロトタイプ制作要素まとめ]]"
     - "[[00_index|計画ドキュメント]]"
 ---
 

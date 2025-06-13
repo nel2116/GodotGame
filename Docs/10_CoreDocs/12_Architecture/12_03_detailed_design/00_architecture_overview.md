@@ -1,16 +1,14 @@
 ---
 title: MVVM+RXアーキテクチャ全体図
-version: 0.5.0
+version: 0.5.2
 status: draft
-updated: 2024-03-23
+updated: 2025-06-13
 tags:
     - Architecture
     - MVVM
     - Reactive
     - Overview
 linked_docs:
-    - "[[12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty詳細設計]]"
-    - "[[12_03_detailed_design/01_core_components/02_event_bus|EventBus詳細設計]]"
     - "[[12_03_detailed_design/02_systems/00_common_systems/01_movement_system|共通移動システム詳細設計]]"
     - "[[12_03_detailed_design/02_systems/00_common_systems/02_animation_system|共通アニメーションシステム詳細設計]]"
     - "[[12_03_detailed_design/02_systems/00_common_systems/03_state_system|共通状態システム詳細設計]]"
@@ -430,6 +428,8 @@ flowchart TD
 
 | バージョン | 更新日     | 変更内容                                                                                          |
 | ---------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| 0.5.2      | 2025-06-13 | 重複リンクの整理 |
+| 0.5.1      | 2025-06-13 | EventBusへのリンク修正 |
 | 0.5.0      | 2024-03-23 | 共通システムの追加と構造の更新<br>- 共通システムのインターフェース追加<br>- システム間の連携強化  |
 | 0.4.0      | 2024-03-23 | パフォーマンス最適化の追加<br>- ObjectPool 実装<br>- UpdateManager 実装<br>- ResourceManager 実装 |
 | 0.3.0      | 2024-03-22 | テスト戦略の追加<br>- テスト基底クラスの実装<br>- 各層のテスト戦略の定義                          |

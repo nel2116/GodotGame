@@ -8,11 +8,11 @@ tags:
     - Plan
     - Development
 linked_docs:
-    - "[[11_1_plan|プロジェクト計画書]]"
-    - "[[11_3_mvp|MVP定義]]"
+    - "[[11_01_project_plan|プロジェクト計画書]]"
+    - "[[11_03_mvp_definition|MVP定義]]"
     - "[[11_5_development_roadmap|開発ロードマップ]]"
-    - "[[11_5_core_loop|コアループ]]"
-    - "[[11_6_feature_list|機能一覧]]"
+    - "[[11_05_core_gameplay_loop|コアループ]]"
+    - "[[11_06_feature_specifications|機能一覧]]"
 ---
 
 # プロトタイプ制作要素まとめ

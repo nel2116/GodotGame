@@ -1,8 +1,8 @@
 ---
 title: Camera3D追従システム 詳細設計書
-version: 0.1.1
+version: 0.1.2
 status: draft
-updated: 2024-06-07
+updated: 2025-06-13
 tags:
   - Architecture
   - Camera
@@ -12,7 +12,7 @@ tags:
   - Godot
 linked_docs:
   - "[[00_architecture_overview|アーキテクチャ概要]]"
-  - "[[01_player_system|プレイヤーシステム]]"
+  - "[[01_player_system/index|プレイヤーシステム]]"
   - "[[05_input_system|入力システム]]"
 ---
 
@@ -154,6 +154,7 @@ public partial class CameraView : Camera3D
 
 | バージョン | 更新日     | 変更内容                                                                 |
 | ---------- | ---------- | ------------------------------------------------------------------------ |
+| 0.1.2      | 2025-06-13 | プレイヤーシステムへのリンクを修正 |
 | 0.1.1      | 2024-06-07 | ドキュメント管理ルールに準拠しメタデータ・目次・セクション等を整理         |
 | 0.1.0      | 2024-06-07 | 初版作成                                                                 |
 
