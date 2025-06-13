@@ -1,0 +1,13 @@
+# 整理ログ 2025-06-13
+
+以下のドキュメントに目次の追加とメタデータ更新を実施しました。
+
+- 12_03_detailed_design/04_testing/01_testing_strategy.md
+- 12_03_detailed_design/02_systems/03_level_generation.md
+- 12_03_detailed_design/02_systems/06_save_load_system.md
+- 12_03_detailed_design/02_systems/05_input_system.md
+- 12_03_detailed_design/02_systems/04_enemy_ai.md
+- 12_03_detailed_design/02_systems/02_skill_system.md
+- 12_03_detailed_design/03_optimization/01_performance_optimization.md
+
+各ファイルでは `version` を上げ、`updated` を 2025-06-13 に設定し、変更履歴に追記しました。
