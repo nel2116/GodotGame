@@ -1,8 +1,8 @@
 ---
 title: プレイヤーシステム基底クラス実装詳細
-version: 0.1.0
+version: 0.1.1
 status: draft
-updated: 2024-03-24
+updated: 2025-06-13
 tags:
     - Architecture
     - MVVM
@@ -12,8 +12,8 @@ tags:
     - Player
     - Base
 linked_docs:
-    - "[[12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_03_detailed_design/01_core_components/04_event_bus|EventBus実装詳細]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[04_event_bus|EventBus実装詳細]]"
 ---
 
 # プレイヤーシステム基底クラス実装詳細
@@ -265,4 +265,5 @@ public void TestPlayerSystemStateManagement()
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.1.1      | 2025-06-13 | 参照リンクを修正 |
 | 0.1.0      | 2024-03-24 | 初版作成 |

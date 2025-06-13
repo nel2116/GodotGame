@@ -8,7 +8,7 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[11_1_plan|計画書]]"
+    - "[[11_01_project_plan|プロジェクト計画書]]"
     - "[[00_index|計画ドキュメント]]"
 ---
 

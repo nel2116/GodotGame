@@ -7,7 +7,7 @@ tags:
     - Risk
     - Management
 linked_docs:
-    - "[[11_1_plan]]"
+    - "[[11_01_project_plan]]"
 ---
 
 | リスク                             | 発生確率 | 影響度 | 優先度 | 対策                                 |

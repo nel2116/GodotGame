@@ -1,8 +1,8 @@
 ---
 title: ユーザーガイド
-version: 0.2.0
+version: 0.3.0
 status: draft
-updated: 2025-06-01
+updated: 2025-06-13
 tags:
     - UserGuide
     - Documentation
@@ -49,6 +49,9 @@ linked_docs:
 -   [[TestExecutionGuide|テスト実行ガイド]]
 
 -   [[TestGuidelines|テストガイドライン]]
+-   [[PerformanceOptimization|パフォーマンス最適化ガイド]]
+-   [[Testing|テストガイド]]
+-   [[Troubleshooting|トラブルシューティングガイド]]
 
 -   [[BasicFeatures|基本機能]]
 
@@ -76,5 +79,6 @@ linked_docs:
 
 | バージョン | 更新日     | 変更内容                 |
 | ---------- | ---------- | ------------------------ |
+| 0.3.0      | 2025-06-13 | ガイドを追加 |
 | 0.2.0      | 2025-06-01 | ガイド一覧の更新と構造化 |
 | 0.1.0      | 2025-06-01 | 初版作成                 |

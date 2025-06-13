@@ -9,10 +9,10 @@ tags:
     - Core
     - Development
 linked_docs:
-    - "[[11_1_plan|プロジェクト計画書]]"
-    - "[[11_2_design_pillar|デザインピラー]]"
-    - "[[11_3_mvp|MVP]]"
-    - "[[11_4_kpi|KPI]]"
+    - "[[11_01_project_plan|プロジェクト計画書]]"
+    - "[[11_02_design_pillars|デザインピラー]]"
+    - "[[11_03_mvp_definition|MVP]]"
+    - "[[11_04_kpi_metrics|KPI]]"
 ---
 
 # 開発ロードマップ

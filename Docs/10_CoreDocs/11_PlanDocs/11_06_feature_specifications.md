@@ -8,8 +8,8 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[11_2_design_pillar|デザインピラー]]"
-    - "[[11_3_mvp|MVP]]"
+    - "[[11_02_design_pillars|デザインピラー]]"
+    - "[[11_03_mvp_definition|MVP]]"
     - "[[00_index|計画ドキュメント]]"
 ---
 
