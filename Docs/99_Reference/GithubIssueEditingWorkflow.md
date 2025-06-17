@@ -7,6 +7,7 @@ tags:
     - GitHub
     - Issue
     - Workflow
+    - Roadmap
     - Reference
 linked_docs:
     - "[[ProjectRules#プロジェクトルール|プロジェクトルール]]"
