@@ -1,92 +1,98 @@
 ---
-title: プロジェクト概要
-version: 0.1.0
+title: プロジェクトドキュメント
+version: 0.1
 status: draft
 updated: 2024-03-21
 tags:
-    - Overview
     - Documentation
+    - Index
     - Project
 linked_docs:
-    - "[[DocumentManagementRules]]"
-    - "[[10_CoreDocs/00_index]]"
-    - "[[20_UserGuides/00_index]]"
-    - "[[30_APIReference/00_index]]"
-    - "[[40_Tutorials/00_index]]"
+    - "[[01_WorldConcept/index]]"
+    - "[[02_GameSystem/index]]"
+    - "[[03_Technical/index]]"
+    - "[[04_UIUX/index]]"
+    - "[[05_MetaElements/index]]"
+    - "[[06_DevelopmentPlan/index]]"
+    - "[[07_Testing/index]]"
+    - "[[08_DocRules/index]]"
 ---
 
-# NewGameProject
+# プロジェクトドキュメント
 
 ## 目次
 
 1. [概要](#概要)
-2. [使用技術](#使用技術)
-3. [プロジェクトルール](#プロジェクトルール)
-4. [フォルダ構成](#フォルダ構成)
-5. [ドキュメント構成](#ドキュメント構成)
-6. [ライセンス](#ライセンス)
+2. [ドキュメント構成](#ドキュメント構成)
+3. [注意事項](#注意事項)
+4. [変更履歴](#変更履歴)
 
 ## 概要
 
-このプロジェクトは、Godot Engine 4.2 を使用したゲーム開発プロジェクトです。
-
-## 使用技術
-
--   Godot Engine 4.2
- -   C# (Godot .NET)
--   Git + GitHub
--   Cursor（AI 補完）
-
-## プロジェクトルール
-
--   読みやすく保守性の高いコードを目指す
--   コメントは日本語で記述
--   大きな要件は分割し、理由も明記する
--   `.cursor.json` にルールを記述し、AI 支援に反映
-
-## フォルダ構成
-
-```
-/Scenes/    - シーンファイル
-/Scripts/   - スクリプト
-/Assets/    - アセット素材
-/Docs/      - 設計資料
-```
+このドキュメントは、ゲーム開発プロジェクトの包括的なドキュメント管理システムです。
 
 ## ドキュメント構成
 
-### コアドキュメント
+1. [世界観・コンセプト](01_WorldConcept/index.md)
 
--   [[10_CoreDocs/00_index|コアドキュメントインデックス]]
--   [[10_CoreDocs/Architecture|アーキテクチャ設計]]
--   [[10_CoreDocs/DevelopmentGuidelines|開発ガイドライン]]
+    - ゲームの世界観設定
+    - キャラクター設定
+    - ストーリー設定
+    - アートコンセプト
 
-### ユーザーガイド
+2. [ゲームシステム設計](02_GameSystem/index.md)
 
--   [[20_UserGuides/00_index|ユーザーガイドインデックス]]
--   [[20_UserGuides/Installation|インストールガイド]]
--   [[20_UserGuides/Configuration|設定ガイド]]
+    - コアゲームプレイ
+    - プレイヤーシステム
+    - 進行システム
 
-### API リファレンス
+3. [技術実装・アーキテクチャ](03_Technical/index.md)
 
--   [[30_APIReference/00_index|APIリファレンスインデックス]]
--   [[30_APIReference/CoreSystemAPI|コアシステムAPI]]
--   [[30_APIReference/GameplayAPI|ゲームプレイAPI]]
--   [[30_APIReference/DataManagementAPI|データ管理API]]
+    - アーキテクチャ設計
+    - コアコンポーネント
+    - システム実装
+    - 最適化
 
-### チュートリアル
+4. [UI/UX 設計](04_UIUX/index.md)
 
--   [[40_Tutorials/00_index|チュートリアルインデックス]]
--   [[40_Tutorials/GettingStarted|はじめに]]
--   [[40_Tutorials/BasicFeatures|基本機能]]
--   [[40_Tutorials/AdvancedFeatures|応用機能]]
+    - UI 設計
+    - UX 設計
+    - アセット管理
 
-## ライセンス
+5. [メタ要素/リプレイ性](05_MetaElements/index.md)
 
-MIT
+    - メタ要素設計
+    - リプレイ性設計
+    - 進行度管理
+
+6. [開発計画/ロードマップ](06_DevelopmentPlan/index.md)
+
+    - 企画フェーズ
+    - 開発フェーズ
+    - テストフェーズ
+    - リリースフェーズ
+
+7. [テスト・KPI・バランス調整](07_Testing/index.md)
+
+    - テスト計画
+    - KPI 設定
+    - バランス調整
+
+8. [ドキュメント管理ルール](08_DocRules/index.md)
+    - ファイル命名規則
+    - ディレクトリ構造
+    - バージョン管理
+    - レビュープロセス
+
+## 注意事項
+
+-   ドキュメントの更新は必ずバージョン管理システムを使用してください
+-   各セクションの index.md を参照して、詳細な情報を確認してください
+-   ドキュメントの変更は、関連するセクションの index.md も更新してください
+-   新しいドキュメントの追加は、適切なセクションの index.md にリンクを追加してください
 
 ## 変更履歴
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
-| 0.1.0      | 2025-06-01 | 初版作成 |
+| 0.1.0      | 2024-03-21 | 初版作成 |
