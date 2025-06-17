@@ -9,6 +9,7 @@ tags:
     - PullRequest
     - Procedure
     - Workflow
+    - Roadmap
     - Reference
 linked_docs:
     - "[[ProjectRules#プロジェクトルール|プロジェクトルール]]"

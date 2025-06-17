@@ -6,6 +6,8 @@ updated: 2025-06-07
 tags:
     - AI
     - Test
+    - KPI
+    - Balance
     - Workflow
     - Reference
 linked_docs:
@@ -45,10 +47,8 @@ linked_docs:
     ```bash
     # C#テストの実行
     dotnet test Tests/Core/CoreTests.csproj -v minimal
-
-    # GUTテストの実行
-    godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
     ```
+    - GUT テストは [[GodotTestCommand.md|共通テストコマンド]] を利用します。
 
 3. **結果の収集**
     - コンソール出力の解析
@@ -80,6 +80,12 @@ linked_docs:
     - 自動リトライ
     - エラーパターンの学習
     - 解決策の提案
+
+## 失敗時のログ確認と報告
+
+1. テストが失敗した場合は `user://gut_test_results/` に生成される XML ログを確認します。
+2. ログ内容を要約し、関連 Issue または PR にコメントとして報告してください。
+3. 再現手順やエラーメッセージを [[DevWorkflows.md|共通開発ワークフロー]] の手順に沿って共有します。
 
 ## 変更履歴
 

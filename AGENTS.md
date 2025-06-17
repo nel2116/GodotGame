@@ -3,7 +3,7 @@
 ## コーディング
 
 -   `.editorconfig` の設定に従い、インデントは 4 スペース、改行コードは LF を使用します。
--   ゲームの処理は C# (Godot 4.x) で実装し、GDScript は使用しません。各関数には日本語で簡潔な説明コメントを付けてください。
+-   ゲームの処理は C# (Godot 4.x) で実装し、GDScript はテストでのみ限定的に使用します。各関数には日本語で簡潔な説明コメントを付けてください。
 -   クラス名はパスカルケース、変数名はスネークケース、定数は大文字スネークケースとします。詳細な命名規則は `Docs/10_CoreDocs/DevelopmentGuidelines.md` を参照してください。
 -   コードは読みやすさと保守性を重視し、不要な処理や曖昧な表現は避けます。
 
@@ -16,6 +16,7 @@
 -   `Docs/` 以下の Markdown を更新する際は `Docs/99_Reference/DocumentManagementRules.md` の指針に従います。
     -   冒頭に `title`、`version`、`status`、`updated`、`tags`、`linked_docs` を含む YAML メタデータを記述します。
     -   `updated` は UTC の `YYYY-MM-DD` 形式で現在の日付を記載し、変更履歴を更新します。
+-   主要ドキュメントの一覧は `Docs/README.md` から確認できます。
 
 ## コミットと PR
 
@@ -24,14 +25,13 @@
 -   1 コミットでは関連する変更のみをまとめ、無関係な修正を含めないでください。
 -   プルリクエストでは変更点、テスト方法、関連 Issue を日本語で説明します。
 -   プルリクエストを作成する際は、`Docs/99_Reference/PullRequestProcedure.md` のガイドラインに従ってください。
--   プルリクエストのテンプレート、`Docs/99_Reference/PRTemplate.md`
+-   PR本文は `Docs/99_Reference/PRTemplate.md` をベースに記入します。
+-   共通作業手順は `Docs/99_Reference/DevWorkflows.md` を参照してください。
+-   追加の開発方針は `Docs/99_Reference/ProjectRules.md` を参照してください。
 
 ## テスト
 
--   テストが存在する場合はコミット前に以下を実行して結果を確認してください。
-    ```bash
-    godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
-    ```
+-   テストが存在する場合は [[Docs/99_Reference/GodotTestCommand.md|共通テストコマンド]] を実行して結果を確認してください。
 -   詳細な手順は `Docs/20_UserGuides/TestExecutionGuide.md` を参照してください。
 -   テスト通過後、`git status` を確認し作業ツリーがクリーンであることを確かめます。
 

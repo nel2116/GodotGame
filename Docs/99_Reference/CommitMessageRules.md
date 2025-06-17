@@ -6,6 +6,7 @@ updated: 2025-06-06
 tags:
     - Git
     - Commit
+    - DocsRule
     - Reference
 linked_docs:
     - "[[PullRequestProcedure|プルリクエスト手順]]"
