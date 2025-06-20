@@ -11,6 +11,6 @@ namespace Core.Utilities
         public LogLevel Level { get; set; }
         public string Message { get; set; } = string.Empty;
         public Exception? Exception { get; set; }
-        public DateTime Timestamp { get; set; }
+        public new DateTime Timestamp { get; set; }
     }
 }

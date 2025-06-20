@@ -31,7 +31,7 @@ namespace Core.Utilities
                 .AddTo(_disposables);
         }
 
-        public bool CanExecute(object parameter) => !_isExecuting.Value;
+        public bool CanExecute(object? parameter) => !_isExecuting.Value;
 
         public event EventHandler? CanExecuteChanged
         {
@@ -39,7 +39,7 @@ namespace Core.Utilities
             remove { _canExecuteChanged -= value; }
         }
 
-        public async void Execute(object parameter)
+        public async void Execute(object? parameter)
         {
             if (!CanExecute(parameter)) return;
             try

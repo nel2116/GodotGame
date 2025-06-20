@@ -35,7 +35,7 @@ namespace Core.Utilities
                 .AddTo(_disposables);
         }
 
-        public bool CanExecute(object parameter) => _canExecute.Value;
+        public bool CanExecute(object? parameter) => _canExecute.Value;
 
         public event EventHandler? CanExecuteChanged
         {
@@ -48,7 +48,7 @@ namespace Core.Utilities
             _canExecute.Value = value;
         }
 
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             if (CanExecute(parameter))
             {
@@ -94,7 +94,7 @@ namespace Core.Utilities
                 .AddTo(_disposables);
         }
 
-        public bool CanExecute(object parameter) => _canExecute.Value;
+        public bool CanExecute(object? parameter) => _canExecute.Value;
 
         public event EventHandler? CanExecuteChanged
         {
@@ -107,7 +107,7 @@ namespace Core.Utilities
             _canExecute.Value = value;
         }
 
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             if (!CanExecute(parameter)) return;
             if (parameter is T t)

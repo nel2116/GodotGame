@@ -52,7 +52,7 @@ namespace Core.Reactive
         /// <summary>
         /// 初期値を設定してプロパティを生成
         /// </summary>
-        public ReactiveProperty(T initialValue = default)
+        public ReactiveProperty(T initialValue = default!)
         {
             _value = initialValue;
             // Subject.Synchronize で購読処理を同期化し、スレッド安全性を確保

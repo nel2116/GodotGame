@@ -24,7 +24,15 @@ namespace Core.Utilities
         {
             if (_handlers.TryGetValue(eventName, out var list))
             {
-                list.RemoveAll(wr => !wr.IsAlive || wr.Target == handler);
+                list.RemoveAll(wr =>
+                {
+                    if (!wr.IsAlive) return true;
+                    if (wr.Target is EventHandler h)
+                    {
+                        return h == handler;
+                    }
+                    return false;
+                });
             }
         }
 
