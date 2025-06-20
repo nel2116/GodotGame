@@ -1,0 +1,54 @@
+# Git関連
+.git
+.gitignore
+.gitattributes
+
+# Docker関連
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# ビルド成果物
+Build/
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.so
+*.dylib
+
+# ログファイル
+*.log
+logs/
+
+# 一時ファイル
+*.tmp
+*.temp
+*~
+
+# IDE関連
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# テスト関連
+Tests/bin/
+Tests/obj/
+*.testresults
+
+# ドキュメント関連
+Docs/
+*.md
+!README.md
+
+# その他
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
