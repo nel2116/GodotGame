@@ -24,7 +24,8 @@ namespace Core.Utilities
         {
             if (_handlers.TryGetValue(eventName, out var list))
             {
-                list.RemoveAll(wr => !wr.IsAlive || wr.Target == handler);
+                // 参照が失効しているか、同じハンドラであれば削除
+                list.RemoveAll(wr => !wr.IsAlive || (wr.Target is EventHandler h && h == handler));
             }
         }
 
