@@ -12,7 +12,7 @@ namespace Systems.Player.Input
         private readonly InputRingBuffer<string> _action_buffer = new(12);
         private readonly InputRingBuffer<Vector2> _movement_buffer = new(12);
 
-        public InputBuffer(IGameEventBus bus)
+        public InputBuffer()
         {
         }
 
@@ -39,15 +39,27 @@ namespace Systems.Player.Input
         {
             foreach (var a in _action_buffer.GetItems())
             {
-                if (a == "Dash") return a;
+                if (a == "Dash")
+                {
+                    _action_buffer.Clear();
+                    return a;
+                }
             }
             foreach (var a in _action_buffer.GetItems())
             {
-                if (a == "Jump") return a;
+                if (a == "Jump")
+                {
+                    _action_buffer.Clear();
+                    return a;
+                }
             }
             foreach (var a in _action_buffer.GetItems())
             {
-                if (a == "Attack") return a;
+                if (a == "Attack")
+                {
+                    _action_buffer.Clear();
+                    return a;
+                }
             }
             return null;
         }

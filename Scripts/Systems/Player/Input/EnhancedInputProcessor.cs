@@ -16,7 +16,7 @@ namespace Systems.Player.Input
         public EnhancedInputProcessor(IGameEventBus bus)
         {
             _event_bus = bus;
-            _buffer = new InputBuffer(bus);
+            _buffer = new InputBuffer();
         }
 
         /// <summary>

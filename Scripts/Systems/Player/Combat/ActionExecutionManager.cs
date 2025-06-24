@@ -34,9 +34,10 @@ namespace Systems.Player.Combat
         /// </summary>
         public bool TryCancel(ActionFrameData newAction)
         {
-            if (_cancel_manager.CanCancel(newAction.ActionName))
+            var current = _frame_manager.CurrentAction;
+            if (current != null && _cancel_manager.CanCancel(newAction.ActionName))
             {
-                _event_bus.Publish(new ActionCanceledEvent(newAction.ActionName));
+                _event_bus.Publish(new ActionCanceledEvent(current.ActionName));
                 _frame_manager.StartAction(newAction);
                 return true;
             }

@@ -21,7 +21,7 @@ namespace Tests.Core.Player.State
         {
             var bus = new GameEventBus();
             var manager = new FrameStateManager(bus);
-            var data = new ActionFrameData("Test", 0, 10, 1, 5, 4);
+            var data = new ActionFrameData("Test", 10, 1, 5, 4);
             manager.StartAction(data);
             Assert.That(manager.CurrentAction, Is.Not.Null);
             Assert.That(manager.CurrentAction!.ActionName, Is.EqualTo("Test"));
@@ -32,7 +32,7 @@ namespace Tests.Core.Player.State
         {
             var bus = new GameEventBus();
             var manager = new FrameStateManager(bus);
-            var data = new ActionFrameData("Test", 0, 10, 1, 5, 4);
+            var data = new ActionFrameData("Test", 10, 1, 5, 4);
             manager.StartAction(data);
             for (int i = 0; i < 5; i++) manager.Tick();
             Assert.IsTrue(manager.IsInCancelableFrame(2, 5));

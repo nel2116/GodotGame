@@ -14,10 +14,10 @@ namespace Systems.Player.State
         public int ActiveFrames { get; }
         public int RecoveryFrames { get; }
 
-        public ActionFrameData(string actionName, int startFrame, int totalFrames, int startupFrames, int activeFrames, int recoveryFrames)
+        public ActionFrameData(string actionName, int totalFrames, int startupFrames, int activeFrames, int recoveryFrames)
         {
             ActionName = actionName;
-            StartFrame = startFrame;
+            StartFrame = 0;
             TotalFrames = totalFrames;
             StartupFrames = startupFrames;
             ActiveFrames = activeFrames;

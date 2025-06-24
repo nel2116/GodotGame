@@ -15,7 +15,7 @@ namespace Tests.Core.Player.Combat
             var ruleManager = new CancelRuleManager(frameManager);
             ruleManager.InitializeDefaultRules();
 
-            var action = new ActionFrameData("Attack_L1", 0, 30, 5, 10, 15);
+            var action = new ActionFrameData("Attack_L1", 30, 5, 10, 15);
             frameManager.StartAction(action);
             for (int i = 0; i < 15; i++) frameManager.Tick();
             Assert.IsTrue(ruleManager.CanCancel("Dodge"));
@@ -29,7 +29,7 @@ namespace Tests.Core.Player.Combat
             var ruleManager = new CancelRuleManager(frameManager);
             ruleManager.InitializeDefaultRules();
 
-            var action = new ActionFrameData("Attack_L1", 0, 30, 5, 10, 15);
+            var action = new ActionFrameData("Attack_L1", 30, 5, 10, 15);
             frameManager.StartAction(action);
             for (int i = 0; i < 10; i++) frameManager.Tick();
             Assert.IsFalse(ruleManager.CanCancel("Dodge"));
