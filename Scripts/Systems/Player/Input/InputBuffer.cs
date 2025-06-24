@@ -37,31 +37,29 @@ namespace Systems.Player.Input
         /// </summary>
         public string? PopAction()
         {
+            string? selected = null;
+            var best = int.MaxValue;
             foreach (var a in _action_buffer.GetItems())
             {
-                if (a == "Dash")
+                var priority = a switch
                 {
-                    _action_buffer.Clear();
-                    return a;
+                    "Dash" => 0,
+                    "Jump" => 1,
+                    "Attack" => 2,
+                    _ => int.MaxValue
+                };
+                if (priority < best)
+                {
+                    selected = a;
+                    best = priority;
                 }
             }
-            foreach (var a in _action_buffer.GetItems())
+
+            if (selected != null)
             {
-                if (a == "Jump")
-                {
-                    _action_buffer.Clear();
-                    return a;
-                }
+                _action_buffer.Clear();
             }
-            foreach (var a in _action_buffer.GetItems())
-            {
-                if (a == "Attack")
-                {
-                    _action_buffer.Clear();
-                    return a;
-                }
-            }
-            return null;
+            return selected;
         }
 
         /// <summary>
