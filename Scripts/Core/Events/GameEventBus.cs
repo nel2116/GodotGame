@@ -39,10 +39,10 @@ namespace Core.Events
 		private volatile bool _disposed;
 		private readonly int _maxEventQueueSize = 1000; // イベントキューサイズの上限
 
-		/// <summary>
-		/// プライベートコンストラクタ
-		/// </summary>
-		private GameEventBus() { _disposed = false; }
+                /// <summary>
+                /// インスタンスを生成するコンストラクタ
+                /// </summary>
+                public GameEventBus() { _disposed = false; }
 
 		/// <summary>
 		/// イベントを発行
@@ -117,11 +117,11 @@ namespace Core.Events
 		/// <summary>
 		/// バスが保持するリソースを解放する（テスト用）
 		/// </summary>
-		internal void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+                public void Dispose()
+                {
+                        Dispose(true);
+                        GC.SuppressFinalize(this);
+                }
 
 		/// <summary>
 		/// IDisposableの明示的実装（アプリ本体からは何もしない）
