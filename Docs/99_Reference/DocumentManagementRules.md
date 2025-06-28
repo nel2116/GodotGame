@@ -7,6 +7,7 @@ tags:
     - Documentation
     - Rules
     - Management
+    - DocsRule
     - Reference
 ---
 

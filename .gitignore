@@ -56,3 +56,18 @@ Docs/10_CoreDocs/13_Skills/SkilData.vfx.translation
 
 .fake
 Docs/.obsidian/workspace.json
+
+# .NET build outputs
+**/bin/
+**/obj/
+**/TestResults/
+
+
+# Godot scene identifiers
+*.uid
+
+# Test logs
+dotnet_test.log
+setup.log
+gut.log
+build.log

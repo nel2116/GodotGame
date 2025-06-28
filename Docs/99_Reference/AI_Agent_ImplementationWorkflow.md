@@ -7,6 +7,7 @@ tags:
     - AI
     - Implementation
     - Workflow
+    - Architecture
     - Reference
 linked_docs:
     - "[[11_PlanDocs/11_5_development_roadmap.md]]"
@@ -44,6 +45,8 @@ linked_docs:
         2. 残りの敵種とスキルツリー基幹ノード
         3. ボスと条件解放スキル
         4. UIポリッシュとテスト調整
+    - 各スプリントの目的はプレイアブルな最小機能を早期に確認することであり、テストが全て成功した時点を完了条件とします。
+    - 進捗は [[DevWorkflows.md|共通開発ワークフロー]] に沿って Issue と PR を運用し、次のサイクルへ進みます。
 4. **戦闘・セーブロードシステム**
     - [[15_ImplementationSpecs/15.4_CombatSystemSpec.md|戦闘システム]]と[[15_ImplementationSpecs/15.6_SaveLoadSpec.md|セーブ・ロード]]を実装し、ゲームループを完成させます。
     - 自動テストを用いて戦闘フローとデータ保存の整合性を検証します。
@@ -51,17 +54,18 @@ linked_docs:
     - プレイヤー成長、フィードバック、パフォーマンス最適化など、[[15_ImplementationSpecs/00_index.md|実装仕様書一覧]]の後半項目を順次反映します。
 6. **コミットとプルリクエスト**
     - [[PullRequestProcedure.md|プルリクエスト手順]]に従い、作業ブランチの作成からレビュー依頼までを行います。
-    - コード変更は `godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json` でテスト後にコミットします。
+    - コード変更は [[GodotTestCommand.md|共通テストコマンド]] でテスト後にコミットします。
+    - 共通作業は [[DevWorkflows.md|共通開発ワークフロー]] を参照してください。
 7. **ドキュメント更新**
     - 実装変更があれば[[DocumentManagementRules.md|ドキュメント管理ルール]]に従い、メタデータと変更履歴を記録します。
 
 # 使用方法
 
 - AIエージェントは上記の手順を参考に、該当する仕様書を確認しながら実装を進めます。
-- ゲームの処理は C# (Godot .NET) で実装し、GDScript は使用しないでください。
-- ただしテストスクリプトは GDScript で記述してもかまいません。C# クラスを参照する際は `[GlobalClass]` 属性を付与し、メソッド名の大文字・小文字に注意してください。
+- ゲームの処理は C# (Godot .NET) で実装し、GDScript はテストでのみ使用可能です。
+- テストスクリプトを書く場合、C# クラスを参照する際は `[GlobalClass]` 属性を付与し、メソッド名の大文字・小文字に注意してください。
 - 仕様書で不明点があれば関連ドキュメントへのリンクから詳細を参照してください。
-- コード変更後はテストコマンド `godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json` を実行して結果を確認します。
+- コード変更後は [[GodotTestCommand.md|共通テストコマンド]] を実行して結果を確認します。
 
 # 制限事項
 
