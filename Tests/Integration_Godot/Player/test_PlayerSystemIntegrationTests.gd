@@ -11,12 +11,21 @@ var animation_node
 var progression_node
 
 func before_each():
-	# 各ViewModelNodeを初期化（C#クラスを直接インスタンス化）
-	input_node = PlayerInputViewModelNode.new()
-	movement_node = PlayerMovementViewModelNode.new()
-	combat_node = PlayerCombatViewModelNode.new()
-	animation_node = PlayerAnimationViewModelNode.new()
-	progression_node = PlayerProgressionViewModelNode.new()
+	# 各ViewModelNodeを初期化（C#クラスを正しく参照）
+	var input_script = load("res://Scripts/Systems/Player/Input/PlayerInputViewModelNode.cs")
+	input_node = input_script.new()
+	
+	var movement_script = load("res://Scripts/Systems/Player/Movement/PlayerMovementViewModelNode.cs")
+	movement_node = movement_script.new()
+	
+	var combat_script = load("res://Scripts/Systems/Player/Combat/PlayerCombatViewModelNode.cs")
+	combat_node = combat_script.new()
+	
+	var animation_script = load("res://Scripts/Systems/Player/Animation/PlayerAnimationViewModelNode.cs")
+	animation_node = animation_script.new()
+	
+	var progression_script = load("res://Scripts/Systems/Player/Progression/PlayerProgressionViewModelNode.cs")
+	progression_node = progression_script.new()
 	
 	# シーンツリーに追加
 	add_child(input_node)
@@ -159,9 +168,14 @@ func test_memory_usage_integration():
 	# メモリ使用量統合テスト
 	var nodes = []
 	for i in range(10):
-		var temp_input = PlayerInputViewModelNode.new()
-		var temp_movement = PlayerMovementViewModelNode.new()
-		var temp_combat = PlayerCombatViewModelNode.new()
+		var temp_input_script = load("res://Scripts/Systems/Player/Input/PlayerInputViewModelNode.cs")
+		var temp_input = temp_input_script.new()
+		
+		var temp_movement_script = load("res://Scripts/Systems/Player/Movement/PlayerMovementViewModelNode.cs")
+		var temp_movement = temp_movement_script.new()
+		
+		var temp_combat_script = load("res://Scripts/Systems/Player/Combat/PlayerCombatViewModelNode.cs")
+		var temp_combat = temp_combat_script.new()
 		
 		add_child(temp_input)
 		add_child(temp_movement)
@@ -196,11 +210,20 @@ func test_node_lifecycle_integration():
 	await get_tree().process_frame
 	
 	# 新しいノードを作成
-	input_node = PlayerInputViewModelNode.new()
-	movement_node = PlayerMovementViewModelNode.new()
-	combat_node = PlayerCombatViewModelNode.new()
-	animation_node = PlayerAnimationViewModelNode.new()
-	progression_node = PlayerProgressionViewModelNode.new()
+	var input_script = load("res://Scripts/Systems/Player/Input/PlayerInputViewModelNode.cs")
+	input_node = input_script.new()
+	
+	var movement_script = load("res://Scripts/Systems/Player/Movement/PlayerMovementViewModelNode.cs")
+	movement_node = movement_script.new()
+	
+	var combat_script = load("res://Scripts/Systems/Player/Combat/PlayerCombatViewModelNode.cs")
+	combat_node = combat_script.new()
+	
+	var animation_script = load("res://Scripts/Systems/Player/Animation/PlayerAnimationViewModelNode.cs")
+	animation_node = animation_script.new()
+	
+	var progression_script = load("res://Scripts/Systems/Player/Progression/PlayerProgressionViewModelNode.cs")
+	progression_node = progression_script.new()
 	
 	add_child(input_node)
 	add_child(movement_node)
