@@ -56,6 +56,7 @@ namespace Systems.Player.Animation
         public void HandleAnimation(string animationName)
         {
             _model.PlayAnimation(animationName);
+            UpdateAnimationState();
         }
 
         private void UpdateAnimationState()

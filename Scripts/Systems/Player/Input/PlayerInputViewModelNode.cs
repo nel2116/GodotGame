@@ -21,13 +21,22 @@ public partial class PlayerInputViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    public void UpdateInput()
+    /// <summary>
+    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
+    /// </summary>
+    private bool EnsureViewModelInitialized()
     {
         if (_viewModel == null)
         {
             GD.PrintErr("PlayerInputViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
+            return false;
         }
+        return true;
+    }
+
+    public void UpdateInput()
+    {
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.UpdateInput();
     }

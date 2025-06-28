@@ -2,14 +2,14 @@ using NUnit.Framework;
 using Core.Events;
 using Systems.Common.State;
 using Systems.Common.Events;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tests.Core.State
 {
     public class CommonStateViewModelTests
     {
         [Test]
-        public void ChangeState_PublishesStateEvent()
+        public async Task ChangeState_PublishesStateEvent()
         {
             // 準備
             var bus = new GameEventBus();
@@ -21,7 +21,7 @@ namespace Tests.Core.State
             
             // 実行
             vm.ChangeState("NewState");
-            Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+            await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
             
             // 検証
             Assert.That(receivedEvent, Is.Not.Null);

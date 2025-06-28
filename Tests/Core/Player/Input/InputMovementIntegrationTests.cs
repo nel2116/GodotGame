@@ -6,6 +6,7 @@ using Core.Events;
 using Godot;
 using System.Reflection;
 using System;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Input
 {
@@ -18,7 +19,7 @@ namespace Tests.Core.Player.Input
         }
 
         [Test]
-        public void InputModel_Move_UpdatesMovementModel()
+        public async Task InputModel_Move_UpdatesMovementModel()
         {
             var bus = new GameEventBus();
             
@@ -50,7 +51,7 @@ namespace Tests.Core.Player.Input
             inputModel.UpdateInput();
 
             // バッファリング遅延を考慮して待機
-            System.Threading.Thread.Sleep(20);
+            await Task.Delay(20);
 
             // 移動モデルの状態を更新
             movementModel.Update();

@@ -27,7 +27,7 @@ func test_initial_movement_state():
 	# 初期状態の確認
 	assert_eq(movement_node.Velocity, Vector2.ZERO, "Initial velocity should be zero")
 	assert_false(movement_node.IsDashing, "Initial state should not be dashing")
-	assert_false(movement_node.IsGrounded, "Initial state should not be grounded")
+	assert_true(movement_node.IsGrounded, "Initial state should be grounded")
 
 func test_handle_jump_action():
 	# ジャンプアクションのテスト

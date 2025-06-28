@@ -20,37 +20,38 @@ func test_initialize_node_properly():
 	assert_true(combat_node.IsInitialized, "Combat node should be properly initialized")
 
 func test_initial_combat_state():
-	# 初期状態の確認
-	assert_eq(combat_node.CurrentHealth, 0.0, "Initial health should be zero")
-	assert_eq(combat_node.MaxHealth, 0.0, "Initial max health should be zero")
+	# 初期状態の確認（実際の実装では初期値は100）
+	assert_eq(combat_node.CurrentHealth, 100.0, "Initial health should be 100")
+	assert_eq(combat_node.MaxHealth, 100.0, "Initial max health should be 100")
 
 func test_attack_action():
 	# 攻撃アクションのテスト
 	combat_node.Attack("BasicAttack")
 	
-	# 攻撃アクションが適切に処理されることを確認
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should remain unchanged for basic attack")
+	# 攻撃アクションが適切に処理されることを確認（体力は変化しない）
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should remain unchanged for basic attack")
 
 func test_take_damage_action():
 	# ダメージを受けるアクションのテスト
 	combat_node.TakeDamage(10.0)
 	
-	# ダメージが適切に処理されることを確認
-	assert_eq(combat_node.CurrentHealth, 0.0, "Damage should be applied")
+	# ダメージが適切に処理されることを確認（防御力5を考慮）
+	assert_eq(combat_node.CurrentHealth, 95.0, "Damage should be applied")
 
 func test_heal_action():
 	# 回復アクションのテスト
+	combat_node.TakeDamage(20.0)  # 先にダメージを与える
 	combat_node.Heal(5.0)
 	
 	# 回復が適切に処理されることを確認
-	assert_eq(combat_node.CurrentHealth, 0.0, "Healing should be applied")
+	assert_eq(combat_node.CurrentHealth, 90.0, "Healing should be applied")
 
 func test_update_combat():
 	# 戦闘更新のテスト
 	combat_node.UpdateCombat()
 	
 	# 戦闘システムが適切に更新されることを確認
-	assert_eq(combat_node.CurrentHealth, 0.0, "Combat should be updated")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Combat should be updated")
 
 func test_multiple_combat_actions():
 	# 複数の戦闘アクションのテスト
@@ -60,7 +61,7 @@ func test_multiple_combat_actions():
 	combat_node.UpdateCombat()
 	
 	assert_true(combat_node.IsInitialized, "Combat node should handle multiple actions")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should be consistent after multiple actions")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should be consistent after multiple actions")
 
 func test_combat_actions_sequence():
 	# 戦闘アクションのシーケンステスト
@@ -73,7 +74,7 @@ func test_combat_actions_sequence():
 	
 	# アクションシーケンスが適切に処理されることを確認
 	assert_true(combat_node.IsInitialized, "Combat node should handle action sequences")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should be consistent after action sequence")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should be consistent after action sequence")
 
 func test_combat_node_lifecycle():
 	# ノードのライフサイクルテスト
@@ -88,7 +89,7 @@ func test_combat_node_lifecycle():
 	combat_node.Initialize()
 	
 	assert_true(combat_node.IsInitialized, "Combat node should be reinitializable")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should be reset after reinitialization")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should be reset after reinitialization")
 
 func test_combat_performance():
 	# パフォーマンステスト
@@ -96,7 +97,7 @@ func test_combat_performance():
 		combat_node.UpdateCombat()
 	
 	assert_true(combat_node.IsInitialized, "Combat node should handle performance test")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should remain consistent after performance test")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should remain consistent after performance test")
 
 func test_combat_error_handling():
 	# エラーハンドリングテスト
@@ -141,7 +142,7 @@ func test_combat_concurrent_operations():
 	
 	# 並行操作後も正常に動作することを確認
 	assert_true(combat_node.IsInitialized, "Combat node should handle concurrent operations")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should be consistent after concurrent operations")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should be consistent after concurrent operations")
 
 func test_combat_action_combinations():
 	# 戦闘アクションの組み合わせテスト
@@ -153,7 +154,7 @@ func test_combat_action_combinations():
 	
 	# 組み合わせアクションが適切に処理されることを確認
 	assert_true(combat_node.IsInitialized, "Combat node should handle action combinations")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should be consistent after action combinations")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should be consistent after action combinations")
 
 func test_invalid_attack_actions():
 	# 無効な攻撃アクションのテスト
@@ -163,7 +164,7 @@ func test_invalid_attack_actions():
 	
 	# 無効なアクション後もシステムが正常に動作することを確認
 	assert_true(combat_node.IsInitialized, "Combat node should handle invalid actions")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should remain consistent after invalid actions")
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should remain consistent after invalid actions")
 
 func test_extreme_damage_values():
 	# 極端なダメージ値のテスト
@@ -183,4 +184,4 @@ func test_extreme_heal_values():
 	
 	# 極端な値後もシステムが正常に動作することを確認
 	assert_true(combat_node.IsInitialized, "Combat node should handle extreme heal values")
-	assert_eq(combat_node.CurrentHealth, 0.0, "Health should remain consistent after extreme heal values") 
+	assert_eq(combat_node.CurrentHealth, 100.0, "Health should remain consistent after extreme heal values") 

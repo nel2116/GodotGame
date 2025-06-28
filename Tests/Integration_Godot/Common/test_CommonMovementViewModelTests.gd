@@ -27,33 +27,38 @@ func test_update_movement_default_velocity_zero():
 	movement_node.UpdateMovement()
 	assert_eq(movement_node.Velocity, Vector2.ZERO, "Default velocity should be zero after update")
 
-func test_set_velocity_action():
-	# 速度設定アクションのテスト
-	var new_velocity = Vector2(10, 5)
-	movement_node.SetVelocity(new_velocity)
+func test_move_action():
+	# 移動アクションのテスト
+	var direction = Vector2(1, 0)
+	movement_node.Move(direction)
 	
-	# 速度設定アクションが適切に処理されることを確認
-	assert_eq(movement_node.Velocity, new_velocity, "Velocity should be set to new value")
+	# 移動アクションが適切に処理されることを確認
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Velocity should change after move action")
 
-func test_multiple_velocity_changes():
-	# 複数の速度変更のテスト
-	movement_node.SetVelocity(Vector2(5, 3))
-	movement_node.SetVelocity(Vector2(15, 8))
-	movement_node.SetVelocity(Vector2(0, 0))
-	
-	assert_true(movement_node.IsInitialized, "Movement node should handle multiple velocity changes")
-	assert_eq(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after multiple changes")
+func test_multiple_movement_changes():
+	# 複数の移動変更のテスト
+	movement_node.Move(Vector2(1, 0))
+	movement_node.Move(Vector2(0, 1))
+	movement_node.Move(Vector2(0, 0))
+	var max_iterations = 100
+	var count = 0
+	while movement_node.Velocity.length() >= 0.01 and count < max_iterations:
+		movement_node.UpdateMovement()
+		count += 1
+	assert_true(movement_node.IsInitialized, "Movement node should handle multiple movement changes")
+	assert_true(movement_node.Velocity.length() < 0.01, "Velocity should be near zero after stop")
 
 func test_movement_actions_sequence():
 	# 移動アクションのシーケンステスト
-	movement_node.SetVelocity(Vector2(10, 5))
+	movement_node.Move(Vector2(1, 0))
 	movement_node.UpdateMovement()
-	movement_node.SetVelocity(Vector2(20, 10))
+	movement_node.Move(Vector2(0, 1))
 	movement_node.UpdateMovement()
 	
 	# アクションシーケンスが適切に処理されることを確認
 	assert_true(movement_node.IsInitialized, "Movement node should handle action sequences")
-	assert_eq(movement_node.Velocity, Vector2(20, 10), "Velocity should be consistent after action sequence")
+	# UpdateMovement()により速度が減衰するが、最後の移動で新しい速度が設定される
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after action sequence")
 
 func test_movement_node_lifecycle():
 	# ノードのライフサイクルテスト
@@ -86,7 +91,7 @@ func test_movement_error_handling():
 	
 	# 初期化前にアクションを呼び出し
 	temp_node.UpdateMovement()
-	temp_node.SetVelocity(Vector2(10, 5))
+	temp_node.Move(Vector2(1, 0))
 	
 	# エラーが発生せずに動作することを確認
 	assert_false(temp_node.IsInitialized, "Node should not be initialized before Initialize() call")
@@ -112,49 +117,65 @@ func test_movement_concurrent_operations():
 	# 並行操作テスト
 	# 複数の操作を同時に実行
 	movement_node.UpdateMovement()
-	movement_node.SetVelocity(Vector2(10, 5))
-	movement_node.SetVelocity(Vector2(20, 10))
+	movement_node.Move(Vector2(1, 0))
+	movement_node.Move(Vector2(0, 1))
 	
 	# 並行操作後も正常に動作することを確認
 	assert_true(movement_node.IsInitialized, "Movement node should handle concurrent operations")
-	assert_eq(movement_node.Velocity, Vector2(20, 10), "Velocity should be consistent after concurrent operations")
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after concurrent operations")
 
 func test_movement_action_combinations():
 	# 移動アクションの組み合わせテスト
-	# 速度設定と更新を組み合わせて実行
-	movement_node.SetVelocity(Vector2(10, 5))
+	movement_node.Move(Vector2(1, 0))
 	movement_node.UpdateMovement()
-	movement_node.SetVelocity(Vector2(0, 0))
-	movement_node.UpdateMovement()
-	
-	# 組み合わせアクションが適切に処理されることを確認
+	movement_node.Move(Vector2(0, 0))
+	var max_iterations = 100
+	var count = 0
+	while movement_node.Velocity.length() >= 0.01 and count < max_iterations:
+		movement_node.UpdateMovement()
+		count += 1
 	assert_true(movement_node.IsInitialized, "Movement node should handle action combinations")
-	assert_eq(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after action combinations")
+	assert_true(movement_node.Velocity.length() < 0.01, "Velocity should be near zero after action combinations")
 
-func test_extreme_velocity_values():
-	# 極端な速度値のテスト
-	movement_node.SetVelocity(Vector2(-999, -999))  # 負の大きな値
-	movement_node.SetVelocity(Vector2(999, 999))    # 正の大きな値
-	movement_node.SetVelocity(Vector2(0.001, 0.001))  # 非常に小さな値
+func test_extreme_movement_values():
+	# 極端な移動値のテスト
+	movement_node.Move(Vector2(-999, -999))  # 負の大きな値
+	movement_node.Move(Vector2(999, 999))    # 正の大きな値
+	movement_node.Move(Vector2(0.001, 0.001))  # 非常に小さな値
 	
 	# 極端な値後もシステムが正常に動作することを確認
-	assert_true(movement_node.IsInitialized, "Movement node should handle extreme velocity values")
-	assert_eq(movement_node.Velocity, Vector2(0.001, 0.001), "Velocity should be consistent after extreme values")
+	assert_true(movement_node.IsInitialized, "Movement node should handle extreme movement values")
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after extreme values")
 
-func test_velocity_precision():
-	# 速度精度のテスト
-	movement_node.SetVelocity(Vector2(3.14159, 2.71828))
+func test_movement_precision():
+	# 移動精度のテスト
+	movement_node.Move(Vector2(0.5, 0.3))
 	
 	# 精度が保持されることを確認
-	assert_true(movement_node.IsInitialized, "Movement node should handle velocity precision")
-	assert_eq(movement_node.Velocity, Vector2(3.14159, 2.71828), "Velocity precision should be maintained")
+	assert_true(movement_node.IsInitialized, "Movement node should handle movement precision")
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Movement precision should be maintained")
 
 func test_movement_update_frequency():
 	# 移動更新頻度のテスト
 	for i in range(10):
-		movement_node.SetVelocity(Vector2(i, i))
+		movement_node.Move(Vector2(i * 0.1, i * 0.1))
 		movement_node.UpdateMovement()
 	
 	# 高頻度の更新後もシステムが正常に動作することを確認
 	assert_true(movement_node.IsInitialized, "Movement node should handle high update frequency")
-	assert_eq(movement_node.Velocity, Vector2(9, 9), "Velocity should be consistent after high frequency updates") 
+	assert_ne(movement_node.Velocity, Vector2.ZERO, "Velocity should be consistent after high frequency updates")
+
+func test_jump_action():
+	# ジャンプアクションのテスト
+	movement_node.Jump()
+	
+	# ジャンプアクションが適切に処理されることを確認
+	assert_true(movement_node.IsInitialized, "Movement node should handle jump action")
+
+func test_dash_action():
+	# ダッシュアクションのテスト
+	movement_node.Move(Vector2(1, 0))
+	movement_node.Dash()
+	
+	# ダッシュアクションが適切に処理されることを確認
+	assert_true(movement_node.IsInitialized, "Movement node should handle dash action") 

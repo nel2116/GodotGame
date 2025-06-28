@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Systems.Player.Combat;
 using Systems.Player.Events;
 using Core.Events;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Combat
 {
@@ -19,7 +20,7 @@ namespace Tests.Core.Player.Combat
         }
 
         [Test]
-        public void Attack_PublishesAttackEvent()
+        public async Task Attack_PublishesAttackEvent()
         {
             var bus = new GameEventBus();
             
@@ -34,7 +35,7 @@ namespace Tests.Core.Player.Combat
             viewModel.Attack("BasicAttack");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(received);
             Assert.AreEqual("BasicAttack", received!.ActionName);
@@ -42,7 +43,7 @@ namespace Tests.Core.Player.Combat
         }
 
         [Test]
-        public void TakeDamage_ReducesHealthAndPublishes()
+        public async Task TakeDamage_ReducesHealthAndPublishes()
         {
             var bus = new GameEventBus();
             
@@ -57,7 +58,7 @@ namespace Tests.Core.Player.Combat
             viewModel.TakeDamage(20f);
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.That(viewModel.CurrentHealth.Value, Is.EqualTo(85f));
             Assert.IsNotNull(received);
@@ -65,7 +66,7 @@ namespace Tests.Core.Player.Combat
         }
 
         [Test]
-        public void Heal_RestoresHealthAndPublishes()
+        public async Task Heal_RestoresHealthAndPublishes()
         {
             var bus = new GameEventBus();
             
@@ -83,7 +84,7 @@ namespace Tests.Core.Player.Combat
             viewModel.Heal(10f);
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.That(viewModel.CurrentHealth.Value, Is.EqualTo(95f));
             Assert.IsNotNull(heal);
@@ -93,7 +94,7 @@ namespace Tests.Core.Player.Combat
         }
 
         [Test]
-        public void Attack_InvalidAction_PublishesError()
+        public async Task Attack_InvalidAction_PublishesError()
         {
             var bus = new GameEventBus();
             
@@ -108,7 +109,7 @@ namespace Tests.Core.Player.Combat
             viewModel.Attack("Unknown");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(error);
             Assert.AreEqual("PlayerCombatModel", error!.Exception.SystemName);

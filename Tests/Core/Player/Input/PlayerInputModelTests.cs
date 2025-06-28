@@ -4,6 +4,7 @@ using Systems.Player.Events;
 using Core.Events;
 using Godot;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Input
 {
@@ -25,7 +26,7 @@ namespace Tests.Core.Player.Input
         }
 
         [Test]
-        public void ProcessInput_Move_PublishesMovementEvent()
+        public async Task ProcessInput_Move_PublishesMovementEvent()
         {
             var bus = new GameEventBus();
             
@@ -47,14 +48,14 @@ namespace Tests.Core.Player.Input
             model.UpdateInput();
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(received);
             Assert.AreEqual(new Vector2(1, 0).Normalized(), received!.Direction);
         }
 
         [Test]
-        public void ProcessInput_Buttons_PublishEvents()
+        public async Task ProcessInput_Buttons_PublishEvents()
         {
             var bus = new GameEventBus();
             
@@ -82,7 +83,7 @@ namespace Tests.Core.Player.Input
             model.UpdateInput();
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(jump);
             Assert.IsNotNull(attack);

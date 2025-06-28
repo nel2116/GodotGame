@@ -22,46 +22,43 @@ public partial class PlayerCombatViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    public void UpdateCombat()
+    /// <summary>
+    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
+    /// </summary>
+    private bool EnsureViewModelInitialized()
     {
         if (_viewModel == null)
         {
             GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
+            return false;
         }
+        return true;
+    }
+
+    public void UpdateCombat()
+    {
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.UpdateCombat();
     }
 
     public void Attack(string actionName)
     {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.Attack(actionName);
     }
 
     public void TakeDamage(float damage)
     {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.TakeDamage(damage);
     }
 
     public void Heal(float amount)
     {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.Heal(amount);
     }

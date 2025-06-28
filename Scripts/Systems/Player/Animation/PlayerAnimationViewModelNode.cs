@@ -21,47 +21,30 @@ public partial class PlayerAnimationViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    public void Update()
+    /// <summary>
+    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
+    /// </summary>
+    private bool EnsureViewModelInitialized()
     {
         if (_viewModel == null)
         {
             GD.PrintErr("PlayerAnimationViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
+            return false;
         }
+        return true;
+    }
+
+    public void Update()
+    {
+        if (!EnsureViewModelInitialized()) return;
         
         _viewModel.Update();
     }
 
-    public void PlayAnimation(string animationName)
+    public void HandleAnimation(string animationName)
     {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerAnimationViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
+        if (!EnsureViewModelInitialized()) return;
         
-        _viewModel.PlayAnimation(animationName);
-    }
-
-    public void BlendAnimation(string animationName, float blendWeight)
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerAnimationViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
-        
-        _viewModel.BlendAnimation(animationName, blendWeight);
-    }
-
-    public void StopAnimation()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerAnimationViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return;
-        }
-        
-        _viewModel.StopAnimation();
+        _viewModel.HandleAnimation(animationName);
     }
 } 

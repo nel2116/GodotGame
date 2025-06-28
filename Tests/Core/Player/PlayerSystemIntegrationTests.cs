@@ -176,7 +176,7 @@ namespace Tests.Core.Player
         }
 
         [Test]
-        public void EventCommunication_Integration()
+        public async Task EventCommunication_Integration()
         {
             // システム間のイベント通信テスト
             var eventReceived = false;
@@ -188,14 +188,14 @@ namespace Tests.Core.Player
             _movementVm.UpdateMovement();
             
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
             
             Assert.IsTrue(eventReceived, "Movement event should be published");
             AssertNoErrors();
         }
 
         [Test]
-        public void ErrorHandling_Integration()
+        public async Task ErrorHandling_Integration()
         {
             // エラーハンドリングの統合テスト
             var errorReceived = false;
@@ -210,7 +210,7 @@ namespace Tests.Core.Player
             }, "Invalid action execution");
             
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
             
             Assert.IsTrue(errorReceived, "Error event should be published");
             AssertNoErrors();

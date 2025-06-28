@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Systems.Player.Animation;
 using Systems.Player.Events;
 using Core.Events;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Animation
 {
@@ -19,7 +20,7 @@ namespace Tests.Core.Player.Animation
         }
 
         [Test]
-        public void PlayAnimation_ValidName_PublishesEvents()
+        public async Task PlayAnimation_ValidName_PublishesEvents()
         {
             var bus = new GameEventBus();
             
@@ -36,7 +37,7 @@ namespace Tests.Core.Player.Animation
             viewModel.HandleAnimation("Jump");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.That(viewModel.CurrentAnimation.Value, Is.EqualTo("Jump"));
             Assert.IsNotNull(played);
@@ -46,7 +47,7 @@ namespace Tests.Core.Player.Animation
         }
 
         [Test]
-        public void Initialize_PublishesInitialEvents()
+        public async Task Initialize_PublishesInitialEvents()
         {
             var bus = new GameEventBus();
             
@@ -61,7 +62,7 @@ namespace Tests.Core.Player.Animation
             viewModel.Initialize();
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(playing);
             Assert.IsTrue(playing!.IsPlaying);

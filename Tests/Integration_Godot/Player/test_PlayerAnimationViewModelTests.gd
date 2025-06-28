@@ -23,27 +23,27 @@ func test_initial_animation_state():
 	# 初期状態の確認
 	assert_eq(animation_node.CurrentAnimation, "Idle", "Initial animation should be Idle")
 
-func test_play_animation_action():
-	# アニメーション再生アクションのテスト
-	animation_node.PlayAnimation("Jump")
+func test_handle_animation_action():
+	# アニメーション処理アクションのテスト
+	animation_node.HandleAnimation("Jump")
 	
-	# アニメーション再生アクションが適切に処理されることを確認
+	# アニメーション処理アクションが適切に処理されることを確認
 	assert_eq(animation_node.CurrentAnimation, "Jump", "Animation should change to Jump")
 
-func test_blend_animation_action():
-	# アニメーションブレンドアクションのテスト
-	animation_node.BlendAnimation("Walk", 0.5)
+func test_handle_animation_action_walk():
+	# アニメーション処理アクションのテスト
+	animation_node.HandleAnimation("Walk")
 	
-	# ブレンドアクションが適切に処理されることを確認
+	# 処理アクションが適切に処理されることを確認
 	assert_eq(animation_node.CurrentAnimation, "Walk", "Animation should change to Walk")
 
-func test_stop_animation_action():
-	# アニメーション停止アクションのテスト
-	animation_node.PlayAnimation("Run")
-	animation_node.StopAnimation()
+func test_handle_animation_action_run():
+	# アニメーション処理アクションのテスト
+	animation_node.HandleAnimation("Run")
+	animation_node.HandleAnimation("Idle")
 	
-	# 停止アクションが適切に処理されることを確認
-	assert_eq(animation_node.CurrentAnimation, "Idle", "Animation should return to Idle after stop")
+	# 処理アクションが適切に処理されることを確認
+	assert_eq(animation_node.CurrentAnimation, "Idle", "Animation should return to Idle")
 
 func test_update_animation():
 	# アニメーション更新のテスト
@@ -54,9 +54,9 @@ func test_update_animation():
 
 func test_multiple_animation_actions():
 	# 複数のアニメーションアクションのテスト
-	animation_node.PlayAnimation("Jump")
-	animation_node.BlendAnimation("Walk", 0.5)
-	animation_node.StopAnimation()
+	animation_node.HandleAnimation("Jump")
+	animation_node.HandleAnimation("Walk")
+	animation_node.HandleAnimation("Idle")
 	animation_node.Update()
 	
 	assert_true(animation_node.IsInitialized, "Animation node should handle multiple actions")
@@ -64,11 +64,11 @@ func test_multiple_animation_actions():
 
 func test_animation_actions_sequence():
 	# アニメーションアクションのシーケンステスト
-	animation_node.PlayAnimation("Jump")
+	animation_node.HandleAnimation("Jump")
 	animation_node.Update()
-	animation_node.BlendAnimation("Walk", 0.5)
+	animation_node.HandleAnimation("Walk")
 	animation_node.Update()
-	animation_node.StopAnimation()
+	animation_node.HandleAnimation("Idle")
 	animation_node.Update()
 	
 	# アクションシーケンスが適切に処理されることを確認
@@ -105,9 +105,9 @@ func test_animation_error_handling():
 	add_child(temp_node)
 	
 	# 初期化前にアクションを呼び出し
-	temp_node.PlayAnimation("Jump")
-	temp_node.BlendAnimation("Walk", 0.5)
-	temp_node.StopAnimation()
+	temp_node.HandleAnimation("Jump")
+	temp_node.HandleAnimation("Walk")
+	temp_node.HandleAnimation("Idle")
 	temp_node.Update()
 	
 	# エラーが発生せずに動作することを確認
@@ -133,9 +133,9 @@ func test_animation_state_consistency():
 func test_animation_concurrent_operations():
 	# 並行操作テスト
 	# 複数の操作を同時に実行
-	animation_node.PlayAnimation("Jump")
-	animation_node.BlendAnimation("Walk", 0.5)
-	animation_node.StopAnimation()
+	animation_node.HandleAnimation("Jump")
+	animation_node.HandleAnimation("Walk")
+	animation_node.HandleAnimation("Idle")
 	
 	# 並行操作後も正常に動作することを確認
 	assert_true(animation_node.IsInitialized, "Animation node should handle concurrent operations")
@@ -143,10 +143,10 @@ func test_animation_concurrent_operations():
 
 func test_animation_action_combinations():
 	# アニメーションアクションの組み合わせテスト
-	# 再生、ブレンド、停止を組み合わせて実行
-	animation_node.PlayAnimation("Jump")
-	animation_node.BlendAnimation("Walk", 0.5)
-	animation_node.StopAnimation()
+	# 再生、処理、停止を組み合わせて実行
+	animation_node.HandleAnimation("Jump")
+	animation_node.HandleAnimation("Walk")
+	animation_node.HandleAnimation("Idle")
 	animation_node.Update()
 	
 	# 組み合わせアクションが適切に処理されることを確認
@@ -155,44 +155,34 @@ func test_animation_action_combinations():
 
 func test_invalid_animation_names():
 	# 無効なアニメーション名のテスト
-	animation_node.PlayAnimation("InvalidAnimation")
-	animation_node.PlayAnimation("")
-	animation_node.PlayAnimation("NonExistentAnimation")
+	animation_node.HandleAnimation("InvalidAnimation")
+	animation_node.HandleAnimation("")
+	animation_node.HandleAnimation("NonExistentAnimation")
 	
 	# 無効なアニメーション名後もシステムが正常に動作することを確認
 	assert_true(animation_node.IsInitialized, "Animation node should handle invalid animation names")
 	assert_eq(animation_node.CurrentAnimation, "Idle", "Animation should remain consistent after invalid names")
 
-func test_extreme_blend_values():
-	# 極端なブレンド値のテスト
-	animation_node.BlendAnimation("Walk", -1.0)  # 負のブレンド値
-	animation_node.BlendAnimation("Walk", 2.0)   # 1を超えるブレンド値
-	animation_node.BlendAnimation("Walk", 0.0)   # ゼロブレンド値
-	
-	# 極端な値後もシステムが正常に動作することを確認
-	assert_true(animation_node.IsInitialized, "Animation node should handle extreme blend values")
-	assert_eq(animation_node.CurrentAnimation, "Walk", "Animation should be consistent after extreme blend values")
-
 func test_animation_transitions():
 	# アニメーション遷移のテスト
-	animation_node.PlayAnimation("Idle")
+	animation_node.HandleAnimation("Idle")
 	assert_eq(animation_node.CurrentAnimation, "Idle", "Should transition to Idle")
 	
-	animation_node.PlayAnimation("Walk")
+	animation_node.HandleAnimation("Walk")
 	assert_eq(animation_node.CurrentAnimation, "Walk", "Should transition to Walk")
 	
-	animation_node.PlayAnimation("Run")
+	animation_node.HandleAnimation("Run")
 	assert_eq(animation_node.CurrentAnimation, "Run", "Should transition to Run")
 	
-	animation_node.PlayAnimation("Jump")
+	animation_node.HandleAnimation("Jump")
 	assert_eq(animation_node.CurrentAnimation, "Jump", "Should transition to Jump")
 
 func test_animation_loop_behavior():
 	# アニメーションループ動作のテスト
 	for i in range(5):
-		animation_node.PlayAnimation("Walk")
+		animation_node.HandleAnimation("Walk")
 		animation_node.Update()
-		animation_node.StopAnimation()
+		animation_node.HandleAnimation("Idle")
 		animation_node.Update()
 	
 	# ループ動作が適切に処理されることを確認
