@@ -36,10 +36,13 @@ public partial class Player : CharacterBody3D
 			InitializeViewModels();
 			InitializeDebugger();
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-			// GodotMock.PrintErr($"Failed to initialize player systems: {ex.Message}");
+			// テスト環境以外ではログ出力
+			if (!GodotMock.IsTestEnvironment())
+			{
+				GD.PrintErr($"Failed to initialize player systems: {ex.Message}");
+			}
 			throw;
 		}
 	}

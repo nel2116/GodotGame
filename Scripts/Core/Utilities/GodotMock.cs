@@ -124,7 +124,7 @@ namespace Core.Utilities
                     }
                     // 通常のログは出力しない（パフォーマンス向上のため）
                 }
-                catch (Exception)
+                catch (Exception _)
                 {
                     // ログ出力中のエラーを無視（無限ループ防止）
                 }
