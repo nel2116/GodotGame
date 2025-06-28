@@ -1,12 +1,12 @@
 using Godot;
-using Core.Events;
 using Systems.Player.Input;
 using Systems.Player.Movement;
+using Core.Utilities;
 
 namespace Systems.Player.Debug
 {
     /// <summary>
-    /// プレイヤーのデバッグ情報を管理するクラス
+    /// プレイヤーデバッガー
     /// </summary>
     public class PlayerDebugger
     {
@@ -22,7 +22,7 @@ namespace Systems.Player.Debug
         }
 
         /// <summary>
-        /// デバッグ出力を有効/無効にします
+        /// デバッグモードを設定
         /// </summary>
         public void SetEnabled(bool enabled)
         {
@@ -30,16 +30,16 @@ namespace Systems.Player.Debug
         }
 
         /// <summary>
-        /// デバッグ情報を出力します
+        /// デバッグ情報を出力
         /// </summary>
         public void PrintDebugInfo()
         {
             if (!_isEnabled) return;
 
-            GD.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
-            GD.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
-            GD.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
-            GD.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
+            GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
+            GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
+            GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
+            GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
         }
     }
 } 

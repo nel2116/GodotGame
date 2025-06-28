@@ -4,6 +4,7 @@ using Core.Reactive;
 using Godot;
 using Core.Events;
 using Systems.Player.Events;
+using Core.Utilities;
 
 namespace Systems.Player.Input
 {
@@ -53,7 +54,7 @@ namespace Systems.Player.Input
         {
             _actions["Move"] = new InputAction("Move", InputType.Vector2);
             _actions["Move"].ExecuteAction = () => {
-                GD.Print($"Executing move action with input: {_currentState.MovementInput}");
+                GodotMock.Print($"Executing move action with input: {_currentState.MovementInput}");
                 if (_currentState.MovementInput != Vector2.Zero)
                 {
                     var direction = _currentState.MovementInput.Normalized();
@@ -88,40 +89,27 @@ namespace Systems.Player.Input
 
         private void ProcessInput()
         {
+            GodotMock.Print($"Processing move input: {_currentState.MovementInput}");
+            
             // 移動入力の処理
-            if (_actions["Move"].Type == InputType.Vector2)
+            if (_currentState.MovementInput != Vector2.Zero)
             {
-                var moveAction = _actions["Move"];
-                moveAction.Execute();
-                GD.Print($"Processing move input: {_currentState.MovementInput}");
+                var action = _actions["Move"];
+                GodotMock.Print($"Action triggered: {action.Name}");
+                action.ExecuteAction();
             }
 
-            // その他のアクションの処理
+            // ボタン入力の処理
             foreach (var action in _actions.Values)
             {
-                if (action.Name != "Move" && IsActionTriggered(action))
+                if (action.Type == InputType.Button && 
+                    _currentState.ButtonStates.ContainsKey(action.Name) && 
+                    _currentState.ButtonStates[action.Name])
                 {
-                    GD.Print($"Action triggered: {action.Name}");
-                    action.Execute();
+                    GodotMock.Print($"Action {action.Name} is triggered");
+                    action.ExecuteAction();
                 }
             }
-        }
-
-        private bool IsActionTriggered(InputAction action)
-        {
-            var isTriggered = action.Type switch
-            {
-                InputType.Button => _currentState.ButtonStates.ContainsKey(action.Name) && _currentState.ButtonStates[action.Name],
-                InputType.Vector2 => _currentState.MovementInput != Vector2.Zero,
-                _ => false
-            };
-
-            if (isTriggered)
-            {
-                GD.Print($"Action {action.Name} is triggered");
-            }
-
-            return isTriggered;
         }
 
         public void Dispose()

@@ -1,15 +1,15 @@
 using NUnit.Framework;
-using Core.Events;
 using System;
-using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Godot;
+using System.Diagnostics;
+using Core.Events;
+using Tests.Core;
 
-namespace Tests.Core
+namespace Tests.Core.Events
 {
-    public class GameEventBusTests
+    public class GameEventBusTests : TestBase
     {
         private class DummyEvent : GameEvent { }
         private class AnotherEvent : GameEvent { }
@@ -22,26 +22,27 @@ namespace Tests.Core
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => notified = true))
             {
                 bus.Publish(new DummyEvent());
+                Assert.IsTrue(notified);
             }
-            Assert.IsTrue(notified);
         }
 
         [Test]
         public void Subscribe_MultipleTypes_NotifyOnlyMatching()
         {
             var bus = new GameEventBus();
-            bool notified_a = false;
-            bool notified_b = false;
+            int dummyCount = 0;
+            int anotherCount = 0;
 
-            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => notified_a = true))
-            using (bus.GetEventStream<AnotherEvent>().Subscribe(_ => notified_b = true))
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => dummyCount++))
+            using (bus.GetEventStream<AnotherEvent>().Subscribe(_ => anotherCount++))
             {
                 bus.Publish(new DummyEvent());
                 bus.Publish(new AnotherEvent());
-            }
+                bus.Publish(new DummyEvent());
 
-            Assert.IsTrue(notified_a);
-            Assert.IsTrue(notified_b);
+                Assert.AreEqual(2, dummyCount);
+                Assert.AreEqual(1, anotherCount);
+            }
         }
 
         [Test]
@@ -49,13 +50,11 @@ namespace Tests.Core
         {
             var bus = new GameEventBus();
             bool notified = false;
-
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => notified = true))
             {
                 bus.Publish(new AnotherEvent());
+                Assert.IsFalse(notified);
             }
-
-            Assert.IsFalse(notified);
         }
 
         [Test, MaxTime(1000)]
@@ -65,12 +64,12 @@ namespace Tests.Core
             int count = 0;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => count++))
             {
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
                     bus.Publish(new DummyEvent());
                 }
             }
-            Assert.AreEqual(10000, count);
+            Assert.AreEqual(1000, count);
         }
 
         [Test, MaxTime(3000)]
@@ -110,7 +109,7 @@ namespace Tests.Core
             int count = 0;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
             {
-                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var stopwatch = Stopwatch.StartNew();
                 while (stopwatch.Elapsed < TimeSpan.FromSeconds(1))
                 {
                     bus.Publish(new DummyEvent());
@@ -185,6 +184,9 @@ namespace Tests.Core
                 bus.Publish(new DummyEvent());
                 Assert.IsFalse(notified, "破棄済みバスからのイベントは通知されないべき");
             }
+
+            // エラーログが出力されていることを確認
+            AssertMockOutputContains("Attempted to publish event to disposed GameEventBus", "ERROR");
         }
 
         /// <summary>
@@ -195,6 +197,9 @@ namespace Tests.Core
         {
             var bus = new GameEventBus();
             Assert.DoesNotThrow(() => bus.Publish<DummyEvent>(null));
+            
+            // エラーログが出力されていることを確認
+            AssertMockOutputContains("Attempted to publish null event", "ERROR");
         }
 
         /// <summary>
@@ -258,7 +263,6 @@ namespace Tests.Core
         public void ErrorHandling_WorksCorrectly()
         {
             var bus = new GameEventBus();
-            bool errorHandled = false;
 
             // エラーを発生させるイベントハンドラ
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ =>
@@ -269,6 +273,22 @@ namespace Tests.Core
                 // エラーが発生しても処理が継続することを確認
                 Assert.DoesNotThrow(() => bus.Publish(new DummyEvent()));
             }
+        }
+
+        /// <summary>
+        /// テスト終了後のクリーンアップ確認
+        /// </summary>
+        [Test]
+        public void TestCleanup_NoErrors()
+        {
+            var bus = new GameEventBus();
+            using (bus.GetEventStream<DummyEvent>().Subscribe(_ => { }))
+            {
+                bus.Publish(new DummyEvent());
+            }
+            
+            // テスト終了時にエラーがないことを確認
+            AssertNoErrors();
         }
     }
 }

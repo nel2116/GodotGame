@@ -3,6 +3,7 @@ using Core.Reactive;
 using Godot;
 using Systems.Common.Movement;
 using Systems.Player.Events;
+using Core.Utilities;
 
 namespace Systems.Player.Movement
 {
@@ -41,7 +42,7 @@ namespace Systems.Player.Movement
 
         private void OnMovementInput(MovementInputEvent evt)
         {
-            GD.Print($"Received movement input: {evt.Direction}");
+            GodotMock.Print($"Received movement input: {evt.Direction}");
             Move(evt.Direction);
         }
 

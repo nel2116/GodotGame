@@ -5,16 +5,26 @@ using Systems.Player.Base;
 using Systems.Player.Events;
 using Core.Events;
 using Systems.Player.State;
-using Godot;
+using Core.Utilities;
 
 namespace Systems.Player.Animation
 {
+    /// <summary>
+    /// アニメーションクリップのモッククラス
+    /// </summary>
+    public class MockAnimation
+    {
+        public string Name { get; set; } = "";
+        public float Length { get; set; } = 1.0f;
+        public bool IsPlaying { get; set; } = false;
+    }
+
     /// <summary>
     /// プレイヤーアニメーションモデル
     /// </summary>
     public class PlayerAnimationModel : PlayerSystemBase
     {
-        private readonly Dictionary<string, Godot.Animation> _clips = new();
+        private readonly Dictionary<string, MockAnimation> _clips = new();
         private bool _is_playing;
         public string CurrentAnimation { get; private set; } = "Idle";
         public float Speed { get; private set; } = 1.0f;
@@ -87,11 +97,30 @@ namespace Systems.Player.Animation
 
         private void LoadAnimationClips()
         {
-            _clips["Idle"] = new Godot.Animation();
-            _clips["Walk"] = new Godot.Animation();
-            _clips["Run"] = new Godot.Animation();
-            _clips["Jump"] = new Godot.Animation();
-            _clips["Attack"] = new Godot.Animation();
+            // テスト環境ではモックアニメーションを使用
+            _clips["Idle"] = new MockAnimation { Name = "Idle", Length = 1.0f };
+            _clips["Walk"] = new MockAnimation { Name = "Walk", Length = 1.0f };
+            _clips["Run"] = new MockAnimation { Name = "Run", Length = 1.0f };
+            _clips["Jump"] = new MockAnimation { Name = "Jump", Length = 1.0f };
+            _clips["Attack"] = new MockAnimation { Name = "Attack", Length = 1.0f };
+            
+            GodotMock.Print("Animation clips loaded successfully");
+        }
+
+        /// <summary>
+        /// アニメーションクリップを取得
+        /// </summary>
+        public MockAnimation? GetClip(string name)
+        {
+            return _clips.TryGetValue(name, out var clip) ? clip : null;
+        }
+
+        /// <summary>
+        /// 利用可能なアニメーション名を取得
+        /// </summary>
+        public IEnumerable<string> GetAvailableAnimations()
+        {
+            return _clips.Keys;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive;
-using Godot;
+using Core.Utilities;
 
 namespace Core.Events
 {
@@ -39,10 +39,10 @@ namespace Core.Events
 		private volatile bool _disposed;
 		private readonly int _maxEventQueueSize = 1000; // イベントキューサイズの上限
 
-                /// <summary>
-                /// インスタンスを生成するコンストラクタ
-                /// </summary>
-                public GameEventBus() { _disposed = false; }
+		/// <summary>
+		/// インスタンスを生成するコンストラクタ
+		/// </summary>
+		public GameEventBus() { _disposed = false; }
 
 		/// <summary>
 		/// イベントを発行
@@ -51,13 +51,13 @@ namespace Core.Events
 		{
 			if (_disposed)
 			{
-				GD.PrintErr("Attempted to publish event to disposed GameEventBus");
+				GodotMock.PrintErr("Attempted to publish event to disposed GameEventBus");
 				return;
 			}
 
 			if (evt == null)
 			{
-				GD.PrintErr("Attempted to publish null event");
+				GodotMock.PrintErr("Attempted to publish null event");
 				return;
 			}
 
@@ -71,7 +71,7 @@ namespace Core.Events
 			}
 			catch (Exception ex)
 			{
-				GD.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
+				GodotMock.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace Core.Events
 		{
 			if (_disposed)
 			{
-				GD.PrintErr("Attempted to get event stream from disposed GameEventBus");
+				GodotMock.PrintErr("Attempted to get event stream from disposed GameEventBus");
 				return Observable.Empty<T>();
 			}
 
@@ -100,7 +100,7 @@ namespace Core.Events
 			}
 			catch (Exception ex)
 			{
-				GD.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
+				GodotMock.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
 				return Observable.Empty<T>();
 			}
 		}
@@ -117,11 +117,11 @@ namespace Core.Events
 		/// <summary>
 		/// バスが保持するリソースを解放する（テスト用）
 		/// </summary>
-                public void Dispose()
-                {
-                        Dispose(true);
-                        GC.SuppressFinalize(this);
-                }
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
 		/// <summary>
 		/// IDisposableの明示的実装（アプリ本体からは何もしない）
@@ -166,14 +166,14 @@ namespace Core.Events
 							}
 							catch (Exception ex)
 							{
-								GD.PrintErr($"Error disposing subject: {ex.Message}");
+								GodotMock.PrintErr($"Error disposing subject: {ex.Message}");
 							}
 						}
 						_subjects.Clear();
 					}
 					catch (Exception ex)
 					{
-						GD.PrintErr($"Error during GameEventBus disposal: {ex.Message}");
+						GodotMock.PrintErr($"Error during GameEventBus disposal: {ex.Message}");
 					}
 					finally
 					{

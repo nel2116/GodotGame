@@ -8,6 +8,7 @@ using Systems.Player.State;
 using Systems.Player.Progression;
 using Systems.Player.Config;
 using Systems.Player.Debug;
+using Core.Utilities;
 
 public partial class Player : CharacterBody3D
 {
@@ -37,7 +38,7 @@ public partial class Player : CharacterBody3D
 		}
 		catch (System.Exception ex)
 		{
-			GD.PrintErr($"Failed to initialize player systems: {ex.Message}");
+			GodotMock.PrintErr($"Failed to initialize player systems: {ex.Message}");
 			// エラー発生時の適切な処理を追加
 		}
 	}

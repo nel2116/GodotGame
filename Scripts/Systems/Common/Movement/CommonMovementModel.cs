@@ -1,5 +1,6 @@
 using System;
 using Core.Reactive;
+using Core.Utilities;
 using Godot;
 
 namespace Systems.Common.Movement
@@ -122,7 +123,7 @@ namespace Systems.Common.Movement
         {
             // 接地判定はCharacterBody3DのIsOnFloor()を使用
             _is_grounded = Mathf.Abs(_verticalVelocity) < GROUNDED_THRESHOLD;
-            GD.Print($"Grounded state: {_is_grounded}, Y velocity: {_verticalVelocity}");
+            GodotMock.Print($"Grounded state: {_is_grounded}, Y velocity: {_verticalVelocity}");
             if (_is_grounded)
             {
                 _can_jump = true;
@@ -147,7 +148,7 @@ namespace Systems.Common.Movement
             if (!_is_grounded)
             {
                 _verticalVelocity += GRAVITY * 0.016f; // 約60FPSを想定
-                GD.Print($"Applying gravity, new Y velocity: {_verticalVelocity}");
+                GodotMock.Print($"Applying gravity, new Y velocity: {_verticalVelocity}");
             }
         }
 
