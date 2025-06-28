@@ -104,7 +104,8 @@ namespace Systems.Player.Animation
             _clips["Jump"] = new MockAnimation { Name = "Jump", Length = 1.0f };
             _clips["Attack"] = new MockAnimation { Name = "Attack", Length = 1.0f };
             
-            GodotMock.Print("Animation clips loaded successfully");
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print("Animation clips loaded successfully");
         }
 
         /// <summary>

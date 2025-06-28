@@ -22,15 +22,20 @@ namespace Tests.Core.Player.Progression
         public void UnlockSkill_ValidSkill_PublishesEvent()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            SkillUnlockedEvent? received = null;
+            bus.GetEventStream<SkillUnlockedEvent>().Subscribe(e => received = e);
+            
             var model = new PlayerProgressionModel();
             var viewModel = new PlayerProgressionViewModel(model, bus);
             viewModel.Initialize();
             viewModel.AddExperience(100); // レベル 2 に到達
 
-            SkillUnlockedEvent? received = null;
-            bus.GetEventStream<SkillUnlockedEvent>().Subscribe(e => received = e);
-
             var result = viewModel.UnlockSkill("Fireball");
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsTrue(result);
             Assert.IsNotNull(received);
@@ -42,16 +47,21 @@ namespace Tests.Core.Player.Progression
         public void AddExperience_PublishesExperienceAndLevelUp()
         {
             var bus = new GameEventBus();
-            var model = new PlayerProgressionModel();
-            var viewModel = new PlayerProgressionViewModel(model, bus);
-            viewModel.Initialize();
-
+            
+            // イベント購読を先に実行
             ExperienceChangedEvent? exp = null;
             LevelUpEvent? level = null;
             bus.GetEventStream<ExperienceChangedEvent>().Subscribe(e => exp = e);
             bus.GetEventStream<LevelUpEvent>().Subscribe(e => level = e);
+            
+            var model = new PlayerProgressionModel();
+            var viewModel = new PlayerProgressionViewModel(model, bus);
+            viewModel.Initialize();
 
             viewModel.AddExperience(150);
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(exp);
             Assert.AreEqual(150, exp!.Experience);

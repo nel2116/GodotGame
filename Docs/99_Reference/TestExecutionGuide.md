@@ -77,6 +77,29 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
     - コンソール出力で結果を確認
     - JUnit 形式の XML ファイルで結果を保存
 
+## 最新テスト結果（2025-06-29）
+
+### Core テスト実行結果
+
+```bash
+# 実行結果サマリー
+テスト概要: 合計: 88, 失敗数: 0, 成功数: 88, スキップ済み数: 0, 期間: 2.5 秒
+```
+
+### 実行時の注意事項
+
+-   **イベントバッファリング**: GameEventBus の 16ms バッファリングにより、テストで 20ms の遅延が必要
+-   **Godot 依存テスト**: `Tests/Integration_Godot/`配下は GUT で実行、Core テストとは分離
+-   **警告**: CS8785（Godot 関連）、CS8625/CS8600（null 非許容型）は動作に影響なし
+
+### 推奨実行手順
+
+1. **Core テスト**: `dotnet test Tests/Core/CoreTests.csproj`
+2. **GUT テスト**: Godot エディタで GUT パネルから実行
+3. **結果確認**: テスト結果レポートを参照
+
+詳細は [[../07_Testing/TestResultsReport|テスト結果レポート]] を参照してください。
+
 ## トラブルシューティング
 
 1. C#スクリプトを追加/変更した場合

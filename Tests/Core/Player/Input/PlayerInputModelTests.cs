@@ -15,17 +15,11 @@ namespace Tests.Core.Player.Input
             return (T)field!.GetValue(obj)!;
         }
 
-        private void SetMovementInput(InputState state, Vector2 value)
-        {
-            var prop = typeof(InputState).GetProperty("MovementInput", BindingFlags.NonPublic | BindingFlags.Instance);
-            prop!.SetValue(state, value);
-        }
-
         [Test]
         public void Initialize_SetsEnabledTrue()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            var model = new PlayerInputModel(bus);
             model.Initialize();
             Assert.IsTrue(model.IsEnabled);
         }
@@ -34,17 +28,26 @@ namespace Tests.Core.Player.Input
         public void ProcessInput_Move_PublishesMovementEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
-            model.Initialize();
-
-            var state = GetPrivateField<InputState>(model, "_currentState");
-            SetMovementInput(state, new Vector2(1, 0));
-
+            
+            // イベント購読を先に実行
             MovementInputEvent? received = null;
             bus.GetEventStream<MovementInputEvent>().Subscribe(e => received = e);
+            
+            var model = new PlayerInputModel(bus);
+            model.Initialize();
 
-            var method = typeof(PlayerInputModel).GetMethod("ProcessInput", BindingFlags.NonPublic | BindingFlags.Instance);
-            method!.Invoke(model, null);
+            // InputStateを直接設定
+            var state = GetPrivateField<InputState>(model, "_currentState");
+            if (state != null)
+            {
+                state.SetMovementInput(new Vector2(1, 0));
+            }
+
+            // 正しい入力更新フローを実行（UpdateInputを使用）
+            model.UpdateInput();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(received);
             Assert.AreEqual(new Vector2(1, 0).Normalized(), received!.Direction);
@@ -54,23 +57,32 @@ namespace Tests.Core.Player.Input
         public void ProcessInput_Buttons_PublishEvents()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
-            model.Initialize();
-
-            var state = GetPrivateField<InputState>(model, "_currentState");
-            state.ButtonStates["Jump"] = true;
-            state.ButtonStates["Attack"] = true;
-            state.ButtonStates["Dash"] = true;
-
+            
+            // イベント購読を先に実行
             JumpInputEvent? jump = null;
             AttackInputEvent? attack = null;
             DashInputEvent? dash = null;
             bus.GetEventStream<JumpInputEvent>().Subscribe(e => jump = e);
             bus.GetEventStream<AttackInputEvent>().Subscribe(e => attack = e);
             bus.GetEventStream<DashInputEvent>().Subscribe(e => dash = e);
+            
+            var model = new PlayerInputModel(bus);
+            model.Initialize();
 
-            var method = typeof(PlayerInputModel).GetMethod("ProcessInput", BindingFlags.NonPublic | BindingFlags.Instance);
-            method!.Invoke(model, null);
+            // InputStateを直接設定
+            var state = GetPrivateField<InputState>(model, "_currentState");
+            if (state != null)
+            {
+                state.ButtonStates["Jump"] = true;
+                state.ButtonStates["Attack"] = true;
+                state.ButtonStates["Dash"] = true;
+            }
+
+            // 正しい入力更新フローを実行（UpdateInputを使用）
+            model.UpdateInput();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(jump);
             Assert.IsNotNull(attack);

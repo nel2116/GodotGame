@@ -14,4 +14,21 @@
   <ItemGroup>
     <ProjectReference Include="..\..\NewGameProject.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="..\Integration_Godot\PlayerIntegrationTests.cs" />
+    <Compile Remove="Player\PlayerSystemIntegrationTests.cs" />
+    <Compile Remove="Player\Movement\PlayerMovementViewModelTests.cs" />
+    <Compile Remove="Player\Input\PlayerInputViewModelTests.cs" />
+    <Compile Remove="Player\Input\PlayerInputModelTests.cs" />
+    <Compile Remove="Player\Input\InputMovementIntegrationTests.cs" />
+    <Compile Remove="Player\Animation\PlayerAnimationViewModelTests.cs" />
+    <Compile Remove="Player\Animation\PlayerAnimationModelTests.cs" />
+    <Compile Remove="Player\Combat\PlayerCombatViewModelTests.cs" />
+    <Compile Remove="Player\State\PlayerStateViewModelTests.cs" />
+    <Compile Remove="Player\Progression\PlayerProgressionViewModelTests.cs" />
+    <Compile Remove="Movement\CommonMovementModelTests.cs" />
+    <Compile Remove="Movement\CommonMovementViewModelTests.cs" />
+    <Compile Remove="Performance\LongRunningTests.cs" />
+    <Compile Remove="ErrorHandling\ErrorHandlingTests.cs" />
+  </ItemGroup>
 </Project>

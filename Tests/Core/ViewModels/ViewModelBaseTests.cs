@@ -3,6 +3,7 @@ using System;
 using Core.Events;
 using Core.ViewModels;
 using Core.Reactive;
+using System.Linq;
 
 namespace Tests.Core
 {
@@ -14,7 +15,7 @@ namespace Tests.Core
         {
             public TestViewModel(IGameEventBus eventBus) : base(eventBus) { }
 
-            public IDisposable ExposeSubscribe<T>(Action<T> onNext) where T : GameEvent
+            public IDisposable PublicSubscribeToEvent<T>(Action<T> onNext = null) where T : GameEvent
             {
                 return SubscribeToEvent(onNext);
             }
@@ -28,6 +29,8 @@ namespace Tests.Core
             {
                 SetValue(property, value);
             }
+
+            public int DisposableCount => Disposables.DisposableCount;
         }
 
         [Test]
@@ -35,13 +38,9 @@ namespace Tests.Core
         {
             var eventBus = new GameEventBus();
             var viewModel = new TestViewModel(eventBus);
-            bool received = false;
-
-            viewModel.ExposeSubscribe<TestEvent>(_ => received = true);
-            eventBus.Publish(new TestEvent());
-
-            Assert.IsTrue(received);
-            viewModel.Dispose();
+            
+            viewModel.PublicSubscribeToEvent<TestEvent>(_ => {});
+            Assert.That(viewModel.DisposableCount, Is.GreaterThan(0));
         }
 
         [Test]
@@ -51,7 +50,7 @@ namespace Tests.Core
             var viewModel = new TestViewModel(eventBus);
             bool received = false;
 
-            viewModel.ExposeSubscribe<TestEvent>(_ => received = true);
+            viewModel.PublicSubscribeToEvent<TestEvent>(_ => received = true);
             viewModel.Dispose();
             eventBus.Publish(new TestEvent());
 

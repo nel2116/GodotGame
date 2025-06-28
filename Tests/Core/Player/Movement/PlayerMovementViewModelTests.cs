@@ -23,14 +23,19 @@ namespace Tests.Core.Player.Movement
         public void Dash_PublishesDashingEvent()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            MovementDashingChangedEvent? received = null;
+            bus.GetEventStream<MovementDashingChangedEvent>().Subscribe(e => received = e);
+            
             var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
 
-            MovementDashingChangedEvent? received = null;
-            bus.GetEventStream<MovementDashingChangedEvent>().Subscribe(e => received = e);
-
             viewModel.HandleDash();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(received);
             Assert.IsTrue(received!.IsDashing);
@@ -41,15 +46,20 @@ namespace Tests.Core.Player.Movement
         public void Jump_Update_PublishesGroundedEvent()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            MovementGroundedChangedEvent? received = null;
+            bus.GetEventStream<MovementGroundedChangedEvent>().Subscribe(e => received = e);
+            
             var model = new PlayerMovementModel(bus);
             var viewModel = new PlayerMovementViewModel(model, bus);
             viewModel.Initialize();
 
-            MovementGroundedChangedEvent? received = null;
-            bus.GetEventStream<MovementGroundedChangedEvent>().Subscribe(e => received = e);
-
             viewModel.HandleJump();
             viewModel.UpdateMovement();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(received);
             Assert.IsFalse(received!.IsGrounded);

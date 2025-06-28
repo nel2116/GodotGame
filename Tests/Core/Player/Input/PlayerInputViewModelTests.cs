@@ -3,6 +3,7 @@ using Systems.Player.Input;
 using Systems.Player.Events;
 using Core.Events;
 using Godot;
+using System.Reflection;
 
 namespace Tests.Core.Player.Input
 {
@@ -12,7 +13,7 @@ namespace Tests.Core.Player.Input
         public void Initialize_DefaultState_IsEnabled()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            var model = new PlayerInputModel(bus);
             var viewModel = new PlayerInputViewModel(model, bus);
             viewModel.Initialize();
             Assert.That(viewModel.IsEnabled.Value, Is.True);
@@ -22,14 +23,20 @@ namespace Tests.Core.Player.Input
         public void UpdateInput_PublishesStateEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            
+            // イベント購読を先に実行
+            InputStateChangedEvent? received = null;
+            bus.GetEventStream<InputStateChangedEvent>().Subscribe(e => received = e);
+            
+            var model = new PlayerInputModel(bus);
             var viewModel = new PlayerInputViewModel(model, bus);
             viewModel.Initialize();
 
-            InputStateChangedEvent? received = null;
-            bus.GetEventStream<InputStateChangedEvent>().Subscribe(e => received = e);
-
+            // 正しい入力更新フローを実行（UpdateInputを使用）
             viewModel.UpdateInput();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(received);
             Assert.IsNotNull(received!.State);
@@ -39,12 +46,17 @@ namespace Tests.Core.Player.Input
         public void Initialize_PublishesEnabledEvent()
         {
             var bus = new GameEventBus();
-            var model = new PlayerInputModel();
+            
+            // イベント購読を先に実行
             InputEnabledChangedEvent? enabled = null;
             bus.GetEventStream<InputEnabledChangedEvent>().Subscribe(e => enabled = e);
 
+            var model = new PlayerInputModel(bus);
             var viewModel = new PlayerInputViewModel(model, bus);
             viewModel.Initialize();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(enabled);
             Assert.IsTrue(enabled!.Enabled);

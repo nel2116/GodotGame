@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using Core.Utilities;
 
 namespace Systems.Player.Input
 {
@@ -16,10 +17,18 @@ namespace Systems.Player.Input
 		/// </summary>
 		public void Update()
 		{
-			MovementInput = Godot.Input.GetVector("move_left", "move_right", "move_up", "move_down");
-			ButtonStates["Jump"] = Godot.Input.IsActionPressed("jump");
-			ButtonStates["Attack"] = Godot.Input.IsActionPressed("attack");
-			ButtonStates["Dash"] = Godot.Input.IsActionPressed("dash");
+			MovementInput = GodotMock.GetVector("move_left", "move_right", "move_up", "move_down");
+			ButtonStates["Jump"] = GodotMock.IsActionPressed("jump");
+			ButtonStates["Attack"] = GodotMock.IsActionPressed("attack");
+			ButtonStates["Dash"] = GodotMock.IsActionPressed("dash");
+		}
+
+		/// <summary>
+		/// テスト用：移動入力を設定する
+		/// </summary>
+		public void SetMovementInput(Vector2 input)
+		{
+			MovementInput = input;
 		}
 	}
 }
