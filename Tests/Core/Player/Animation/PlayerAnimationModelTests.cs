@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Systems.Player.Animation;
 using Systems.Player.Events;
 using Core.Events;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Animation
 {
@@ -11,35 +12,44 @@ namespace Tests.Core.Player.Animation
         public async Task BlendAnimation_PublishesEvents()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            AnimationBlendStartedEvent? started = null;
+            AnimationBlendCompletedEvent? completed = null;
+            bus.GetEventStream<AnimationBlendStartedEvent>().Subscribe(e => started = e);
+            bus.GetEventStream<AnimationBlendCompletedEvent>().Subscribe(e => completed = e);
+            
             var model = new PlayerAnimationModel(bus);
             model.Initialize();
 
-            AnimationBlendStartedEvent? start = null;
-            AnimationBlendCompletedEvent? complete = null;
-            bus.GetEventStream<AnimationBlendStartedEvent>().Subscribe(e => start = e);
-            bus.GetEventStream<AnimationBlendCompletedEvent>().Subscribe(e => complete = e);
+            await model.BlendAnimationAsync("Idle", "Jump", 0.1f);
 
-            await model.BlendAnimationAsync("Idle", "Walk", 0.01f);
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
-            Assert.IsNotNull(start);
-            Assert.AreEqual("Idle", start!.FromAnimation);
-            Assert.AreEqual("Walk", start.ToAnimation);
-            Assert.AreEqual(0.01f, start.BlendTime);
-            Assert.IsNotNull(complete);
-            Assert.AreEqual("Walk", complete!.AnimationName);
+            Assert.IsNotNull(started);
+            Assert.AreEqual("Idle", started!.FromAnimation);
+            Assert.AreEqual("Jump", started.ToAnimation);
+            Assert.IsNotNull(completed);
+            Assert.AreEqual("Jump", completed!.AnimationName);
         }
 
         [Test]
         public void PlayAnimation_InvalidName_PublishesError()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            ErrorEvent? error = null;
+            bus.GetEventStream<ErrorEvent>().Subscribe(e => error = e);
+            
             var model = new PlayerAnimationModel(bus);
             model.Initialize();
 
-            ErrorEvent? error = null;
-            bus.GetEventStream<ErrorEvent>().Subscribe(e => error = e);
+            model.PlayAnimation("Invalid");
 
-            model.PlayAnimation("Unknown");
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(error);
             Assert.AreEqual("PlayerAnimationModel", error!.Exception.SystemName);

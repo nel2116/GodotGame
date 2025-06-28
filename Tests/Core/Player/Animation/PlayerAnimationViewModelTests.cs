@@ -22,16 +22,21 @@ namespace Tests.Core.Player.Animation
         public void PlayAnimation_ValidName_PublishesEvents()
         {
             var bus = new GameEventBus();
-            var model = new PlayerAnimationModel(bus);
-            var viewModel = new PlayerAnimationViewModel(model, bus);
-            viewModel.Initialize();
-
+            
+            // イベント購読を先に実行
             AnimationPlayedEvent? played = null;
             AnimationChangedEvent? changed = null;
             bus.GetEventStream<AnimationPlayedEvent>().Subscribe(e => played = e);
             bus.GetEventStream<AnimationChangedEvent>().Subscribe(e => changed = e);
+            
+            var model = new PlayerAnimationModel(bus);
+            var viewModel = new PlayerAnimationViewModel(model, bus);
+            viewModel.Initialize();
 
             viewModel.HandleAnimation("Jump");
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.That(viewModel.CurrentAnimation.Value, Is.EqualTo("Jump"));
             Assert.IsNotNull(played);
@@ -44,14 +49,19 @@ namespace Tests.Core.Player.Animation
         public void Initialize_PublishesInitialEvents()
         {
             var bus = new GameEventBus();
-            var model = new PlayerAnimationModel(bus);
+            
+            // イベント購読を先に実行
             AnimationPlayingChangedEvent? playing = null;
             AnimationSpeedChangedEvent? speed = null;
             bus.GetEventStream<AnimationPlayingChangedEvent>().Subscribe(e => playing = e);
             bus.GetEventStream<AnimationSpeedChangedEvent>().Subscribe(e => speed = e);
 
+            var model = new PlayerAnimationModel(bus);
             var viewModel = new PlayerAnimationViewModel(model, bus);
             viewModel.Initialize();
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(playing);
             Assert.IsTrue(playing!.IsPlaying);

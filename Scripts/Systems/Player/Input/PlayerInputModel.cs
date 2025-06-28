@@ -30,6 +30,16 @@ namespace Systems.Player.Input
         }
 
         /// <summary>
+        /// イベントバスを指定したコンストラクタ
+        /// </summary>
+        public PlayerInputModel(IGameEventBus eventBus)
+        {
+            _eventBus = eventBus;
+            _isEnabled = false;
+            InitializeActions();
+        }
+
+        /// <summary>
         /// 初期化処理
         /// </summary>
         public void Initialize()
@@ -54,7 +64,8 @@ namespace Systems.Player.Input
         {
             _actions["Move"] = new InputAction("Move", InputType.Vector2);
             _actions["Move"].ExecuteAction = () => {
-                GodotMock.Print($"Executing move action with input: {_currentState.MovementInput}");
+                // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+                // GodotMock.Print($"Executing move action with input: {_currentState.MovementInput}");
                 if (_currentState.MovementInput != Vector2.Zero)
                 {
                     var direction = _currentState.MovementInput.Normalized();
@@ -89,13 +100,15 @@ namespace Systems.Player.Input
 
         private void ProcessInput()
         {
-            GodotMock.Print($"Processing move input: {_currentState.MovementInput}");
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print($"Processing move input: {_currentState.MovementInput}");
             
             // 移動入力の処理
             if (_currentState.MovementInput != Vector2.Zero)
             {
                 var action = _actions["Move"];
-                GodotMock.Print($"Action triggered: {action.Name}");
+                // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+                // GodotMock.Print($"Action triggered: {action.Name}");
                 action.ExecuteAction();
             }
 
@@ -106,7 +119,8 @@ namespace Systems.Player.Input
                     _currentState.ButtonStates.ContainsKey(action.Name) && 
                     _currentState.ButtonStates[action.Name])
                 {
-                    GodotMock.Print($"Action {action.Name} is triggered");
+                    // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+                    // GodotMock.Print($"Action {action.Name} is triggered");
                     action.ExecuteAction();
                 }
             }

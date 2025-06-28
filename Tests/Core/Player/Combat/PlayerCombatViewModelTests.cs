@@ -22,14 +22,19 @@ namespace Tests.Core.Player.Combat
         public void Attack_PublishesAttackEvent()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            AttackExecutedEvent? received = null;
+            bus.GetEventStream<AttackExecutedEvent>().Subscribe(e => received = e);
+            
             var model = new PlayerCombatModel(bus);
             var viewModel = new PlayerCombatViewModel(model, bus);
             viewModel.Initialize();
 
-            AttackExecutedEvent? received = null;
-            bus.GetEventStream<AttackExecutedEvent>().Subscribe(e => received = e);
-
             viewModel.Attack("BasicAttack");
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(received);
             Assert.AreEqual("BasicAttack", received!.ActionName);
@@ -40,14 +45,19 @@ namespace Tests.Core.Player.Combat
         public void TakeDamage_ReducesHealthAndPublishes()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            DamageTakenEvent? received = null;
+            bus.GetEventStream<DamageTakenEvent>().Subscribe(e => received = e);
+            
             var model = new PlayerCombatModel(bus);
             var viewModel = new PlayerCombatViewModel(model, bus);
             viewModel.Initialize();
 
-            DamageTakenEvent? received = null;
-            bus.GetEventStream<DamageTakenEvent>().Subscribe(e => received = e);
-
             viewModel.TakeDamage(20f);
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.That(viewModel.CurrentHealth.Value, Is.EqualTo(85f));
             Assert.IsNotNull(received);
@@ -58,17 +68,22 @@ namespace Tests.Core.Player.Combat
         public void Heal_RestoresHealthAndPublishes()
         {
             var bus = new GameEventBus();
-            var model = new PlayerCombatModel(bus);
-            var viewModel = new PlayerCombatViewModel(model, bus);
-            viewModel.Initialize();
-
+            
+            // イベント購読を先に実行
             HealAppliedEvent? heal = null;
             HealthChangedEvent? changed = null;
             bus.GetEventStream<HealAppliedEvent>().Subscribe(e => heal = e);
             bus.GetEventStream<HealthChangedEvent>().Subscribe(e => changed = e);
+            
+            var model = new PlayerCombatModel(bus);
+            var viewModel = new PlayerCombatViewModel(model, bus);
+            viewModel.Initialize();
 
             viewModel.TakeDamage(20f);
             viewModel.Heal(10f);
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.That(viewModel.CurrentHealth.Value, Is.EqualTo(95f));
             Assert.IsNotNull(heal);
@@ -81,14 +96,19 @@ namespace Tests.Core.Player.Combat
         public void Attack_InvalidAction_PublishesError()
         {
             var bus = new GameEventBus();
+            
+            // イベント購読を先に実行
+            ErrorEvent? error = null;
+            bus.GetEventStream<ErrorEvent>().Subscribe(e => error = e);
+            
             var model = new PlayerCombatModel(bus);
             var viewModel = new PlayerCombatViewModel(model, bus);
             viewModel.Initialize();
 
-            ErrorEvent? error = null;
-            bus.GetEventStream<ErrorEvent>().Subscribe(e => error = e);
-
             viewModel.Attack("Unknown");
+
+            // 少し待機してイベント処理を完了させる
+            System.Threading.Thread.Sleep(10);
 
             Assert.IsNotNull(error);
             Assert.AreEqual("PlayerCombatModel", error!.Exception.SystemName);

@@ -51,13 +51,15 @@ namespace Core.Events
 		{
 			if (_disposed)
 			{
-				GodotMock.PrintErr("Attempted to publish event to disposed GameEventBus");
+				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+				// GodotMock.PrintErr("Attempted to publish event to disposed GameEventBus");
 				return;
 			}
 
 			if (evt == null)
 			{
-				GodotMock.PrintErr("Attempted to publish null event");
+				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+				// GodotMock.PrintErr("Attempted to publish null event");
 				return;
 			}
 
@@ -71,7 +73,9 @@ namespace Core.Events
 			}
 			catch (Exception ex)
 			{
-				GodotMock.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
+				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+				// GodotMock.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
+				throw;
 			}
 		}
 
@@ -82,7 +86,8 @@ namespace Core.Events
 		{
 			if (_disposed)
 			{
-				GodotMock.PrintErr("Attempted to get event stream from disposed GameEventBus");
+				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+				// GodotMock.PrintErr("Attempted to get event stream from disposed GameEventBus");
 				return Observable.Empty<T>();
 			}
 
@@ -91,16 +96,12 @@ namespace Core.Events
 				return GetOrCreateSubject(typeof(T))
 					.OfType<T>()
 					.Buffer(TimeSpan.FromMilliseconds(16)) // フレームレートに合わせたバッファリング
-					.SelectMany(events => events)
-					.TakeUntil(Observable.Create<Unit>(observer =>
-					{
-						observer.OnCompleted();
-						return () => { };
-					}));
+					.SelectMany(events => events);
 			}
 			catch (Exception ex)
 			{
-				GodotMock.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
+				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+				// GodotMock.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
 				return Observable.Empty<T>();
 			}
 		}
@@ -166,14 +167,16 @@ namespace Core.Events
 							}
 							catch (Exception ex)
 							{
-								GodotMock.PrintErr($"Error disposing subject: {ex.Message}");
+								// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+								// GodotMock.PrintErr($"Error disposing subject: {ex.Message}");
 							}
 						}
 						_subjects.Clear();
 					}
 					catch (Exception ex)
 					{
-						GodotMock.PrintErr($"Error during GameEventBus disposal: {ex.Message}");
+						// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+						// GodotMock.PrintErr($"Error during GameEventBus disposal: {ex.Message}");
 					}
 					finally
 					{

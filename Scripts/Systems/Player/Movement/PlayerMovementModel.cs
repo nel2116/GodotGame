@@ -42,8 +42,9 @@ namespace Systems.Player.Movement
 
         private void OnMovementInput(MovementInputEvent evt)
         {
-            GodotMock.Print($"Received movement input: {evt.Direction}");
-            Move(evt.Direction);
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print($"Received movement input: {evt.Direction}");
+            base.Move(evt.Direction);
         }
 
         /// <summary>

@@ -36,10 +36,20 @@ namespace Systems.Player.Debug
         {
             if (!_isEnabled) return;
 
-            GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
-            GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
-            GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
-            GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
+            // GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
+            // GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
+            // GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
+        }
+
+        public void LogPlayerState()
+        {
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
+            // GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
+            // GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
+            // GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
         }
     }
 } 

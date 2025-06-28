@@ -123,7 +123,8 @@ namespace Systems.Common.Movement
         {
             // 接地判定はCharacterBody3DのIsOnFloor()を使用
             _is_grounded = Mathf.Abs(_verticalVelocity) < GROUNDED_THRESHOLD;
-            GodotMock.Print($"Grounded state: {_is_grounded}, Y velocity: {_verticalVelocity}");
+            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+            // GodotMock.Print($"Grounded state: {_is_grounded}, Y velocity: {_verticalVelocity}");
             if (_is_grounded)
             {
                 _can_jump = true;
@@ -148,7 +149,8 @@ namespace Systems.Common.Movement
             if (!_is_grounded)
             {
                 _verticalVelocity += GRAVITY * 0.016f; // 約60FPSを想定
-                GodotMock.Print($"Applying gravity, new Y velocity: {_verticalVelocity}");
+                // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+                // GodotMock.Print($"Applying gravity, new Y velocity: {_verticalVelocity}");
             }
         }
 
