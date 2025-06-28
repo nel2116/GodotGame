@@ -4,7 +4,12 @@ using Core.Events;
 
 public partial class PlayerInputViewModelNode : Node
 {
-    private PlayerInputViewModel _viewModel;
+    private PlayerInputViewModel? _viewModel;
+    
+    /// <summary>
+    /// ViewModelが初期化されているかどうかを確認
+    /// </summary>
+    public bool IsInitialized => _viewModel != null;
 
     public bool IsEnabled => _viewModel?.IsEnabled?.Value ?? false;
 
@@ -18,6 +23,12 @@ public partial class PlayerInputViewModelNode : Node
 
     public void UpdateInput()
     {
-        _viewModel?.UpdateInput();
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerInputViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.UpdateInput();
     }
 } 

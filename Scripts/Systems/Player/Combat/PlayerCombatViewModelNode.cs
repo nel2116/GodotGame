@@ -4,7 +4,12 @@ using Core.Events;
 
 public partial class PlayerCombatViewModelNode : Node
 {
-    private PlayerCombatViewModel _viewModel;
+    private PlayerCombatViewModel? _viewModel;
+    
+    /// <summary>
+    /// ViewModelが初期化されているかどうかを確認
+    /// </summary>
+    public bool IsInitialized => _viewModel != null;
 
     public float CurrentHealth => _viewModel?.CurrentHealth?.Value ?? 0f;
     public float MaxHealth => _viewModel?.MaxHealth?.Value ?? 0f;
@@ -19,21 +24,45 @@ public partial class PlayerCombatViewModelNode : Node
 
     public void UpdateCombat()
     {
-        _viewModel?.UpdateCombat();
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.UpdateCombat();
     }
 
     public void Attack(string actionName)
     {
-        _viewModel?.Attack(actionName);
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.Attack(actionName);
     }
 
     public void TakeDamage(float damage)
     {
-        _viewModel?.TakeDamage(damage);
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.TakeDamage(damage);
     }
 
     public void Heal(float amount)
     {
-        _viewModel?.Heal(amount);
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.Heal(amount);
     }
 } 

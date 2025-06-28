@@ -4,7 +4,12 @@ using Core.Events;
 
 public partial class PlayerMovementViewModelNode : Node
 {
-    private PlayerMovementViewModel _viewModel;
+    private PlayerMovementViewModel? _viewModel;
+    
+    /// <summary>
+    /// ViewModelが初期化されているかどうかを確認
+    /// </summary>
+    public bool IsInitialized => _viewModel != null;
 
     public Vector2 Velocity => _viewModel?.Velocity?.Value ?? Vector2.Zero;
     public bool IsGrounded => _viewModel?.IsGrounded?.Value ?? false;
@@ -20,16 +25,34 @@ public partial class PlayerMovementViewModelNode : Node
 
     public void UpdateMovement()
     {
-        _viewModel?.UpdateMovement();
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerMovementViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.UpdateMovement();
     }
 
     public void HandleJump()
     {
-        _viewModel?.HandleJump();
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerMovementViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.HandleJump();
     }
 
     public void HandleDash()
     {
-        _viewModel?.HandleDash();
+        if (_viewModel == null)
+        {
+            GD.PrintErr("PlayerMovementViewModelNode: ViewModel is not initialized. Call Initialize() first.");
+            return;
+        }
+        
+        _viewModel.HandleDash();
     }
 } 
