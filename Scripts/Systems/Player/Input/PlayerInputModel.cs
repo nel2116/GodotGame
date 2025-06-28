@@ -112,6 +112,14 @@ namespace Systems.Player.Input
                     // GodotMock.Print($"Action triggered: {action.Name}");
                     action.ExecuteAction();
                 }
+                else
+                {
+                    // Moveアクションが見つからない場合のログ出力
+                    if (!GodotMock.IsTestEnvironment())
+                    {
+                        GD.PrintErr("Move action not found in _actions dictionary");
+                    }
+                }
             }
 
             // ボタン入力の処理
