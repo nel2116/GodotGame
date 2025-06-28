@@ -19,13 +19,13 @@ namespace Tests.Core.Player
     /// </summary>
     public class PlayerSystemIntegrationTests : TestBase
     {
-        private GameEventBus _eventBus = null!;
-        private PlayerInputViewModel _inputVm = null!;
-        private PlayerMovementViewModel _movementVm = null!;
-        private PlayerCombatViewModel _combatVm = null!;
-        private PlayerAnimationViewModel _animationVm = null!;
-        private PlayerStateViewModel _stateVm = null!;
-        private PlayerProgressionViewModel _progressionVm = null!;
+        private GameEventBus? _eventBus;
+        private PlayerInputViewModel? _inputVm;
+        private PlayerMovementViewModel? _movementVm;
+        private PlayerCombatViewModel? _combatVm;
+        private PlayerAnimationViewModel? _animationVm;
+        private PlayerStateViewModel? _stateVm;
+        private PlayerProgressionViewModel? _progressionVm;
 
         protected override void OnSetUp()
         {
