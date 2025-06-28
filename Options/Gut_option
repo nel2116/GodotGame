@@ -2,10 +2,10 @@
  "background_color": "262626ff",
  "compact_mode": false,
  "configured_dirs": [
-  "res://Tests/Core/Tests/Integration_Godot"
+  "res://Tests/Integration_Godot"
  ],
  "dirs": [
-  "res://Tests/Core/Tests/Integration_Godot"
+  "res://Tests/Integration_Godot"
  ],
  "disable_colors": false,
  "double_strategy": 1,
