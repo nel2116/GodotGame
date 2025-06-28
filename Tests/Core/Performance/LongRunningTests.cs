@@ -22,16 +22,16 @@ namespace Tests.Core.Performance
     /// </summary>
     public class LongRunningTests : TestBase
     {
-        private GameEventBus _eventBus = null!;
-        private PlayerInputViewModel _inputVm = null!;
-        private PlayerMovementViewModel _movementVm = null!;
-        private PlayerCombatViewModel _combatVm = null!;
-        private PlayerAnimationViewModel _animationVm = null!;
-        private PlayerStateViewModel _stateVm = null!;
-        private PlayerProgressionViewModel _progressionVm = null!;
-        private CommonMovementModel _movementModel = null!;
-        private CommonStateModel _stateModel = null!;
-        private CommonResourceModel _resourceModel = null!;
+        private GameEventBus? _eventBus;
+        private PlayerInputViewModel? _inputVm;
+        private PlayerMovementViewModel? _movementVm;
+        private PlayerCombatViewModel? _combatVm;
+        private PlayerAnimationViewModel? _animationVm;
+        private PlayerStateViewModel? _stateVm;
+        private PlayerProgressionViewModel? _progressionVm;
+        private CommonMovementModel? _movementModel;
+        private CommonStateModel? _stateModel;
+        private CommonResourceModel? _resourceModel;
 
         protected override void OnSetUp()
         {

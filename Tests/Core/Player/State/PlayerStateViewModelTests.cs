@@ -3,6 +3,7 @@ using Systems.Player.State;
 using Systems.Player.Events;
 using Systems.Common.Events;
 using Core.Events;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.State
 {
@@ -20,7 +21,7 @@ namespace Tests.Core.Player.State
         }
 
         [Test]
-        public void ChangeState_PublishesStateEvent()
+        public async Task ChangeState_PublishesStateEvent()
         {
             var bus = new GameEventBus();
             
@@ -35,7 +36,7 @@ namespace Tests.Core.Player.State
             viewModel.HandleStateChange("Moving");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.That(viewModel.CurrentState.Value, Is.EqualTo("Moving"));
             Assert.IsNotNull(received);
@@ -43,7 +44,7 @@ namespace Tests.Core.Player.State
         }
 
         [Test]
-        public void ChangeState_Invalid_PublishesError()
+        public async Task ChangeState_Invalid_PublishesError()
         {
             var bus = new GameEventBus();
             
@@ -58,7 +59,7 @@ namespace Tests.Core.Player.State
             viewModel.HandleStateChange("Unknown");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(error);
             Assert.AreEqual("PlayerStateModel", error!.Exception.SystemName);

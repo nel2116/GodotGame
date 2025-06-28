@@ -15,20 +15,20 @@ namespace Tests.Core.Events
         private class AnotherEvent : GameEvent { }
 
         [Test]
-        public void Publish_NotifiesSubscribers()
+        public async Task Publish_NotifiesSubscribers()
         {
             var bus = new GameEventBus();
             bool notified = false;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => notified = true))
             {
                 bus.Publish(new DummyEvent());
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
                 Assert.IsTrue(notified);
             }
         }
 
         [Test]
-        public void Subscribe_MultipleTypes_NotifyOnlyMatching()
+        public async Task Subscribe_MultipleTypes_NotifyOnlyMatching()
         {
             var bus = new GameEventBus();
             int dummyCount = 0;
@@ -40,7 +40,7 @@ namespace Tests.Core.Events
                 bus.Publish(new DummyEvent());
                 bus.Publish(new AnotherEvent());
                 bus.Publish(new DummyEvent());
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
 
                 Assert.AreEqual(2, dummyCount);
                 Assert.AreEqual(1, anotherCount);
@@ -48,20 +48,20 @@ namespace Tests.Core.Events
         }
 
         [Test]
-        public void Publish_UnsubscribedType_DoesNotNotify()
+        public async Task Publish_UnsubscribedType_DoesNotNotify()
         {
             var bus = new GameEventBus();
             bool notified = false;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => notified = true))
             {
                 bus.Publish(new AnotherEvent());
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
                 Assert.IsFalse(notified);
             }
         }
 
         [Test, MaxTime(1000)]
-        public void Publish_Performance()
+        public async Task Publish_Performance()
         {
             var bus = new GameEventBus();
             int count = 0;
@@ -71,13 +71,13 @@ namespace Tests.Core.Events
                 {
                     bus.Publish(new DummyEvent());
                 }
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
             }
             Assert.AreEqual(1000, count);
         }
 
         [Test, MaxTime(3000)]
-        public void Publish_LargeVolume_Performance()
+        public async Task Publish_LargeVolume_Performance()
         {
             var bus = new GameEventBus();
             int count = 0;
@@ -87,20 +87,20 @@ namespace Tests.Core.Events
                 {
                     bus.Publish(new DummyEvent());
                 }
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
             }
             Assert.AreEqual(50000, count);
         }
 
         [Test]
-        public void Publish_Concurrent()
+        public async Task Publish_Concurrent()
         {
             var bus = new GameEventBus();
             int count = 0;
             using (bus.GetEventStream<DummyEvent>().Subscribe(_ => Interlocked.Increment(ref count)))
             {
                 Parallel.For(0, 1000, _ => bus.Publish(new DummyEvent()));
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
             }
             Assert.AreEqual(1000, count);
         }
@@ -130,7 +130,7 @@ namespace Tests.Core.Events
         /// 多数のタスクから同時に発行しても全て処理されるか確認
         /// </summary>
         [Test, MaxTime(3000)]
-        public void LoadTest_ConcurrentPublish()
+        public async Task LoadTest_ConcurrentPublish()
         {
             var bus = new GameEventBus();
             int count = 0;
@@ -148,7 +148,7 @@ namespace Tests.Core.Events
                     });
                 }
                 Task.WaitAll(tasks);
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
             }
             // 記録漏れがないことを確認するが、並列実行の揺らぎを考慮し下限のみ検証
             Assert.GreaterOrEqual(count, 20000);
@@ -174,7 +174,7 @@ namespace Tests.Core.Events
         /// 破棄済みのバスに対する操作が適切に処理されることを確認
         /// </summary>
         [Test]
-        public void Operations_AfterDispose_HandleGracefully()
+        public async Task Operations_AfterDispose_HandleGracefully()
         {
             var bus = new GameEventBus();
             bus.Dispose();
@@ -189,7 +189,7 @@ namespace Tests.Core.Events
             using (stream.Subscribe(_ => notified = true))
             {
                 bus.Publish(new DummyEvent());
-                Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+                await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
                 Assert.IsFalse(notified, "破棄済みバスからのイベントは通知されないべき");
             }
         }
@@ -198,7 +198,7 @@ namespace Tests.Core.Events
         /// イベントのバッファリングが正しく機能することを確認
         /// </summary>
         [Test, MaxTime(2000)]
-        public void EventBuffering_WorksCorrectly()
+        public async Task EventBuffering_WorksCorrectly()
         {
             var bus = new GameEventBus();
             int count = 0;
@@ -217,7 +217,7 @@ namespace Tests.Core.Events
                 }
 
                 // バッファリングの効果を確認するため少し待機
-                Thread.Sleep(50);
+                await Task.Delay(50);
             }
 
             Assert.Greater(count, 0, "イベントが少なくとも1つは通知されるべき");
@@ -287,11 +287,11 @@ namespace Tests.Core.Events
         /// nullイベントの発行が適切に処理されることを確認
         /// </summary>
         [Test]
-        public void Publish_NullEvent_HandleGracefully()
+        public async Task Publish_NullEvent_HandleGracefully()
         {
             var bus = new GameEventBus();
             Assert.DoesNotThrow(() => bus.Publish<DummyEvent>(null));
-            Thread.Sleep(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
+            await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
         }
     }
 }

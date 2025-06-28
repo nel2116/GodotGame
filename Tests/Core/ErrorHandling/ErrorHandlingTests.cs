@@ -18,10 +18,10 @@ namespace Tests.Core.ErrorHandling
     /// </summary>
     public class ErrorHandlingTests : TestBase
     {
-        private GameEventBus _eventBus = null!;
-        private CommonMovementModel _movementModel = null!;
-        private CommonStateModel _stateModel = null!;
-        private CommonResourceModel _resourceModel = null!;
+        private GameEventBus? _eventBus;
+        private CommonMovementModel? _movementModel;
+        private CommonStateModel? _stateModel;
+        private CommonResourceModel? _resourceModel;
 
         protected override void OnSetUp()
         {

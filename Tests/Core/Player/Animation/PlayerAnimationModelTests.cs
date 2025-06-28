@@ -25,7 +25,7 @@ namespace Tests.Core.Player.Animation
             await model.BlendAnimationAsync("Idle", "Jump", 0.1f);
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(started);
             Assert.AreEqual("Idle", started!.FromAnimation);
@@ -35,7 +35,7 @@ namespace Tests.Core.Player.Animation
         }
 
         [Test]
-        public void PlayAnimation_InvalidName_PublishesError()
+        public async Task PlayAnimation_InvalidName_PublishesError()
         {
             var bus = new GameEventBus();
             
@@ -49,7 +49,7 @@ namespace Tests.Core.Player.Animation
             model.PlayAnimation("Invalid");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(error);
             Assert.AreEqual("PlayerAnimationModel", error!.Exception.SystemName);

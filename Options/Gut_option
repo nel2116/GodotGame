@@ -2,12 +2,10 @@
  "background_color": "262626ff",
  "compact_mode": false,
  "configured_dirs": [
-  "res://Scripts/Tests",
-  "res://Scripts/Tests/Core/Event",
-  "res://Scripts/Tests/Core/Effect"
+  "res://Tests/Integration_Godot"
  ],
  "dirs": [
-  "res://Scripts/Tests/Core/Effect"
+  "res://Tests/Integration_Godot"
  ],
  "disable_colors": false,
  "double_strategy": 1,
@@ -27,7 +25,7 @@
  "post_run_script": "",
  "pre_run_script": "",
  "prefix": "test_",
- "should_exit": true,
+ "should_exit": false,
  "should_exit_on_success": false,
  "should_maximize": false,
  "suffix": ".gd"

@@ -37,6 +37,14 @@ namespace Core.Utilities
         }
 
         /// <summary>
+        /// テスト環境かどうかを取得
+        /// </summary>
+        public static bool IsTestEnvironment()
+        {
+            return _isTestEnvironment;
+        }
+
+        /// <summary>
         /// テスト環境の初期化
         /// </summary>
         private static void InitializeTestEnvironment()
@@ -116,7 +124,7 @@ namespace Core.Utilities
                     }
                     // 通常のログは出力しない（パフォーマンス向上のため）
                 }
-                catch (Exception ex)
+                catch (Exception _)
                 {
                     // ログ出力中のエラーを無視（無限ループ防止）
                 }

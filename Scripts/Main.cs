@@ -3,7 +3,7 @@ using Core.Utilities;
 
 public partial class Main : Node3D
 {
-	private Player _player;
+	private Player? _player;
 
 	// ゲーム開始時に初期化処理を行う
 	public override void _Ready()

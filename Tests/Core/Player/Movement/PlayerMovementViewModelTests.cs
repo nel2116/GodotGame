@@ -3,6 +3,7 @@ using Systems.Player.Movement;
 using Systems.Common.Events;
 using Core.Events;
 using Godot;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Movement
 {
@@ -20,7 +21,7 @@ namespace Tests.Core.Player.Movement
         }
 
         [Test]
-        public void Dash_PublishesDashingEvent()
+        public async Task Dash_PublishesDashingEvent()
         {
             var bus = new GameEventBus();
             
@@ -35,7 +36,7 @@ namespace Tests.Core.Player.Movement
             viewModel.HandleDash();
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(received);
             Assert.IsTrue(received!.IsDashing);
@@ -43,7 +44,7 @@ namespace Tests.Core.Player.Movement
         }
 
         [Test]
-        public void Jump_Update_PublishesGroundedEvent()
+        public async Task Jump_Update_PublishesGroundedEvent()
         {
             var bus = new GameEventBus();
             
@@ -59,7 +60,7 @@ namespace Tests.Core.Player.Movement
             viewModel.UpdateMovement();
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(received);
             Assert.IsFalse(received!.IsGrounded);

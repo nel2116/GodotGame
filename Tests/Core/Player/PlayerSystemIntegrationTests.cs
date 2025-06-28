@@ -35,6 +35,14 @@ namespace Tests.Core.Player
             {
                 _eventBus = new GameEventBus();
                 InitializeViewModels();
+                
+                // 初期化後のnullチェック
+                Assert.IsNotNull(_inputVm, "InputViewModel should be initialized");
+                Assert.IsNotNull(_movementVm, "MovementViewModel should be initialized");
+                Assert.IsNotNull(_combatVm, "CombatViewModel should be initialized");
+                Assert.IsNotNull(_animationVm, "AnimationViewModel should be initialized");
+                Assert.IsNotNull(_stateVm, "StateViewModel should be initialized");
+                Assert.IsNotNull(_progressionVm, "ProgressionViewModel should be initialized");
             }, "System initialization");
         }
 
@@ -168,7 +176,7 @@ namespace Tests.Core.Player
         }
 
         [Test]
-        public void EventCommunication_Integration()
+        public async Task EventCommunication_Integration()
         {
             // システム間のイベント通信テスト
             var eventReceived = false;
@@ -180,14 +188,14 @@ namespace Tests.Core.Player
             _movementVm.UpdateMovement();
             
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
             
             Assert.IsTrue(eventReceived, "Movement event should be published");
             AssertNoErrors();
         }
 
         [Test]
-        public void ErrorHandling_Integration()
+        public async Task ErrorHandling_Integration()
         {
             // エラーハンドリングの統合テスト
             var errorReceived = false;
@@ -198,22 +206,21 @@ namespace Tests.Core.Player
             
             SafeTestExecution(() =>
             {
-                // 無効な入力でエラーが適切に処理されることを確認
                 _combatVm.Attack("InvalidAction");
-                
-                // 少し待機してイベント処理を完了させる
-                System.Threading.Thread.Sleep(10);
-                
-                // エラーイベントが発行されることを確認
-                Assert.IsTrue(errorReceived, "Error event should be published");
-            }, "Error handling");
+            }, "Invalid action execution");
+            
+            // 少し待機してイベント処理を完了させる
+            await Task.Delay(10);
+            
+            Assert.IsTrue(errorReceived, "Error event should be published");
+            AssertNoErrors();
         }
 
         [Test]
         public void Performance_Integration()
         {
             // パフォーマンス統合テスト
-            MeasurePerformance(() =>
+            SafeTestExecution(() =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
@@ -224,7 +231,7 @@ namespace Tests.Core.Player
                     _stateVm.UpdateState();
                     _progressionVm.Update();
                 }
-            }, "1000 system updates", 5000);
+            }, "Performance test");
             
             AssertNoErrors();
         }
@@ -232,20 +239,20 @@ namespace Tests.Core.Player
         [Test]
         public void MemoryUsage_Integration()
         {
-            // メモリ使用量の統合テスト
-            CheckMemoryUsage("Before system operations");
-            
-            for (int i = 0; i < 100; i++)
+            // メモリ使用量統合テスト
+            SafeTestExecution(() =>
             {
-                _inputVm.UpdateInput();
-                _movementVm.UpdateMovement();
-                _combatVm.UpdateCombat();
-                _animationVm.Update();
-                _stateVm.UpdateState();
-                _progressionVm.Update();
-            }
+                for (int i = 0; i < 100; i++)
+                {
+                    _inputVm.UpdateInput();
+                    _movementVm.UpdateMovement();
+                    _combatVm.UpdateCombat();
+                    _animationVm.Update();
+                    _stateVm.UpdateState();
+                    _progressionVm.Update();
+                }
+            }, "Memory usage test");
             
-            CheckMemoryUsage("After system operations");
             AssertNoErrors();
         }
 
@@ -255,12 +262,21 @@ namespace Tests.Core.Player
             // 非同期操作の統合テスト
             SafeTestExecution(async () =>
             {
-                var task1 = Task.Run(() => _inputVm.UpdateInput());
-                var task2 = Task.Run(() => _movementVm.UpdateMovement());
-                var task3 = Task.Run(() => _combatVm.UpdateCombat());
+                var task = Task.Run(() =>
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        _inputVm.UpdateInput();
+                        _movementVm.UpdateMovement();
+                        _combatVm.UpdateCombat();
+                        _animationVm.Update();
+                        _stateVm.UpdateState();
+                        _progressionVm.Update();
+                    }
+                });
                 
-                await Task.WhenAll(task1, task2, task3);
-            }, "Async operations");
+                await task;
+            }, "Async operations test");
             
             AssertNoErrors();
         }

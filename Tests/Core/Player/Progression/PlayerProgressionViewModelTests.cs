@@ -2,6 +2,7 @@ using NUnit.Framework;
 using Systems.Player.Progression;
 using Systems.Player.Events;
 using Core.Events;
+using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Progression
 {
@@ -19,7 +20,7 @@ namespace Tests.Core.Player.Progression
         }
 
         [Test]
-        public void UnlockSkill_ValidSkill_PublishesEvent()
+        public async Task UnlockSkill_ValidSkill_PublishesEvent()
         {
             var bus = new GameEventBus();
             
@@ -35,7 +36,7 @@ namespace Tests.Core.Player.Progression
             var result = viewModel.UnlockSkill("Fireball");
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsTrue(result);
             Assert.IsNotNull(received);
@@ -44,7 +45,7 @@ namespace Tests.Core.Player.Progression
         }
 
         [Test]
-        public void AddExperience_PublishesExperienceAndLevelUp()
+        public async Task AddExperience_PublishesExperienceAndLevelUp()
         {
             var bus = new GameEventBus();
             
@@ -61,7 +62,7 @@ namespace Tests.Core.Player.Progression
             viewModel.AddExperience(150);
 
             // 少し待機してイベント処理を完了させる
-            System.Threading.Thread.Sleep(10);
+            await Task.Delay(10);
 
             Assert.IsNotNull(exp);
             Assert.AreEqual(150, exp!.Experience);
