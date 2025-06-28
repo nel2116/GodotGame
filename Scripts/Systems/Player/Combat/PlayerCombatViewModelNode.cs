@@ -12,8 +12,33 @@ public partial class PlayerCombatViewModelNode : BaseViewModelNode
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public float CurrentHealth => _viewModel?.CurrentHealth?.Value ?? 0f;
-    public float MaxHealth => _viewModel?.MaxHealth?.Value ?? 0f;
+    public float CurrentHealth 
+    {
+        get
+        {
+            if (_viewModel?.CurrentHealth != null)
+            {
+                var currentHealth = _viewModel.CurrentHealth;
+                if (currentHealth != null)
+                    return currentHealth.Value;
+            }
+            return 0f;
+        }
+    }
+    
+    public float MaxHealth 
+    {
+        get
+        {
+            if (_viewModel?.MaxHealth != null)
+            {
+                var maxHealth = _viewModel.MaxHealth;
+                if (maxHealth != null)
+                    return maxHealth.Value;
+            }
+            return 0f;
+        }
+    }
 
     public void Initialize()
     {
@@ -25,29 +50,25 @@ public partial class PlayerCombatViewModelNode : BaseViewModelNode
 
     public void UpdateCombat()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.UpdateCombat();
     }
 
     public void Attack(string actionName)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Attack(actionName);
     }
 
     public void TakeDamage(float damage)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.TakeDamage(damage);
     }
 
     public void Heal(float amount)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Heal(amount);
     }
 } 

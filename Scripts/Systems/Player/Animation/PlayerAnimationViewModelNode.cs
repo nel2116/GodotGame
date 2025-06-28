@@ -12,7 +12,19 @@ public partial class PlayerAnimationViewModelNode : BaseViewModelNode
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public string CurrentAnimation => _viewModel?.CurrentAnimation?.Value ?? "Idle";
+    public string CurrentAnimation 
+    {
+        get
+        {
+            if (_viewModel?.CurrentAnimation != null)
+            {
+                var currentAnimation = _viewModel.CurrentAnimation;
+                if (currentAnimation != null)
+                    return currentAnimation.Value;
+            }
+            return "Idle";
+        }
+    }
 
     public void Initialize()
     {
@@ -24,15 +36,25 @@ public partial class PlayerAnimationViewModelNode : BaseViewModelNode
 
     public void Update()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerAnimationViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Update();
     }
 
     public void HandleAnimation(string animationName)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerAnimationViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.HandleAnimation(animationName);
+    }
+
+    public void UpdateAnimation()
+    {
+        if (!EnsureViewModelInitialized(_viewModel)) return;
+        _viewModel.UpdateAnimation();
+    }
+
+    public void PlayAnimation(string animationName)
+    {
+        if (!EnsureViewModelInitialized(_viewModel)) return;
+        _viewModel.PlayAnimation(animationName);
     }
 } 

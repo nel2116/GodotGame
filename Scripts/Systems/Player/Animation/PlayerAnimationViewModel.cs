@@ -59,11 +59,32 @@ namespace Systems.Player.Animation
             UpdateAnimationState();
         }
 
+        public void PlayAnimation(string animationName)
+        {
+            _model.PlayAnimation(animationName);
+            UpdateAnimationState();
+        }
+
         private void UpdateAnimationState()
         {
-            _current_animation.Value = _model.CurrentAnimation;
-            _speed.Value = _model.Speed;
-            _is_playing.Value = _model.IsPlaying;
+            var currentAnimation = _model.CurrentAnimation;
+            var speed = _model.Speed;
+            var isPlaying = _model.IsPlaying;
+
+            if (_current_animation.Value != currentAnimation)
+            {
+                _current_animation.Value = currentAnimation;
+            }
+
+            if (_speed.Value != speed)
+            {
+                _speed.Value = speed;
+            }
+
+            if (_is_playing.Value != isPlaying)
+            {
+                _is_playing.Value = isPlaying;
+            }
         }
 
         private void OnAnimationChanged(string animation)

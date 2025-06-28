@@ -71,7 +71,7 @@ namespace Core.Events
 					typedSubject.OnNext(evt);
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
 				// GodotMock.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
@@ -98,7 +98,7 @@ namespace Core.Events
 					.Buffer(TimeSpan.FromMilliseconds(16)) // フレームレートに合わせたバッファリング
 					.SelectMany(events => events);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
 				// GodotMock.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
@@ -165,7 +165,7 @@ namespace Core.Events
 									disposable.Dispose();
 								}
 							}
-							catch (Exception ex)
+							catch (Exception)
 							{
 								// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
 								// GodotMock.PrintErr($"Error disposing subject: {ex.Message}");
@@ -173,7 +173,7 @@ namespace Core.Events
 						}
 						_subjects.Clear();
 					}
-					catch (Exception ex)
+					catch (Exception)
 					{
 						// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
 						// GodotMock.PrintErr($"Error during GameEventBus disposal: {ex.Message}");

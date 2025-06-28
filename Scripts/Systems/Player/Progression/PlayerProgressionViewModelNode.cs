@@ -12,9 +12,47 @@ public partial class PlayerProgressionViewModelNode : BaseViewModelNode
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public int Level => _viewModel?.Level?.Value ?? 1;
-    public int Experience => _viewModel?.Experience?.Value ?? 0;
-    public int AvailableSkillPoints => _viewModel?.AvailableSkillPoints?.Value ?? 0;
+    public int Level 
+    {
+        get
+        {
+            if (_viewModel?.Level != null)
+            {
+                var level = _viewModel.Level;
+                if (level != null)
+                    return level.Value;
+            }
+            return 1;
+        }
+    }
+    
+    public int Experience 
+    {
+        get
+        {
+            if (_viewModel?.Experience != null)
+            {
+                var experience = _viewModel.Experience;
+                if (experience != null)
+                    return experience.Value;
+            }
+            return 0;
+        }
+    }
+    
+    public int AvailableSkillPoints 
+    {
+        get
+        {
+            if (_viewModel?.AvailableSkillPoints != null)
+            {
+                var skillPoints = _viewModel.AvailableSkillPoints;
+                if (skillPoints != null)
+                    return skillPoints.Value;
+            }
+            return 0;
+        }
+    }
 
     public void Initialize()
     {
@@ -26,22 +64,19 @@ public partial class PlayerProgressionViewModelNode : BaseViewModelNode
 
     public void UpdateProgression()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.UpdateProgression();
     }
 
-    public void AddExperience(int exp)
+    public void AddExperience(int experience)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return;
-        
-        _viewModel.AddExperience(exp);
+        if (!EnsureViewModelInitialized(_viewModel)) return;
+        _viewModel.AddExperience(experience);
     }
 
     public bool UnlockSkill(string skillName)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return false;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return false;
         return _viewModel.UnlockSkill(skillName);
     }
 } 

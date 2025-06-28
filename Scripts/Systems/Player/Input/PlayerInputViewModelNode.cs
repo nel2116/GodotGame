@@ -12,7 +12,19 @@ public partial class PlayerInputViewModelNode : BaseViewModelNode
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public bool IsEnabled => _viewModel?.IsEnabled?.Value ?? false;
+    public bool IsEnabled 
+    {
+        get
+        {
+            if (_viewModel?.IsEnabled != null)
+            {
+                var isEnabled = _viewModel.IsEnabled;
+                if (isEnabled != null)
+                    return isEnabled.Value;
+            }
+            return false;
+        }
+    }
 
     public void Initialize()
     {
@@ -24,8 +36,7 @@ public partial class PlayerInputViewModelNode : BaseViewModelNode
 
     public void UpdateInput()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "PlayerInputViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.UpdateInput();
     }
 } 

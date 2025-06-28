@@ -106,10 +106,12 @@ namespace Systems.Player.Input
             // 移動入力の処理
             if (_currentState.MovementInput != Vector2.Zero)
             {
-                var action = _actions["Move"];
-                // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-                // GodotMock.Print($"Action triggered: {action.Name}");
-                action.ExecuteAction();
+                if (_actions.TryGetValue("Move", out var action))
+                {
+                    // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
+                    // GodotMock.Print($"Action triggered: {action.Name}");
+                    action.ExecuteAction();
+                }
             }
 
             // ボタン入力の処理

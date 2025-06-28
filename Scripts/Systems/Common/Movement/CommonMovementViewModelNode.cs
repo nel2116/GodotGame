@@ -12,7 +12,19 @@ public partial class CommonMovementViewModelNode : BaseViewModelNode
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public Vector2 Velocity => _viewModel?.Velocity?.Value ?? Vector2.Zero;
+    public Vector2 Velocity 
+    {
+        get
+        {
+            if (_viewModel?.Velocity != null)
+            {
+                var velocity = _viewModel.Velocity;
+                if (velocity != null)
+                    return velocity.Value;
+            }
+            return Vector2.Zero;
+        }
+    }
 
     public void Initialize()
     {
@@ -24,29 +36,25 @@ public partial class CommonMovementViewModelNode : BaseViewModelNode
 
     public void UpdateMovement()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "CommonMovementViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.UpdateMovement();
     }
 
     public void Move(Vector2 direction)
     {
-        if (!EnsureViewModelInitialized(_viewModel, "CommonMovementViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Move(direction);
     }
 
     public void Jump()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "CommonMovementViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Jump();
     }
 
     public void Dash()
     {
-        if (!EnsureViewModelInitialized(_viewModel, "CommonMovementViewModelNode")) return;
-        
+        if (!EnsureViewModelInitialized(_viewModel)) return;
         _viewModel.Dash();
     }
 } 

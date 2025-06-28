@@ -13,13 +13,12 @@ namespace Core.ViewModels
         /// </summary>
         /// <typeparam name="T">ViewModelの型</typeparam>
         /// <param name="viewModel">チェック対象のViewModel</param>
-        /// <param name="nodeName">ノード名（エラーメッセージ用）</param>
         /// <returns>初期化済みの場合true、未初期化の場合false</returns>
-        protected bool EnsureViewModelInitialized<T>(T? viewModel, string nodeName) where T : class
+        protected bool EnsureViewModelInitialized<T>(T? viewModel) where T : class
         {
             if (viewModel == null)
             {
-                GD.PrintErr($"{nodeName}: ViewModel is not initialized. Call Initialize() first.");
+                GD.PrintErr($"{GetType().Name}: ViewModel is not initialized. Call Initialize() first.");
                 return false;
             }
             return true;
