@@ -37,6 +37,14 @@ namespace Core.Utilities
         }
 
         /// <summary>
+        /// テスト環境かどうかを取得
+        /// </summary>
+        public static bool IsTestEnvironment()
+        {
+            return _isTestEnvironment;
+        }
+
+        /// <summary>
         /// テスト環境の初期化
         /// </summary>
         private static void InitializeTestEnvironment()
