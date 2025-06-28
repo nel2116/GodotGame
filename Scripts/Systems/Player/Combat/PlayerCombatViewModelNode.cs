@@ -1,8 +1,9 @@
 using Godot;
 using Systems.Player.Combat;
 using Core.Events;
+using Core.ViewModels;
 
-public partial class PlayerCombatViewModelNode : Node
+public partial class PlayerCombatViewModelNode : BaseViewModelNode
 {
     private PlayerCombatViewModel? _viewModel;
     
@@ -22,43 +23,30 @@ public partial class PlayerCombatViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    /// <summary>
-    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
-    /// </summary>
-    private bool EnsureViewModelInitialized()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerCombatViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return false;
-        }
-        return true;
-    }
-
     public void UpdateCombat()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
         
         _viewModel.UpdateCombat();
     }
 
     public void Attack(string actionName)
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
         
         _viewModel.Attack(actionName);
     }
 
     public void TakeDamage(float damage)
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
         
         _viewModel.TakeDamage(damage);
     }
 
     public void Heal(float amount)
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerCombatViewModelNode")) return;
         
         _viewModel.Heal(amount);
     }

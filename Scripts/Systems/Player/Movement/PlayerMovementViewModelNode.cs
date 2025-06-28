@@ -1,8 +1,9 @@
 using Godot;
 using Systems.Player.Movement;
 using Core.Events;
+using Core.ViewModels;
 
-public partial class PlayerMovementViewModelNode : Node
+public partial class PlayerMovementViewModelNode : BaseViewModelNode
 {
     private PlayerMovementViewModel? _viewModel;
     
@@ -23,36 +24,23 @@ public partial class PlayerMovementViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    /// <summary>
-    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
-    /// </summary>
-    private bool EnsureViewModelInitialized()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerMovementViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return false;
-        }
-        return true;
-    }
-
     public void UpdateMovement()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerMovementViewModelNode")) return;
         
         _viewModel.UpdateMovement();
     }
 
     public void HandleJump()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerMovementViewModelNode")) return;
         
         _viewModel.HandleJump();
     }
 
     public void HandleDash()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerMovementViewModelNode")) return;
         
         _viewModel.HandleDash();
     }

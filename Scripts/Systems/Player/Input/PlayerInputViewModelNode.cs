@@ -1,8 +1,9 @@
 using Godot;
 using Systems.Player.Input;
 using Core.Events;
+using Core.ViewModels;
 
-public partial class PlayerInputViewModelNode : Node
+public partial class PlayerInputViewModelNode : BaseViewModelNode
 {
     private PlayerInputViewModel? _viewModel;
     
@@ -21,22 +22,9 @@ public partial class PlayerInputViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    /// <summary>
-    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
-    /// </summary>
-    private bool EnsureViewModelInitialized()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerInputViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return false;
-        }
-        return true;
-    }
-
     public void UpdateInput()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerInputViewModelNode")) return;
         
         _viewModel.UpdateInput();
     }

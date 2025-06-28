@@ -1,8 +1,9 @@
 using Godot;
 using Systems.Player.Animation;
 using Core.Events;
+using Core.ViewModels;
 
-public partial class PlayerAnimationViewModelNode : Node
+public partial class PlayerAnimationViewModelNode : BaseViewModelNode
 {
     private PlayerAnimationViewModel? _viewModel;
     
@@ -21,29 +22,16 @@ public partial class PlayerAnimationViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    /// <summary>
-    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
-    /// </summary>
-    private bool EnsureViewModelInitialized()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerAnimationViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return false;
-        }
-        return true;
-    }
-
     public void Update()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerAnimationViewModelNode")) return;
         
         _viewModel.Update();
     }
 
     public void HandleAnimation(string animationName)
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerAnimationViewModelNode")) return;
         
         _viewModel.HandleAnimation(animationName);
     }

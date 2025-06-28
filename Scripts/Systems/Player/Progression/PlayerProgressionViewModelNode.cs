@@ -1,8 +1,9 @@
 using Godot;
 using Systems.Player.Progression;
 using Core.Events;
+using Core.ViewModels;
 
-public partial class PlayerProgressionViewModelNode : Node
+public partial class PlayerProgressionViewModelNode : BaseViewModelNode
 {
     private PlayerProgressionViewModel? _viewModel;
     
@@ -23,36 +24,23 @@ public partial class PlayerProgressionViewModelNode : Node
         _viewModel.Initialize();
     }
 
-    /// <summary>
-    /// ViewModelが初期化されていることを確認し、未初期化の場合はエラーメッセージを出力してfalseを返す
-    /// </summary>
-    private bool EnsureViewModelInitialized()
-    {
-        if (_viewModel == null)
-        {
-            GD.PrintErr("PlayerProgressionViewModelNode: ViewModel is not initialized. Call Initialize() first.");
-            return false;
-        }
-        return true;
-    }
-
     public void UpdateProgression()
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return;
         
         _viewModel.UpdateProgression();
     }
 
     public void AddExperience(int exp)
     {
-        if (!EnsureViewModelInitialized()) return;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return;
         
         _viewModel.AddExperience(exp);
     }
 
     public bool UnlockSkill(string skillName)
     {
-        if (!EnsureViewModelInitialized()) return false;
+        if (!EnsureViewModelInitialized(_viewModel, "PlayerProgressionViewModelNode")) return false;
         
         return _viewModel.UnlockSkill(skillName);
     }
