@@ -6,12 +6,13 @@ using Systems.Player.Events;
 namespace Systems.Player.Input
 {
 	/// <summary>
-	/// プレイヤー入力ビューモデル
+	/// プレイヤー入力ビューモデル。
+	/// 入力状態の変更を検出し、変更時のみイベントを発行する。
 	/// </summary>
 	public class PlayerInputViewModel : ViewModelBase
 	{
 		private readonly PlayerInputModel _model;
-		private InputState? _lastSnapshot;
+		private InputState? _previousStateSnapshot;
 		public ReactiveProperty<InputState> CurrentState { get; }
 		public ReactiveProperty<bool> IsEnabled { get; }
 
@@ -27,7 +28,7 @@ namespace Systems.Player.Input
 		}
 
 		/// <summary>
-		/// 初期化処理
+		/// 入力システムを初期化し、初期状態を反映する。
 		/// </summary>
 		public void Initialize()
 		{
@@ -36,7 +37,7 @@ namespace Systems.Player.Input
 		}
 
 		/// <summary>
-		/// 入力更新
+		/// 入力状態を更新し、変更があればイベントを発行する。
 		/// </summary>
 		public void UpdateInput()
 		{
@@ -44,25 +45,39 @@ namespace Systems.Player.Input
 			UpdateInputState();
 		}
 
+		/// <summary>
+		/// モデルの入力状態を取得し、前回の状態と比較して変更があれば通知する。
+		/// 状態が同じ場合は IsEnabled のみ更新して早期リターンする。
+		/// </summary>
 		private void UpdateInputState()
 		{
-			var snapshot = _model.CurrentState.Clone();
-			if (_lastSnapshot != null && _lastSnapshot.IsEquivalentTo(snapshot))
+			var currentSnapshot = _model.CurrentState.Clone();
+			var hasStateChanged = _previousStateSnapshot == null || !_previousStateSnapshot.IsEquivalentTo(currentSnapshot);
+
+			if (!hasStateChanged)
 			{
 				IsEnabled.Value = _model.IsEnabled;
 				return;
 			}
 
-			_lastSnapshot = snapshot;
-			CurrentState.Value = snapshot;
+			_previousStateSnapshot = currentSnapshot;
+			CurrentState.Value = currentSnapshot;
 			IsEnabled.Value = _model.IsEnabled;
 		}
 
+		/// <summary>
+		/// 入力状態が変更されたときにイベントを発行する。
+		/// </summary>
+		/// <param name="state">新しい入力状態</param>
 		private void OnInputStateChanged(InputState state)
 		{
 			EventBus.Publish(new InputStateChangedEvent(state));
 		}
 
+		/// <summary>
+		/// 入力の有効/無効状態が変更されたときにイベントを発行する。
+		/// </summary>
+		/// <param name="enabled">入力が有効かどうか</param>
 		private void OnEnabledChanged(bool enabled)
 		{
 			EventBus.Publish(new InputEnabledChangedEvent(enabled));

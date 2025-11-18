@@ -21,10 +21,11 @@ public partial class Player : CharacterBody3D
 	private PlayerStateViewModel _stateViewModel = default!;
 	private PlayerProgressionViewModel _progressionViewModel = default!;
 	private PlayerDebugger? _debugger;
-	private bool _isInitialized;
+	private bool _hasInitialized;
 
 	/// <summary>
 	/// 入力設定とプレイヤーサブシステムを初期化する。
+	/// 初期化に失敗した場合は例外を再スローし、ゲームを続行できない状態にする。
 	/// </summary>
 	public override void _Ready()
 	{
@@ -37,7 +38,7 @@ public partial class Player : CharacterBody3D
 		{
 			InitializeViewModels();
 			InitializeDebugger();
-			_isInitialized = true;
+			_hasInitialized = true;
 		}
 		catch (Exception exception)
 		{
@@ -48,6 +49,7 @@ public partial class Player : CharacterBody3D
 
 	/// <summary>
 	/// 各ビューモデルを生成し初期化する。
+	/// 初期化順序は依存関係に基づいて決定される（入力→移動→戦闘→アニメーション→状態→進行度）。
 	/// </summary>
 	private void InitializeViewModels()
 	{
@@ -93,10 +95,11 @@ public partial class Player : CharacterBody3D
 
 	/// <summary>
 	/// 各サブシステムを更新し、計算結果を物理ボディに適用する。
+	/// 更新順序：入力 → 移動 → ゲームプレイシステム → 物理適用 → 接地状態更新 → デバッグ情報出力
 	/// </summary>
 	public override void _PhysicsProcess(double delta)
 	{
-		if (!_isInitialized)
+		if (!_hasInitialized)
 		{
 			return;
 		}
@@ -110,7 +113,7 @@ public partial class Player : CharacterBody3D
 	}
 
 	/// <summary>
-	/// 入力関連の更新を行う。
+	/// 入力システムを更新し、最新の入力状態を反映する。
 	/// </summary>
 	private void UpdateInputSystem()
 	{
@@ -118,7 +121,7 @@ public partial class Player : CharacterBody3D
 	}
 
 	/// <summary>
-	/// 移動系の更新処理をまとめる。
+	/// 移動システムを更新し、速度と状態を計算する。
 	/// </summary>
 	private void UpdateMovementSystem()
 	{
@@ -126,7 +129,7 @@ public partial class Player : CharacterBody3D
 	}
 
 	/// <summary>
-	/// 戦闘・アニメーション・状態・進行度を更新する。
+	/// 戦闘・アニメーション・状態・進行度の各システムを更新する。
 	/// </summary>
 	private void UpdateGameplaySystems()
 	{
@@ -138,28 +141,30 @@ public partial class Player : CharacterBody3D
 
 	/// <summary>
 	/// モデルの速度を CharacterBody3D に転写して移動させる。
+	/// 平面速度（XZ）と垂直速度（Y）を組み合わせて3D速度ベクトルを構築する。
 	/// </summary>
 	private void ApplyMovementToBody()
 	{
-		var planarVelocity = _movementViewModel.Velocity.Value;
+		var horizontalVelocity = _movementViewModel.Velocity.Value;
 		var verticalVelocity = _movementViewModel.Model.VerticalVelocity;
 
-		Velocity = new Vector3(planarVelocity.X, verticalVelocity, planarVelocity.Y);
+		Velocity = new Vector3(horizontalVelocity.X, verticalVelocity, horizontalVelocity.Y);
 		MoveAndSlide();
 	}
 
 	/// <summary>
 	/// Godot の接地判定をビューモデルへ反映する。
+	/// CharacterBody3D の IsOnFloor() を使用して接地状態を判定し、モデルとビューモデルに同期する。
 	/// </summary>
 	private void UpdateGroundedState()
 	{
-		var grounded = IsOnFloor();
-		_movementViewModel.Model.SetGroundedState(grounded);
-		_movementViewModel.IsGrounded.Value = grounded;
+		var isGrounded = IsOnFloor();
+		_movementViewModel.Model.SetGroundedState(isGrounded);
+		_movementViewModel.IsGrounded.Value = isGrounded;
 	}
 
 	/// <summary>
-	/// 必要に応じてデバッグ情報を出力する。
+	/// デバッグビルド時のみ、デバッグ情報を出力する。
 	/// </summary>
 	private void PrintDebugInformation()
 	{
@@ -201,6 +206,7 @@ public partial class Player : CharacterBody3D
 
 	/// <summary>
 	/// モデル生成から初期化までをまとめるファクトリメソッド。
+	/// 各 ViewModel の生成パターンを統一し、初期化順序を保証する。
 	/// </summary>
 	private TViewModel CreateViewModel<TModel, TViewModel>(
 		Func<TModel> modelFactory,
@@ -209,7 +215,7 @@ public partial class Player : CharacterBody3D
 	{
 		if (_eventBus == null)
 		{
-			throw new InvalidOperationException("Event bus has not been initialized.");
+			throw new InvalidOperationException("Event bus must be initialized before creating view models.");
 		}
 
 		var model = modelFactory();
