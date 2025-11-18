@@ -34,7 +34,7 @@ namespace Tests.Core
         {
             var mgr = new WeakEventManager();
             int called = 0;
-            EventHandler handler = (_, _) => called++;
+            EventHandler? handler = (_, _) => called++;
             mgr.AddHandler("dead", handler);
 
             // テスト目的で内部フィールドにアクセスする

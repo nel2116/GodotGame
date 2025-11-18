@@ -1,19 +1,34 @@
 using Godot;
-using Core.Utilities;
 
 public partial class Main : Node3D
 {
-	private Player? _player;
+	private const string PlayerNodePath = "Player";
+	private Player? _playerInstance;
 
-	// ゲーム開始時に初期化処理を行う
+	/// <summary>
+	/// シーンからプレイヤーノードを取得し、参照を保持する。
+	/// </summary>
 	public override void _Ready()
 	{
-		// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-		// GodotMock.Print("ゲームの初期化処理を実行します。");
-		
-		// プレイヤーの初期化
-		_player = new Player();
-		AddChild(_player);
+		CachePlayerFromScene();
 	}
 
+	/// <summary>
+	/// シーン上の Player ノードを検索し、重複生成を避ける。
+	/// </summary>
+	private void CachePlayerFromScene()
+	{
+		if (_playerInstance != null)
+		{
+			return;
+		}
+
+		if (!HasNode(PlayerNodePath))
+		{
+			GD.PrintErr("Player node was not found in the scene tree.");
+			return;
+		}
+
+		_playerInstance = GetNode<Player>(PlayerNodePath);
+	}
 }
