@@ -10,7 +10,7 @@ tags:
     - Index
 linked_docs:
     - "[[00_index]]"
-    - "[[01_SkillSystem/index|スキルシステム]]"
+    - "[[Skills/index|スキルシステム]]"
 ---
 
 # ゲームシステム設計
@@ -29,7 +29,7 @@ linked_docs:
 
 ## 関連ドキュメント
 
--   [[01_SkillSystem/index|スキルシステム]]
+-   [[Skills/index|スキルシステム]]
 
 ## システム一覧
 

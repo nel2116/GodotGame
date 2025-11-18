@@ -1,0 +1,4 @@
+skill_id,branch,tier,skill_name,skill_type,active_slot,description,base_value,scaling_stat,scaling_ratio,cooldown_sec,cost_type,cost,hitbox,range_m,duration_sec,unlock_condition,tags,vfx_id,sfx_id
+SB_ATK_01,Core,1,Shadow Slash,Active,Primary,近距離を薙ぎ払う闇の斬撃。Crit率+10。,100,ATK,1.0,0,Stamina,5,Arc,1.5,0,,damage;crit,visual_slash,slash_light
+SB_ATK_02,Core,1,Shadow Thrust,Active,Primary,前方へ長い突きを放つ。Poise削り+20。,120,ATK,1.05,4,Stamina,6,Line,2.5,0,SB_ATK_01,poise;line,visual_thrust,slash_heavy
+SB_BUFF_01,Support,1,Veil Step,Passive,,ローリング無敵F+2。,,,NONE,,0,Passive,0,,, ,dodge;invul,buff_aura,buff_whisper

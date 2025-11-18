@@ -12,7 +12,7 @@
 ### 1.3 ゲームシステム設計
 - [ゲームシステム設計](02_GameSystem/index.md)
 - [ゲームシステム設計詳細](02_GameSystem/00_index.md)
-- [スキルシステム](02_GameSystem/01_SkillSystem/)
+- [スキルシステム](02_GameSystem/Skills/)
 
 ## 2. 技術実装・アーキテクチャ
 
@@ -21,7 +21,7 @@
 - [システム責任範囲](03_Technical/SystemResponsibilities.md)
 
 ### 2.2 アーキテクチャ設計
-- [MVVM/Rx アーキテクチャ概要](03_Technical/12_01_mvvm_rx_architecture.md)
+- [MVVM/Rx アーキテクチャ概要](03_Architecture/Design/mvvm_rx_architecture.md)
 - [基本設計](03_Technical/12_02_basic_design.md)
 - [詳細設計](03_Technical/12_03_detailed_design.md)
 - [システム統合](03_Technical/12_04_system_integration.md)

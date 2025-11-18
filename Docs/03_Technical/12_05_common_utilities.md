@@ -8,7 +8,7 @@ tags:
     - Utility
     - Overview
 linked_docs:
-    - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[../03_Architecture/Design/mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
     - "[[12_03_detailed_design/01_core_components/05_common_utilities|共通ユーティリティ実装詳細]]"
     - "[[12_04_system_integration|システム間連携]]"

@@ -9,7 +9,7 @@ tags:
     - Integration
     - Architecture
 linked_docs:
-    - "[[12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[../Design/mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[12_02_basic_design|MVVM+RX基本設計書]]"
     - "[[12_03_detailed_design/01_core_components/04_event_bus|EventBus実装詳細]]"
 ---
