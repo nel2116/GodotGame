@@ -18,26 +18,31 @@ namespace Tests.Core.State
             vm.Initialize();
             StateChangedEvent receivedEvent = null;
             bus.GetEventStream<StateChangedEvent>().Subscribe(e => receivedEvent = e);
-            
-            // 実行
-            vm.ChangeState("NewState");
-            await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
-            
+
+            // 実行 - 有効な状態遷移を実行（Idle -> Walk）
+            vm.ChangeState("Walk");
+            await Task.Delay(10); // イベント処理の遅延を考慮
+
             // 検証
             Assert.That(receivedEvent, Is.Not.Null);
+            Assert.That(receivedEvent.State, Is.EqualTo("Walk"));
         }
 
         [Test]
-        public void ChangeState_Invalid_NoEvent()
+        public async Task ChangeState_Invalid_NoEvent()
         {
             var bus = new GameEventBus();
             var model = new CommonStateModel();
             var vm = new CommonStateViewModel(model, bus);
-            vm.Initialize();
             bool called = false;
+            // 購読をInitialize()の前に設定（Initialize()で発行されるイベントは無視）
             bus.GetEventStream<StateChangedEvent>().Subscribe(_ => called = true);
+            vm.Initialize();
+            await Task.Delay(10); // Initialize()のイベント処理を待つ
+            called = false; // Initialize()のイベントをリセット
             vm.ChangeState("Invalid");
-            Assert.IsFalse(called);
+            await Task.Delay(10); // イベント処理の遅延を考慮
+            Assert.IsFalse(called, "無効な状態変更ではイベントが発行されないべき");
             Assert.AreEqual("Idle", vm.CurrentState.Value);
         }
     }

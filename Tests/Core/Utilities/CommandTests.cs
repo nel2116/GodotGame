@@ -36,14 +36,39 @@ namespace Tests.Core
         public async Task AsyncCommand_Execute_UpdatesState()
         {
             bool run = false;
+            bool isExecutingChanged = false;
             var cmd = new AsyncCommand(async () =>
             {
                 await Task.Delay(10);
                 run = true;
             });
-            cmd.Execute(null);
-            await Task.Delay(20);
-            Assert.IsTrue(run);
+
+            // IsExecutingの状態変化を監視
+            using (cmd.IsExecuting.Subscribe(executing =>
+            {
+                if (executing)
+                {
+                    isExecutingChanged = true;
+                }
+            }))
+            {
+                cmd.Execute(null);
+                // 実行開始を確認
+                await Task.Delay(5);
+                Assert.IsTrue(isExecutingChanged, "IsExecutingがtrueに変更されるべき");
+
+                // 実行完了を確認
+                await Task.Delay(20);
+                Assert.IsTrue(run, "コマンドが実行されるべき");
+
+                // 実行完了後、IsExecutingがfalseに戻ることを確認
+                bool isExecuting = false;
+                using (cmd.IsExecuting.Subscribe(executing => isExecuting = executing))
+                {
+                    await Task.Delay(5);
+                    Assert.IsFalse(isExecuting, "実行完了後、IsExecutingがfalseに戻るべき");
+                }
+            }
         }
 
         [Test]

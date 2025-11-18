@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class PlayerAnimationViewModelNode : BaseViewModelNode
 {
     private PlayerAnimationViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public string CurrentAnimation 
+    public string CurrentAnimation
     {
         get
         {
@@ -37,24 +37,24 @@ public partial class PlayerAnimationViewModelNode : BaseViewModelNode
     public void Update()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Update();
+        _viewModel!.Update();
     }
 
     public void HandleAnimation(string animationName)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.HandleAnimation(animationName);
+        _viewModel!.HandleAnimation(animationName);
     }
 
     public void UpdateAnimation()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateAnimation();
+        _viewModel!.UpdateAnimation();
     }
 
     public void PlayAnimation(string animationName)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.PlayAnimation(animationName);
+        _viewModel!.PlayAnimation(animationName);
     }
-} 
+}

@@ -50,7 +50,7 @@ namespace Core.Utilities
         private static void InitializeTestEnvironment()
         {
             if (_isInitialized) return;
-            
+
             try
             {
                 // テスト環境での初期化処理
@@ -68,7 +68,7 @@ namespace Core.Utilities
         private static void CleanupTestEnvironment()
         {
             if (!_isInitialized) return;
-            
+
             try
             {
                 ClearMockOutput();
@@ -124,7 +124,7 @@ namespace Core.Utilities
                     }
                     // 通常のログは出力しない（パフォーマンス向上のため）
                 }
-                catch (Exception _)
+                catch (Exception)
                 {
                     // ログ出力中のエラーを無視（無限ループ防止）
                 }
@@ -140,10 +140,10 @@ namespace Core.Utilities
             {
                 // テスト環境では重要なログのみ出力（デバッグログは無効化）
                 var messageStr = message?.ToString() ?? "null";
-                
+
                 // 重要なメッセージのみ出力
-                if (messageStr.Contains("ERROR") || 
-                    messageStr.Contains("WARNING") || 
+                if (messageStr.Contains("ERROR") ||
+                    messageStr.Contains("WARNING") ||
                     messageStr.Contains("Exception") ||
                     messageStr.Contains("Failed"))
                 {
@@ -292,7 +292,7 @@ namespace Core.Utilities
         {
             lock (_lock)
             {
-                return _mockOutput.Exists(output => 
+                return _mockOutput.Exists(output =>
                     output.Contains(message) && output.Contains($"[{level}]"));
             }
         }
@@ -347,7 +347,7 @@ namespace Core.Utilities
             {
                 return defaultValue;
             }
-            
+
             try
             {
                 return godotFunction();
@@ -359,4 +359,4 @@ namespace Core.Utilities
             }
         }
     }
-} 
+}

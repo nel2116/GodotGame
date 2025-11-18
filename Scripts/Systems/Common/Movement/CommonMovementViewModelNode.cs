@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class CommonMovementViewModelNode : BaseViewModelNode
 {
     private CommonMovementViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public Vector2 Velocity 
+    public Vector2 Velocity
     {
         get
         {
@@ -37,24 +37,24 @@ public partial class CommonMovementViewModelNode : BaseViewModelNode
     public void UpdateMovement()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateMovement();
+        _viewModel!.UpdateMovement();
     }
 
     public void Move(Vector2 direction)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Move(direction);
+        _viewModel!.Move(direction);
     }
 
     public void Jump()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Jump();
+        _viewModel!.Jump();
     }
 
     public void Dash()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Dash();
+        _viewModel!.Dash();
     }
-} 
+}

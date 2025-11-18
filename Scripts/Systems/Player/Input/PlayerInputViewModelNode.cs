@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class PlayerInputViewModelNode : BaseViewModelNode
 {
     private PlayerInputViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public bool IsEnabled 
+    public bool IsEnabled
     {
         get
         {
@@ -37,6 +37,6 @@ public partial class PlayerInputViewModelNode : BaseViewModelNode
     public void UpdateInput()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateInput();
+        _viewModel!.UpdateInput();
     }
-} 
+}

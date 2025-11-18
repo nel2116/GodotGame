@@ -48,8 +48,13 @@ namespace Systems.Common.State
         /// </summary>
         public void ChangeState(string newState)
         {
+            var previousState = _model.CurrentState;
             _model.ChangeState(newState);
-            CurrentState.Value = _model.CurrentState;
+            // 状態が実際に変更された場合のみ更新とイベント発行を行う
+            if (_model.CurrentState != previousState)
+            {
+                CurrentState.Value = _model.CurrentState;
+            }
         }
 
         /// <summary>

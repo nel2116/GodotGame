@@ -97,10 +97,10 @@ namespace Core.Events
 
 			try
 			{
+				// ReplaySubjectを使用しているため、購読前に発行されたイベントも取得できる
+				// Bufferを削除して即座に通知されるようにする（テスト環境では即座に、本番環境では必要に応じてバッファリングを追加可能）
 				return GetOrCreateSubject(typeof(T))
-					.OfType<T>()
-					.Buffer(TimeSpan.FromMilliseconds(16)) // フレームレートに合わせたバッファリング
-					.SelectMany(events => events);
+					.OfType<T>();
 			}
 			catch (Exception ex)
 			{

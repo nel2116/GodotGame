@@ -15,14 +15,14 @@ namespace Tests.Core.Resource
             var bus = new GameEventBus();
             var model = new CommonResourceModel();
             var vm = new CommonResourceViewModel(model, bus);
-            vm.Initialize();
             ResourceCacheChangedEvent receivedEvent = null;
+            // 購読をInitialize()の前に設定（ReplaySubjectにより過去のイベントも取得可能）
             bus.GetEventStream<ResourceCacheChangedEvent>().Subscribe(e => receivedEvent = e);
-            
+
             // 実行
             vm.Initialize();
-            await Task.Delay(20); // イベント処理の遅延を考慮（バッファリング16ms + 余裕）
-            
+            await Task.Delay(10); // イベント処理の遅延を考慮
+
             // 検証
             Assert.That(receivedEvent, Is.Not.Null);
         }

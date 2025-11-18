@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class PlayerCombatViewModelNode : BaseViewModelNode
 {
     private PlayerCombatViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public float CurrentHealth 
+    public float CurrentHealth
     {
         get
         {
@@ -25,8 +25,8 @@ public partial class PlayerCombatViewModelNode : BaseViewModelNode
             return 0f;
         }
     }
-    
-    public float MaxHealth 
+
+    public float MaxHealth
     {
         get
         {
@@ -51,24 +51,24 @@ public partial class PlayerCombatViewModelNode : BaseViewModelNode
     public void UpdateCombat()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateCombat();
+        _viewModel!.UpdateCombat();
     }
 
     public void Attack(string actionName)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Attack(actionName);
+        _viewModel!.Attack(actionName);
     }
 
     public void TakeDamage(float damage)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.TakeDamage(damage);
+        _viewModel!.TakeDamage(damage);
     }
 
     public void Heal(float amount)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.Heal(amount);
+        _viewModel!.Heal(amount);
     }
-} 
+}

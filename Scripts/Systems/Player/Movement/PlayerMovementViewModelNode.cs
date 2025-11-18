@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class PlayerMovementViewModelNode : BaseViewModelNode
 {
     private PlayerMovementViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public Vector2 Velocity 
+    public Vector2 Velocity
     {
         get
         {
@@ -25,8 +25,8 @@ public partial class PlayerMovementViewModelNode : BaseViewModelNode
             return Vector2.Zero;
         }
     }
-    
-    public bool IsGrounded 
+
+    public bool IsGrounded
     {
         get
         {
@@ -39,8 +39,8 @@ public partial class PlayerMovementViewModelNode : BaseViewModelNode
             return false;
         }
     }
-    
-    public bool IsDashing 
+
+    public bool IsDashing
     {
         get
         {
@@ -65,18 +65,18 @@ public partial class PlayerMovementViewModelNode : BaseViewModelNode
     public void UpdateMovement()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateMovement();
+        _viewModel!.UpdateMovement();
     }
 
     public void HandleJump()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.HandleJump();
+        _viewModel!.HandleJump();
     }
 
     public void HandleDash()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.HandleDash();
+        _viewModel!.HandleDash();
     }
-} 
+}

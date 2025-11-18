@@ -102,15 +102,16 @@ namespace Systems.Player.Input
         {
             // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
             // GodotMock.Print($"Processing move input: {_currentState.MovementInput}");
-            
+
             // 移動入力の処理
             if (_currentState.MovementInput != Vector2.Zero)
             {
                 if (_actions.TryGetValue("Move", out var action))
                 {
+                    // TryGetValueがtrueを返した場合、actionはnullではない
                     // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
                     // GodotMock.Print($"Action triggered: {action.Name}");
-                    action.ExecuteAction();
+                    action!.ExecuteAction();
                 }
                 else
                 {
@@ -125,8 +126,9 @@ namespace Systems.Player.Input
             // ボタン入力の処理
             foreach (var action in _actions.Values)
             {
-                if (action.Type == InputType.Button && 
-                    _currentState.ButtonStates.ContainsKey(action.Name) && 
+                if (action != null &&
+                    action.Type == InputType.Button &&
+                    _currentState.ButtonStates.ContainsKey(action.Name) &&
                     _currentState.ButtonStates[action.Name])
                 {
                     // テスト環境ではログ出力を無効化（パフォーマンス向上のため）

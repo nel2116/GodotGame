@@ -6,13 +6,13 @@ using Core.ViewModels;
 public partial class PlayerProgressionViewModelNode : BaseViewModelNode
 {
     private PlayerProgressionViewModel? _viewModel;
-    
+
     /// <summary>
     /// ViewModelが初期化されているかどうかを確認
     /// </summary>
     public bool IsInitialized => _viewModel != null;
 
-    public int Level 
+    public int Level
     {
         get
         {
@@ -25,8 +25,8 @@ public partial class PlayerProgressionViewModelNode : BaseViewModelNode
             return 1;
         }
     }
-    
-    public int Experience 
+
+    public int Experience
     {
         get
         {
@@ -39,8 +39,8 @@ public partial class PlayerProgressionViewModelNode : BaseViewModelNode
             return 0;
         }
     }
-    
-    public int AvailableSkillPoints 
+
+    public int AvailableSkillPoints
     {
         get
         {
@@ -65,18 +65,18 @@ public partial class PlayerProgressionViewModelNode : BaseViewModelNode
     public void UpdateProgression()
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.UpdateProgression();
+        _viewModel!.UpdateProgression();
     }
 
     public void AddExperience(int experience)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return;
-        _viewModel.AddExperience(experience);
+        _viewModel!.AddExperience(experience);
     }
 
     public bool UnlockSkill(string skillName)
     {
         if (!EnsureViewModelInitialized(_viewModel)) return false;
-        return _viewModel.UnlockSkill(skillName);
+        return _viewModel!.UnlockSkill(skillName);
     }
-} 
+}
