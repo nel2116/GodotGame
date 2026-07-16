@@ -146,11 +146,11 @@
 
 ### ✅ テスト・品質
 - [[../07_Testing/moc|テスト・品質保証]]
-- [[../07_Testing/Automation/test_automation|テスト自動化]]
+- [[TestExecutionGuide|テスト自動化]]
 
 ### 📘 管理ルール
 - [[../08_DocRules/moc|ドキュメント管理ルール]]
-- [[../08_DocRules/Development/development_guidelines|開発ガイドライン]]
+- [[DevelopmentGuidelines|開発ガイドライン]]
 
 ---
 

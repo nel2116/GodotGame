@@ -14,9 +14,9 @@ tags:
 linked_docs:
     - "[[11_17_week1_dungeon_foundation_plan|Week 1: 基盤実装計画]]"
     - "[[11_18_week2_dungeon_extension_plan|Week 2: 機能拡張計画]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_12_level_design|レベル生成詳細]]"
-    - "[[12_03_detailed_design/02_systems/03_level_generation|レベル生成システム実装詳細]]"
+    - "[[03_level_generation|レベル生成システム実装詳細]]"
 ---
 
 # Week 3: ダンジョン生成システム統合・テスト実装計画

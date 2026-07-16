@@ -8,10 +8,10 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[index|開発計画・ロードマップ]]"
+    - "[[06_DevelopmentPlan/moc|開発計画・ロードマップ]]"
     - "[[11_01_project_plan|プロジェクト計画書]]"
     - "[[11_02_design_pillars|デザインピラー]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
 ---
 
 > **目的**：デザインピラー達成度を "数値" で追跡し、開発判断を迷わなくする。  

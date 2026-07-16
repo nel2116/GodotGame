@@ -9,7 +9,7 @@ tags:
     - Core
 linked_docs:
     - "[[11_01_project_plan|プロジェクト計画書]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[06_DevelopmentPlan/moc|計画ドキュメント]]"
 ---
 
 ## コアゲームループ図

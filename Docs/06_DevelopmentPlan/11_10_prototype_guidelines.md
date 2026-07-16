@@ -9,7 +9,7 @@ tags:
     - Development
 linked_docs:
     - "[[11_01_project_plan|プロジェクト計画書]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_5_development_roadmap|開発ロードマップ]]"
     - "[[11_05_core_gameplay_loop|コアループ]]"
     - "[[11_06_feature_specifications|機能一覧]]"
@@ -27,7 +27,7 @@ linked_docs:
 
 ## 概要
 
-Docs/10_CoreDocs/11_PlanDocs の各ドキュメントを参照し、プロトタイプ段階で実装すべき機能と準備事項を整理する。
+Docs/06_DevelopmentPlan の各ドキュメントを参照し、プロトタイプ段階で実装すべき機能と準備事項を整理する。
 
 ## 必要要素
 
@@ -59,19 +59,19 @@ Docs/10_CoreDocs/11_PlanDocs の各ドキュメントを参照し、プロトタ
 
 1. **プレイヤーキャラクター基盤**：
     - 移動・ジャンプ・ダッシュ、ステートマシンと入力システム
-    - 詳細: [[11_11_player_foundation|プレイヤー基盤詳細]]
+    - 詳細: [[11_11_player_systems|プレイヤー基盤詳細]]
 2. **レベル生成**：
     - 部屋形状定義と接続ロジック、ナビゲーションメッシュ
-    - 詳細: [[11_12_level_generation|レベル生成詳細]]
+    - 詳細: [[11_12_level_design|レベル生成詳細]]
 3. **スキルシステム**：
     - スキル定義と効果実行、クールダウン管理、スキルツリー UI
-    - 詳細: [[11_13_skill_system|スキルシステム詳細]]
+    - 詳細: [[11_13_skill_mechanics|スキルシステム詳細]]
 4. **UI とメタ要素**：
     - ヘルスバー、スキルアイコン、インベントリの簡易実装
-    - 詳細: [[11_14_ui_meta|UIとメタ要素詳細]]
+    - 詳細: [[11_14_ui_metagame|UIとメタ要素詳細]]
 5. **テストと調整**：
     - コアループ通りに遊べるかチェックし、KPI 指標を計測
-    - 詳細: [[11_15_testing_adjustment|テストと調整詳細]]
+    - 詳細: [[11_15_balance_testing|テストと調整詳細]]
 
 ## 変更履歴
 

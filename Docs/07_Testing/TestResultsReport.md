@@ -10,7 +10,7 @@ tags:
     - CoreTests
     - GUT
 linked_docs:
-    - "[[index|テスト戦略]]"
+    - "[[testing_plan|テスト戦略]]"
     - "[[TestingEnvironment|テスト環境]]"
     - "[[../99_Reference/TestExecutionGuide|テスト実行ガイド]]"
 ---

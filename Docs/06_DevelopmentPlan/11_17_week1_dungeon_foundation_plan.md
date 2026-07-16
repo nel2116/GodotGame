@@ -11,10 +11,10 @@ tags:
     - Foundation
     - DevelopmentPlan
 linked_docs:
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_12_level_design|レベル生成詳細]]"
     - "[[11_16_core_implementation|コアシステム実装計画]]"
-    - "[[12_03_detailed_design/02_systems/03_level_generation|レベル生成システム実装詳細]]"
+    - "[[03_level_generation|レベル生成システム実装詳細]]"
 ---
 
 # Week 1: ダンジョン生成システム基盤実装計画

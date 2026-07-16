@@ -10,8 +10,8 @@ tags:
     - Architecture
 linked_docs:
     - "[[../Design/mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[12_02_basic_design|MVVM+RX基本設計書]]"
-    - "[[12_03_detailed_design/01_core_components/04_event_bus|EventBus実装詳細]]"
+    - "[[basic_design|MVVM+RX基本設計書]]"
+    - "[[04_event_bus|EventBus実装詳細]]"
 ---
 
 # システム間連携

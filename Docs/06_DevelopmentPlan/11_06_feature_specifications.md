@@ -9,8 +9,8 @@ tags:
     - Core
 linked_docs:
     - "[[11_02_design_pillars|デザインピラー]]"
-    - "[[11_03_mvp_definition|MVP]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[mvp_definition|MVP]]"
+    - "[[06_DevelopmentPlan/moc|計画ドキュメント]]"
 ---
 
 ## 機能テーブル

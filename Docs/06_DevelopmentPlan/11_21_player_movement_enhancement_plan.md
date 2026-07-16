@@ -13,9 +13,9 @@ tags:
 linked_docs:
     - "[[11_09_core_experience|コア体験仕様]]"
     - "[[11_11_player_systems|プレイヤー基盤詳細]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_16_core_implementation|コアシステム実装計画]]"
-    - "[[12_03_detailed_design/02_systems/01_player_system/02_movement_system|プレイヤー移動システム実装詳細]]"
+    - "[[02_movement_system|プレイヤー移動システム実装詳細]]"
 ---
 
 # プレイヤー移動システム強化実装計画
