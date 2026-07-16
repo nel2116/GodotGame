@@ -1,7 +1,5 @@
 using System.Linq;
-using Core.Events;
 using Godot;
-
 namespace Systems.Player.Input
 {
     /// <summary>
@@ -12,24 +10,31 @@ namespace Systems.Player.Input
         private readonly InputRingBuffer<string> _action_buffer = new(12);
         private readonly InputRingBuffer<Vector2> _movement_buffer = new(12);
 
-        public InputBuffer()
-        {
-        }
+        private const string DashAction = PlayerInputActionNames.Dash;
+        private const string JumpAction = PlayerInputActionNames.Jump;
+        private const string AttackAction = PlayerInputActionNames.Attack;
 
-        /// <summary>
-        /// アクション入力をバッファする
-        /// </summary>
-        public void BufferAction(string action)
+        public void CollectInputState(InputState state)
         {
-            _action_buffer.Add(action);
-        }
+            if (state.IsButtonPressed(DashAction))
+            {
+                _action_buffer.Add(DashAction);
+            }
 
-        /// <summary>
-        /// 移動入力をバッファする
-        /// </summary>
-        public void BufferMovement(Vector2 dir)
-        {
-            _movement_buffer.Add(dir);
+            if (state.IsButtonPressed(JumpAction))
+            {
+                _action_buffer.Add(JumpAction);
+            }
+
+            if (state.IsButtonPressed(AttackAction))
+            {
+                _action_buffer.Add(AttackAction);
+            }
+
+            if (state.MovementInput != Vector2.Zero)
+            {
+                _movement_buffer.Add(state.MovementInput);
+            }
         }
 
         /// <summary>
@@ -43,9 +48,9 @@ namespace Systems.Player.Input
             {
                 var priority = a switch
                 {
-                    "Dash" => 0,
-                    "Jump" => 1,
-                    "Attack" => 2,
+                    DashAction => 0,
+                    JumpAction => 1,
+                    AttackAction => 2,
                     _ => int.MaxValue
                 };
                 if (priority < best)

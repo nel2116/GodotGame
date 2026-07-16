@@ -7,7 +7,8 @@ using Systems.Common.Events;
 namespace Systems.Player.Movement
 {
     /// <summary>
-    /// プレイヤー移動ビューモデル
+    /// プレイヤー移動ビューモデル。
+    /// 移動モデルの状態を View に公開し、変更時にイベントを発行する。
     /// </summary>
     public class PlayerMovementViewModel : ViewModelBase
     {
@@ -31,7 +32,7 @@ namespace Systems.Player.Movement
         }
 
         /// <summary>
-        /// 初期化処理
+        /// 移動システムを初期化し、初期状態を反映する。
         /// </summary>
         public void Initialize()
         {
@@ -40,7 +41,7 @@ namespace Systems.Player.Movement
         }
 
         /// <summary>
-        /// 更新処理
+        /// 移動システムを更新し、最新の状態を反映する。
         /// </summary>
         public void UpdateMovement()
         {
@@ -49,7 +50,7 @@ namespace Systems.Player.Movement
         }
 
         /// <summary>
-        /// ジャンプ処理
+        /// ジャンプ処理を実行する。
         /// </summary>
         public void HandleJump()
         {
@@ -57,13 +58,17 @@ namespace Systems.Player.Movement
         }
 
         /// <summary>
-        /// ダッシュ処理
+        /// ダッシュ処理を実行する。
         /// </summary>
         public void HandleDash()
         {
             _model.Dash();
         }
 
+        /// <summary>
+        /// モデルの移動状態を取得し、ReactiveProperty に反映する。
+        /// 変更時にイベントが自動的に発行される。
+        /// </summary>
         private void UpdateMovementState()
         {
             Velocity.Value = _model.Velocity;
@@ -71,16 +76,28 @@ namespace Systems.Player.Movement
             IsDashing.Value = _model.IsDashing;
         }
 
+        /// <summary>
+        /// 速度が変更されたときにイベントを発行する。
+        /// </summary>
+        /// <param name="velocity">新しい速度ベクトル</param>
         private void OnVelocityChanged(Vector2 velocity)
         {
             EventBus.Publish(new MovementVelocityChangedEvent(velocity));
         }
 
+        /// <summary>
+        /// 接地状態が変更されたときにイベントを発行する。
+        /// </summary>
+        /// <param name="grounded">接地しているかどうか</param>
         private void OnGroundedChanged(bool grounded)
         {
             EventBus.Publish(new MovementGroundedChangedEvent(grounded));
         }
 
+        /// <summary>
+        /// ダッシュ状態が変更されたときにイベントを発行する。
+        /// </summary>
+        /// <param name="dashing">ダッシュ中かどうか</param>
         private void OnDashingChanged(bool dashing)
         {
             EventBus.Publish(new MovementDashingChangedEvent(dashing));

@@ -154,17 +154,28 @@ namespace Systems.Common.Movement
             }
         }
 
-        private float GetMovementSpeed()
+        public void SetGroundedState(bool isGrounded)
+        {
+            _is_grounded = isGrounded;
+            if (_is_grounded)
+            {
+                _can_jump = true;
+                _can_dash = true;
+                _verticalVelocity = 0f;
+            }
+        }
+
+        protected virtual float GetMovementSpeed()
         {
             return 5.0f; // 基本移動速度
         }
 
-        private float GetJumpForce()
+        protected virtual float GetJumpForce()
         {
             return 10.0f; // ジャンプ力
         }
 
-        private float GetDashMultiplier()
+        protected virtual float GetDashMultiplier()
         {
             return 2.0f; // ダッシュ時の速度倍率
         }
