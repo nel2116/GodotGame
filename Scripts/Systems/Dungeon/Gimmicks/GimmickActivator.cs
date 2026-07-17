@@ -17,11 +17,12 @@ namespace Systems.Dungeon.Gimmicks
         /// 隠し通路ギミックを発動する
         /// 発動に成功すると、対象ギミックと接続先の対応するギミックの両方を有効化し、
         /// 対応する扉（自室・接続先の両側）を通常の扉（<see cref="DoorType.Normal"/>）に変更する
+        /// 接続先の部屋・扉・ギミックが見つからない場合は、どちらの側も変更せずに失敗を返す
         /// </summary>
         /// <param name="rooms">部屋データの辞書（部屋位置がキー）</param>
         /// <param name="roomPosition">ギミックが属する部屋の位置</param>
         /// <param name="gimmickPosition">発動対象のギミックの位置</param>
-        /// <returns>発動に成功した場合は true。ギミックが存在しない、種類が異なる、既に発動済みの場合は false</returns>
+        /// <returns>発動に成功した場合は true。ギミックが存在しない、種類が異なる、既に発動済み、接続先の対応データが見つからない場合は false</returns>
         public bool TryActivateHiddenPassage(Dictionary<Vector2I, RoomData> rooms, Vector2I roomPosition, Vector2I gimmickPosition)
         {
             if (!TryFindGimmick(rooms, roomPosition, gimmickPosition, out var room, out var gimmick) ||
@@ -31,29 +32,16 @@ namespace Systems.Dungeon.Gimmicks
             }
 
             var door = room.Doors.FirstOrDefault(d => d.Position == gimmickPosition);
-            if (door == null)
+            if (door == null ||
+                !TryFindConnectedGimmick(rooms, roomPosition, door, GimmickType.HiddenPassage, out var connectedDoor, out var connectedGimmick))
             {
                 return false;
             }
 
-            gimmick!.IsActive = true;
+            gimmick.IsActive = true;
             door.Type = DoorType.Normal;
-
-            if (rooms.TryGetValue(door.ConnectedRoomPosition, out var connectedRoom))
-            {
-                var connectedDoor = connectedRoom.Doors.FirstOrDefault(d => d.ConnectedRoomPosition == roomPosition);
-                if (connectedDoor != null)
-                {
-                    connectedDoor.Type = DoorType.Normal;
-
-                    var connectedGimmick = connectedRoom.Gimmicks.FirstOrDefault(
-                        g => g.Type == GimmickType.HiddenPassage && g.Position == connectedDoor.Position);
-                    if (connectedGimmick != null)
-                    {
-                        connectedGimmick.IsActive = true;
-                    }
-                }
-            }
+            connectedDoor.Type = DoorType.Normal;
+            connectedGimmick.IsActive = true;
 
             return true;
         }
@@ -62,12 +50,13 @@ namespace Systems.Dungeon.Gimmicks
         /// 鍵扉ギミックを発動（解錠）する
         /// 発動に成功すると、対象ギミックと接続先の対応するギミックの両方を有効化し、
         /// 対応する扉（自室・接続先の両側）の施錠を解除する（扉の種類は <see cref="DoorType.Locked"/> のまま据え置く）
+        /// 接続先の部屋・扉・ギミックが見つからない場合は、どちらの側も変更せずに失敗を返す
         /// </summary>
         /// <param name="rooms">部屋データの辞書（部屋位置がキー）</param>
         /// <param name="roomPosition">ギミックが属する部屋の位置</param>
         /// <param name="gimmickPosition">発動対象のギミックの位置</param>
         /// <param name="hasKey">鍵を所持しているかどうか（鍵アイテムシステムは Week2 範囲外のため呼び出し側の判定結果を受け取る）</param>
-        /// <returns>発動に成功した場合は true。鍵を所持していない、ギミックが存在しない、既に発動済みの場合は false</returns>
+        /// <returns>発動に成功した場合は true。鍵を所持していない、ギミックが存在しない、既に発動済み、接続先の対応データが見つからない場合は false</returns>
         public bool TryActivateLockedDoor(Dictionary<Vector2I, RoomData> rooms, Vector2I roomPosition, Vector2I gimmickPosition, bool hasKey)
         {
             if (!TryFindGimmick(rooms, roomPosition, gimmickPosition, out var room, out var gimmick) ||
@@ -77,31 +66,57 @@ namespace Systems.Dungeon.Gimmicks
             }
 
             var door = room.Doors.FirstOrDefault(d => d.Position == gimmickPosition);
-            if (door == null)
+            if (door == null ||
+                !TryFindConnectedGimmick(rooms, roomPosition, door, GimmickType.LockedDoor, out var connectedDoor, out var connectedGimmick))
             {
                 return false;
             }
 
-            gimmick!.IsActive = true;
+            gimmick.IsActive = true;
             door.IsLocked = false;
-
-            if (rooms.TryGetValue(door.ConnectedRoomPosition, out var connectedRoom))
-            {
-                var connectedDoor = connectedRoom.Doors.FirstOrDefault(d => d.ConnectedRoomPosition == roomPosition);
-                if (connectedDoor != null)
-                {
-                    connectedDoor.IsLocked = false;
-
-                    var connectedGimmick = connectedRoom.Gimmicks.FirstOrDefault(
-                        g => g.Type == GimmickType.LockedDoor && g.Position == connectedDoor.Position);
-                    if (connectedGimmick != null)
-                    {
-                        connectedGimmick.IsActive = true;
-                    }
-                }
-            }
+            connectedDoor.IsLocked = false;
+            connectedGimmick.IsActive = true;
 
             return true;
+        }
+
+        /// <summary>
+        /// 指定した扉の接続先の部屋から、対となる扉と対応するギミックを探す
+        /// 接続先の部屋・対となる扉・対応するギミックのいずれかが見つからない場合は失敗する
+        /// </summary>
+        /// <param name="rooms">部屋データの辞書（部屋位置がキー）</param>
+        /// <param name="roomPosition">発動元の部屋の位置</param>
+        /// <param name="door">発動対象の扉（発動元の部屋に属する）</param>
+        /// <param name="gimmickType">探索対象のギミックの種類</param>
+        /// <param name="connectedDoor">見つかった接続先の扉（見つからない場合は null）</param>
+        /// <param name="connectedGimmick">見つかった接続先のギミック（見つからない場合は null）</param>
+        /// <returns>接続先の扉・ギミックの両方が見つかった場合は true</returns>
+        private static bool TryFindConnectedGimmick(
+            Dictionary<Vector2I, RoomData> rooms,
+            Vector2I roomPosition,
+            DoorData door,
+            GimmickType gimmickType,
+            [NotNullWhen(true)] out DoorData? connectedDoor,
+            [NotNullWhen(true)] out GimmickData? connectedGimmick)
+        {
+            connectedGimmick = null;
+
+            if (!rooms.TryGetValue(door.ConnectedRoomPosition, out var connectedRoom))
+            {
+                connectedDoor = null;
+                return false;
+            }
+
+            connectedDoor = connectedRoom.GetDoorTo(roomPosition);
+            if (connectedDoor == null)
+            {
+                return false;
+            }
+
+            var connectedDoorPosition = connectedDoor.Position;
+            connectedGimmick = connectedRoom.Gimmicks.FirstOrDefault(
+                g => g.Type == gimmickType && g.Position == connectedDoorPosition);
+            return connectedGimmick != null;
         }
 
         /// <summary>

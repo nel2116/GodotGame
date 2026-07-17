@@ -116,8 +116,8 @@ namespace Systems.Dungeon.ViewModels
 
         /// <summary>
         /// 隠し通路ギミックの発動を試みる
-        /// 発動に成功した場合はナビゲーションメッシュを再構築したうえで <see cref="HiddenPassageRevealedEvent"/> を、
-        /// 失敗した場合は <see cref="GimmickActivationFailedEvent"/>（<see cref="GimmickType.HiddenPassage"/>）を発行する
+        /// 発動に成功した場合はナビゲーションメッシュを再構築し、<see cref="Rooms"/> の変更を通知したうえで
+        /// <see cref="HiddenPassageRevealedEvent"/> を、失敗した場合は <see cref="GimmickActivationFailedEvent"/>（<see cref="GimmickType.HiddenPassage"/>）を発行する
         /// </summary>
         /// <param name="roomPosition">ギミックが属する部屋の位置</param>
         /// <param name="gimmickPosition">発動対象のギミックの位置</param>
@@ -127,6 +127,7 @@ namespace Systems.Dungeon.ViewModels
             if (_gimmickActivator.TryActivateHiddenPassage(Rooms.Value, roomPosition, gimmickPosition))
             {
                 _navigationManager.BuildMesh(Rooms.Value, _levelGenerationModel.RoomTemplates);
+                NotifyRoomsChanged();
                 EventBus.Publish(new HiddenPassageRevealedEvent(roomPosition, gimmickPosition));
                 return true;
             }
@@ -137,8 +138,8 @@ namespace Systems.Dungeon.ViewModels
 
         /// <summary>
         /// 鍵扉ギミックの発動（解錠）を試みる
-        /// 発動に成功した場合はナビゲーションメッシュを再構築したうえで <see cref="LockedDoorUnlockedEvent"/> を、
-        /// 失敗した場合は <see cref="GimmickActivationFailedEvent"/>（<see cref="GimmickType.LockedDoor"/>）を発行する
+        /// 発動に成功した場合はナビゲーションメッシュを再構築し、<see cref="Rooms"/> の変更を通知したうえで
+        /// <see cref="LockedDoorUnlockedEvent"/> を、失敗した場合は <see cref="GimmickActivationFailedEvent"/>（<see cref="GimmickType.LockedDoor"/>）を発行する
         /// </summary>
         /// <param name="roomPosition">ギミックが属する部屋の位置</param>
         /// <param name="gimmickPosition">発動対象のギミックの位置</param>
@@ -149,12 +150,24 @@ namespace Systems.Dungeon.ViewModels
             if (_gimmickActivator.TryActivateLockedDoor(Rooms.Value, roomPosition, gimmickPosition, hasKey))
             {
                 _navigationManager.BuildMesh(Rooms.Value, _levelGenerationModel.RoomTemplates);
+                NotifyRoomsChanged();
                 EventBus.Publish(new LockedDoorUnlockedEvent(roomPosition, gimmickPosition));
                 return true;
             }
 
             EventBus.Publish(new GimmickActivationFailedEvent(roomPosition, gimmickPosition, GimmickType.LockedDoor));
             return false;
+        }
+
+        /// <summary>
+        /// <see cref="Rooms"/> の変更を購読者に通知する
+        /// ギミック発動は <see cref="RoomData"/>/<see cref="DoorData"/> を in-place で書き換えるため、
+        /// 同一の辞書インスタンスを再代入するだけでは参照が変わらず <see cref="ReactiveProperty{T}"/> の変更検知（既定の等価比較）が
+        /// 働かない。新しい辞書インスタンスへ詰め替えて再代入することで、確実に変更通知を発火させる
+        /// </summary>
+        private void NotifyRoomsChanged()
+        {
+            Rooms.Value = new Dictionary<Vector2I, RoomData>(Rooms.Value);
         }
     }
 }

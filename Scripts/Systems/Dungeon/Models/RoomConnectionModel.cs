@@ -102,7 +102,7 @@ namespace Systems.Dungeon.Models
                         return false;
                     }
 
-                    if (!connectedRoom.Doors.Any(d => d.ConnectedRoomPosition == position))
+                    if (connectedRoom.GetDoorTo(position) == null)
                     {
                         return false;
                     }

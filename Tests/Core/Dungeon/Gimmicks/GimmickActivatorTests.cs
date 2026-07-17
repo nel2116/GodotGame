@@ -105,6 +105,21 @@ namespace Tests.Core.Dungeon.Gimmicks
         }
 
         [Test]
+        public void TryActivateHiddenPassage_ConnectedRoomMissing_ReturnsFalseAndDoesNotChangeLocalState()
+        {
+            var rooms = CreateRoomsWithHiddenPassage();
+            rooms.Remove(RoomBPosition);
+            var activator = new GimmickActivator();
+
+            // 接続先の部屋が見つからない場合、自室側の状態も変更せずに失敗すること（片側だけの発動を防ぐ）
+            bool result = activator.TryActivateHiddenPassage(rooms, RoomAPosition, DoorAPosition);
+
+            Assert.IsFalse(result);
+            Assert.IsFalse(rooms[RoomAPosition].Gimmicks.Single().IsActive);
+            Assert.AreEqual(DoorType.Secret, rooms[RoomAPosition].Doors.Single().Type);
+        }
+
+        [Test]
         public void TryActivateLockedDoor_NoKey_ReturnsFalse()
         {
             var rooms = CreateRoomsWithLockedDoor();
@@ -162,6 +177,21 @@ namespace Tests.Core.Dungeon.Gimmicks
             bool result = activator.TryActivateLockedDoor(rooms, RoomAPosition, new Vector2I(99, 99), hasKey: true);
 
             Assert.IsFalse(result);
+        }
+
+        [Test]
+        public void TryActivateLockedDoor_ConnectedRoomMissing_ReturnsFalseAndDoesNotChangeLocalState()
+        {
+            var rooms = CreateRoomsWithLockedDoor();
+            rooms.Remove(RoomBPosition);
+            var activator = new GimmickActivator();
+
+            // 接続先の部屋が見つからない場合、自室側の状態も変更せずに失敗すること（片側だけの解錠を防ぐ）
+            bool result = activator.TryActivateLockedDoor(rooms, RoomAPosition, DoorAPosition, hasKey: true);
+
+            Assert.IsFalse(result);
+            Assert.IsFalse(rooms[RoomAPosition].Gimmicks.Single().IsActive);
+            Assert.IsTrue(rooms[RoomAPosition].Doors.Single().IsLocked);
         }
     }
 }

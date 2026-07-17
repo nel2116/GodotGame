@@ -20,13 +20,14 @@ namespace Systems.Dungeon.TileMap
         /// <see cref="TileType.Obstacle"/>、それ以外は <see cref="TileType.Floor"/> とする
         /// 外周（部屋ローカル X/Y が 0 または ROOM_SIZE-1）は基本 <see cref="TileType.Wall"/> とし、
         /// <see cref="RoomTemplate.DoorPositions"/> に一致するセルは対応する扉（<see cref="RoomData.Doors"/>、インデックス対応）の
-        /// 種類に応じて <see cref="TileType.Door"/>・<see cref="TileType.LockedDoor"/>・<see cref="TileType.SecretWall"/> のいずれかとする
+        /// 種類・施錠状態に応じて <see cref="TileType.Door"/>・<see cref="TileType.LockedDoor"/>・<see cref="TileType.SecretWall"/> のいずれかとする
         /// すべてのセルは room.Position を加算したワールドタイル座標として返す
         /// </summary>
         /// <param name="room">対象の部屋データ</param>
         /// <param name="template">対象の部屋テンプレート（room.Doors と DoorPositions がインデックスで対応していること）</param>
         /// <returns>ワールドタイル座標とタイル種別の組の一覧</returns>
         /// <exception cref="ArgumentNullException">room または template が null の場合</exception>
+        /// <exception cref="InvalidOperationException">room.Doors と template.DoorPositions の件数が一致しない場合</exception>
         public List<(Vector2I WorldPosition, TileType Type)> GenerateTiles(RoomData room, RoomTemplate template)
         {
             if (room == null)
@@ -39,7 +40,7 @@ namespace Systems.Dungeon.TileMap
                 throw new ArgumentNullException(nameof(template));
             }
 
-            var doorTypeByLocalPosition = BuildDoorTypeMap(room, template);
+            var doorByLocalPosition = BuildDoorMap(room, template);
             var result = new List<(Vector2I WorldPosition, TileType Type)>();
 
             for (int x = 0; x < DungeonConstants.ROOM_SIZE; x++)
@@ -50,7 +51,7 @@ namespace Systems.Dungeon.TileMap
                     bool isBoundary = x == 0 || y == 0 || x == DungeonConstants.ROOM_SIZE - 1 || y == DungeonConstants.ROOM_SIZE - 1;
 
                     var type = isBoundary
-                        ? GetBoundaryTileType(local, doorTypeByLocalPosition)
+                        ? GetBoundaryTileType(local, doorByLocalPosition)
                         : GetInteriorTileType(local, template);
 
                     result.Add((room.Position + local, type));
@@ -61,20 +62,27 @@ namespace Systems.Dungeon.TileMap
         }
 
         /// <summary>
-        /// 扉のローカル座標から扉種別への対応表を構築する
+        /// 扉のローカル座標から扉データへの対応表を構築する
         /// <see cref="RoomTemplate.DoorPositions"/> と <see cref="RoomData.Doors"/> はインデックスで対応するため、
         /// 両者を先頭から順にペアリングして参照する
         /// </summary>
         /// <param name="room">対象の部屋データ</param>
         /// <param name="template">対象の部屋テンプレート</param>
-        /// <returns>扉のローカル座標をキーとした扉種別の辞書</returns>
-        private static Dictionary<Vector2I, DoorType> BuildDoorTypeMap(RoomData room, RoomTemplate template)
+        /// <returns>扉のローカル座標をキーとした扉データの辞書</returns>
+        /// <exception cref="InvalidOperationException">room.Doors と template.DoorPositions の件数が一致しない場合</exception>
+        private static Dictionary<Vector2I, DoorData> BuildDoorMap(RoomData room, RoomTemplate template)
         {
-            var map = new Dictionary<Vector2I, DoorType>();
-            int count = Math.Min(template.DoorPositions.Count, room.Doors.Count);
-            for (int i = 0; i < count; i++)
+            if (template.DoorPositions.Count != room.Doors.Count)
             {
-                map[template.DoorPositions[i]] = room.Doors[i].Type;
+                throw new InvalidOperationException(
+                    $"部屋テンプレートの扉数（{template.DoorPositions.Count}）と部屋データの扉数（{room.Doors.Count}）が一致しません。" +
+                    "RoomTemplate.DoorPositions と RoomData.Doors はインデックスで対応している必要があります。");
+            }
+
+            var map = new Dictionary<Vector2I, DoorData>();
+            for (int i = 0; i < template.DoorPositions.Count; i++)
+            {
+                map[template.DoorPositions[i]] = room.Doors[i];
             }
 
             return map;
@@ -82,24 +90,26 @@ namespace Systems.Dungeon.TileMap
 
         /// <summary>
         /// 外周セルのタイル種別を判定する
-        /// 扉のローカル座標に一致すれば扉種別に応じたタイル種別を、一致しなければ壁を返す
+        /// 扉のローカル座標に一致すれば扉の種類・施錠状態に応じたタイル種別を、一致しなければ壁を返す
+        /// 鍵扉は解錠後（<see cref="DoorData.IsLocked"/> が false）は <see cref="TileType.Door"/> として扱う
+        /// （<see cref="DoorData.Type"/> 自体は解錠後も <see cref="DoorType.Locked"/> のまま据え置かれるため、Type だけでは判定できない）
         /// </summary>
         /// <param name="local">判定対象の部屋ローカル座標</param>
-        /// <param name="doorTypeByLocalPosition">扉のローカル座標から扉種別への対応表</param>
+        /// <param name="doorByLocalPosition">扉のローカル座標から扉データへの対応表</param>
         /// <returns>外周セルのタイル種別</returns>
-        private static TileType GetBoundaryTileType(Vector2I local, Dictionary<Vector2I, DoorType> doorTypeByLocalPosition)
+        private static TileType GetBoundaryTileType(Vector2I local, Dictionary<Vector2I, DoorData> doorByLocalPosition)
         {
-            if (!doorTypeByLocalPosition.TryGetValue(local, out var doorType))
+            if (!doorByLocalPosition.TryGetValue(local, out var door))
             {
                 return TileType.Wall;
             }
 
-            return doorType switch
+            if (door.Type == DoorType.Secret)
             {
-                DoorType.Secret => TileType.SecretWall,
-                DoorType.Locked => TileType.LockedDoor,
-                _ => TileType.Door
-            };
+                return TileType.SecretWall;
+            }
+
+            return door.Type == DoorType.Locked && door.IsLocked ? TileType.LockedDoor : TileType.Door;
         }
 
         /// <summary>

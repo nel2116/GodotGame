@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Godot;
 using Core.Events;
@@ -32,10 +33,10 @@ namespace Tests.Core.Dungeon.ViewModels
 
             var viewModel = new RoomViewModel(room, bus);
 
-            Assert.AreEqual(RoomType.Treasure, viewModel.Type.Value);
+            Assert.AreEqual(RoomType.Treasure, viewModel.Type);
             Assert.IsFalse(viewModel.IsVisited.Value);
-            Assert.AreEqual(1, viewModel.Doors.Count);
-            Assert.AreEqual(1, viewModel.Gimmicks.Count);
+            Assert.AreEqual(1, viewModel.Doors.Value.Count);
+            Assert.AreEqual(1, viewModel.Gimmicks.Value.Count);
         }
 
         [Test]
@@ -50,16 +51,25 @@ namespace Tests.Core.Dungeon.ViewModels
         }
 
         [Test]
-        public void Doors_ReflectsLatestRoomDataState()
+        public void Refresh_AfterRoomDataChanges_NotifiesSubscribersWithUpdatedSnapshot()
         {
             var bus = new GameEventBus();
             var room = CreateRoom();
             var viewModel = new RoomViewModel(room, bus);
+            IReadOnlyList<DoorData>? notifiedDoors = null;
+            viewModel.Doors.Subscribe(doors => notifiedDoors = doors);
 
-            // RoomData 側の扉状態が書き換わった場合、ViewModel 経由でも最新状態が見えること
+            // RoomData.Doors の要素は同一インスタンス参照のため、Refresh を呼ぶ前でも
+            // ReactiveProperty のスナップショット経由で最新のフィールド値自体は見える
             room.Doors[0].IsLocked = false;
+            Assert.IsFalse(viewModel.Doors.Value[0].IsLocked);
 
-            Assert.IsFalse(viewModel.Doors[0].IsLocked);
+            // Refresh を呼び出すことで初めて、購読者への変更通知（Subscribe）が発火すること
+            Assert.IsNull(notifiedDoors);
+            viewModel.Refresh();
+
+            Assert.IsNotNull(notifiedDoors);
+            Assert.IsFalse(notifiedDoors![0].IsLocked);
         }
     }
 }

@@ -151,6 +151,22 @@ namespace Tests.Core.Dungeon.ViewModels
         }
 
         [Test]
+        public void TryActivateHiddenPassage_ValidGimmick_NotifiesRoomsSubscribers()
+        {
+            var bus = new GameEventBus();
+            var viewModel = CreateViewModel(bus);
+            viewModel.Rooms.Value = CreateRoomsWithHiddenPassage();
+            bool notified = false;
+            viewModel.Rooms.Subscribe(_ => notified = true);
+
+            // ギミック発動は RoomData を in-place で書き換えるため、Rooms の変更通知が確実に発火することを確認する
+            bool result = viewModel.TryActivateHiddenPassage(RoomAPosition, DoorAPosition);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(notified);
+        }
+
+        [Test]
         public void TryActivateHiddenPassage_AlreadyActive_ReturnsFalseAndPublishesFailedEvent()
         {
             var bus = new GameEventBus();

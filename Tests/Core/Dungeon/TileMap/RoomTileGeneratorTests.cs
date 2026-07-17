@@ -166,7 +166,8 @@ namespace Tests.Core.Dungeon.TileMap
         [Test]
         public void GenerateTiles_DoorStateChangesAfterGimmickActivation_ReflectsNewType()
         {
-            // 鍵扉解錠後（Type は Locked のまま、IsLocked のみ変化）の再生成でも扉種別自体は Type ベースで LockedDoor のままであること
+            // 鍵扉解錠後（Type は Locked のまま、IsLocked のみ false に変化）の再生成では
+            // IsLocked も判定に使うため Door（通行可能な扉）になること
             var doorLocal = new Vector2I(15, 8);
             var (room, template) = CreateRoomWithDoor(DoorType.Locked, isLocked: true, doorLocal: doorLocal);
             var generator = new RoomTileGenerator();
@@ -174,14 +175,52 @@ namespace Tests.Core.Dungeon.TileMap
             room.Doors[0].IsLocked = false;
             var tiles = generator.GenerateTiles(room, template);
 
-            Assert.AreEqual(TileType.LockedDoor, FindType(tiles, RoomPosition + doorLocal));
+            Assert.AreEqual(TileType.Door, FindType(tiles, RoomPosition + doorLocal));
 
-            // 隠し通路発動後（Type が Secret から Normal へ変化）は Door になること
+            // 隠し通路発動後（Type が Secret から Normal へ変化）も Door になること
             var (secretRoom, secretTemplate) = CreateRoomWithDoor(DoorType.Secret, isLocked: false, doorLocal: doorLocal);
             secretRoom.Doors[0].Type = DoorType.Normal;
             var secretTiles = generator.GenerateTiles(secretRoom, secretTemplate);
 
             Assert.AreEqual(TileType.Door, FindType(secretTiles, RoomPosition + doorLocal));
+        }
+
+        [Test]
+        public void GenerateTiles_LockedDoorStillLocked_IsLockedDoor()
+        {
+            // 施錠中（IsLocked = true）の間は LockedDoor のままであること
+            var doorLocal = new Vector2I(15, 8);
+            var (room, template) = CreateRoomWithDoor(DoorType.Locked, isLocked: true, doorLocal: doorLocal);
+            var generator = new RoomTileGenerator();
+
+            var tiles = generator.GenerateTiles(room, template);
+
+            Assert.AreEqual(TileType.LockedDoor, FindType(tiles, RoomPosition + doorLocal));
+        }
+
+        [Test]
+        public void GenerateTiles_DoorCountMismatch_Throws()
+        {
+            // RoomTemplate.DoorPositions と RoomData.Doors の件数が一致しない場合は例外を投げること
+            var room = new RoomData { Position = RoomPosition, Type = RoomType.Combat };
+            room.AddDoor(new DoorData
+            {
+                Position = RoomPosition + new Vector2I(15, 8),
+                Type = DoorType.Normal,
+                IsLocked = false,
+                ConnectedRoomPosition = RoomPosition + new Vector2I(16, 0)
+            });
+
+            var template = new RoomTemplate
+            {
+                Type = RoomType.Combat,
+                ObstaclePositions = new List<Vector2I>(),
+                DoorPositions = new List<Vector2I>()
+            };
+
+            var generator = new RoomTileGenerator();
+
+            Assert.Throws<InvalidOperationException>(() => generator.GenerateTiles(room, template));
         }
     }
 }

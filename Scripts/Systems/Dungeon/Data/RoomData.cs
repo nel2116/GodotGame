@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace Systems.Dungeon.Data
@@ -55,6 +56,16 @@ namespace Systems.Dungeon.Data
         public void AddGimmick(GimmickData gimmick)
         {
             Gimmicks.Add(gimmick);
+        }
+
+        /// <summary>
+        /// 指定した接続先部屋位置に対応する扉を取得する
+        /// </summary>
+        /// <param name="connectedRoomPosition">接続先の部屋の位置</param>
+        /// <returns>対応する扉データ。見つからない場合は null</returns>
+        public DoorData? GetDoorTo(Vector2I connectedRoomPosition)
+        {
+            return Doors.FirstOrDefault(d => d.ConnectedRoomPosition == connectedRoomPosition);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Systems.Dungeon.Gimmicks
                         continue;
                     }
 
-                    var connectedDoor = connectedRoom.Doors.FirstOrDefault(d => d.ConnectedRoomPosition == position);
+                    var connectedDoor = connectedRoom.GetDoorTo(position);
                     if (connectedDoor == null)
                     {
                         continue;
@@ -178,7 +178,7 @@ namespace Systems.Dungeon.Gimmicks
                         continue;
                     }
 
-                    var connectedDoor = connectedRoom.Doors.FirstOrDefault(d => d.ConnectedRoomPosition == position);
+                    var connectedDoor = connectedRoom.GetDoorTo(position);
                     if (connectedDoor == null || connectedDoor.Type == DoorType.Secret)
                     {
                         continue;
