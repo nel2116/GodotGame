@@ -1,8 +1,8 @@
 ---
 title: 実装状況レポート
-version: 1.0.0
+version: 1.3.0
 status: active
-updated: 2025-01-27
+updated: 2026-07-17
 tags:
     - Implementation
     - Status
@@ -10,11 +10,12 @@ tags:
 linked_docs:
     - "[[../03_Architecture/Design/mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
     - "[[../06_DevelopmentPlan/11_01_project_plan|プロジェクト計画]]"
+    - "[[../07_Testing/TestResultsReport|テスト結果レポート]]"
 ---
 
 # 実装状況レポート
 
-> **更新日**: 2025-01-27
+> **更新日**: 2026-07-17
 > **プロジェクト**: GodotGame (Godot 4.x + C#)
 
 ## 📊 概要
@@ -23,10 +24,13 @@ linked_docs:
 
 ### テスト結果サマリー
 
-- **総テスト数**: 88
-- **成功**: 88
+- **総テスト数**: 159（`Performance/LongRunningTests.cs`の長時間stabilityテストを除く）
+- **成功**: 152
 - **失敗**: 0
-- **成功率**: 100% ✅
+- **スキップ（理由明記の[Ignore]）**: 7
+- **成功率**: 100%（実行分） ✅
+
+長期間`Compile Remove`でビルド対象外だった14ファイルを精査し、Godot依存の有無を確認した上で全てビルド対象に復元済み（詳細は[[../07_Testing/TestResultsReport|テスト結果レポート]]）。
 
 ## 🏗️ アーキテクチャ実装状況
 
@@ -39,10 +43,9 @@ linked_docs:
 - ✅ `IReactiveProperty<T>` - 完全実装
 
 #### イベントシステム
-- ✅ `GameEventBus` - 実装済み（テストで一部問題あり）
+- ✅ `GameEventBus` - 完全実装（同期発行、バッファリングなし）
 - ✅ `GameEvent` - 完全実装
 - ✅ `IGameEventBus` - 完全実装
-- ⚠️ イベント通知の非同期処理に問題あり（テスト失敗）
 
 #### ViewModel基盤
 - ✅ `ViewModelBase` - 完全実装
@@ -163,14 +166,12 @@ linked_docs:
 - ✅ `IResourceSystem` - 完全実装
 - ✅ `ResourceData` - 完全実装
 - ✅ `ResourcePool` - 完全実装
-- ⚠️ イベント発行に問題あり（テスト失敗）
 
 #### 状態管理システム (State)
 - ✅ `CommonStateModel` - 完全実装
 - ✅ `CommonStateViewModel` - 完全実装
 - ✅ `CommonStateView` - 完全実装
 - ✅ `IStateSystem` - 完全実装
-- ⚠️ イベント発行に問題あり（テスト失敗）
 
 #### イベントシステム (Events)
 - ✅ `MovementEvents` - 完全実装
@@ -187,34 +188,34 @@ linked_docs:
 - ✅ `ReactivePropertyTests` - 完全実装
 - ✅ `ReactivePropertyAdvancedTests` - 完全実装
 - ✅ `CompositeDisposableTests` - 完全実装
-- ✅ `GameEventBusTests` - 実装済み（一部失敗）
+- ✅ `GameEventBusTests` - 完全実装
 - ✅ `ViewModelBaseTests` - 完全実装
 
 #### プレイヤーシステムテスト
-- ✅ `PlayerInputModelTests` - 実装済み（Compile Remove）
-- ✅ `PlayerInputViewModelTests` - 実装済み（Compile Remove）
+- ✅ `PlayerInputModelTests` - 完全実装（一部[Ignore]、理由は下記「既知の問題」参照）
+- ✅ `PlayerInputViewModelTests` - 完全実装
 - ✅ `InputBufferTests` - 完全実装
 - ✅ `InputRingBufferTests` - 完全実装
-- ✅ `InputMovementIntegrationTests` - 実装済み（Compile Remove）
-- ✅ `PlayerMovementViewModelTests` - 実装済み（Compile Remove）
-- ✅ `PlayerCombatViewModelTests` - 実装済み（Compile Remove）
+- ✅ `InputMovementIntegrationTests` - 完全実装（一部[Ignore]）
+- ✅ `PlayerMovementViewModelTests` - 完全実装
+- ✅ `PlayerCombatViewModelTests` - 完全実装
 - ✅ `CancelRuleManagerTests` - 完全実装
-- ✅ `PlayerAnimationModelTests` - 実装済み（Compile Remove）
-- ✅ `PlayerAnimationViewModelTests` - 実装済み（Compile Remove）
-- ✅ `PlayerStateViewModelTests` - 実装済み（Compile Remove）
+- ✅ `PlayerAnimationModelTests` - 完全実装
+- ✅ `PlayerAnimationViewModelTests` - 完全実装
+- ✅ `PlayerStateViewModelTests` - 完全実装
 - ✅ `FrameStateManagerTests` - 完全実装
-- ✅ `PlayerProgressionViewModelTests` - 実装済み（Compile Remove）
+- ✅ `PlayerProgressionViewModelTests` - 完全実装
 - ✅ `PlayerPerformanceTests` - 完全実装
-- ✅ `PlayerSystemIntegrationTests` - 実装済み（Compile Remove）
+- ✅ `PlayerSystemIntegrationTests` - 完全実装（一部[Ignore]）
 
 #### 共通システムテスト
-- ✅ `CommonMovementModelTests` - 実装済み（Compile Remove）
-- ✅ `CommonMovementViewModelTests` - 実装済み（Compile Remove）
+- ✅ `CommonMovementModelTests` - 完全実装（一部[Ignore]）
+- ✅ `CommonMovementViewModelTests` - 完全実装
 - ✅ `CommonResourceModelTests` - 完全実装
-- ✅ `CommonResourceViewModelTests` - 完全実装（一部失敗）
+- ✅ `CommonResourceViewModelTests` - 完全実装
 - ✅ `ResourceDataTests` - 完全実装
 - ✅ `CommonStateModelTests` - 完全実装
-- ✅ `CommonStateViewModelTests` - 完全実装（一部失敗）
+- ✅ `CommonStateViewModelTests` - 完全実装
 
 #### ユーティリティテスト
 - ✅ `ReactiveCollectionTests` - 完全実装
@@ -222,15 +223,16 @@ linked_docs:
 - ✅ `AsyncValidatorTests` - 完全実装
 - ✅ `WeakEventManagerTests` - 完全実装
 
-#### パフォーマンステスト
-- ✅ `LongRunningTests` - 実装済み（Compile Remove）
+#### パフォーマンステスト（`[Category("LongRunning")]`、通常のdotnet test実行からは除外）
+- ✅ `LongRunningTests` - 完全実装（コンパイル対象。`dotnet test --filter "TestCategory=LongRunning"`で個別実行）
 - ✅ `LongRunning_Stability` - 成功（期待値を調整して修正済み）
 
 ### ⚠️ テストの問題点
 
 #### テストの状態
-- ✅ すべてのテストが成功（88/88）
+- ✅ 実行対象（`TestCategory!=LongRunning`）は全て成功（152/152、失敗0件）
 - ✅ AsyncCommand_Execute_UpdatesStateテストを修正完了
+- ⚠️ 7件は実装との不整合が判明したため理由を明記して`[Ignore]`にしている（下記「既知の問題」参照）
 
 ## 📝 コンパイル警告
 
@@ -287,8 +289,8 @@ linked_docs:
 ### テスト設計
 - ✅ 単体テスト
 - ✅ 統合テスト
-- ✅ パフォーマンステスト
-- ⚠️ 一部テストが無効化されている
+- ✅ パフォーマンステスト（`[Category("LongRunning")]`で通常実行から分離）
+- ✅ CIでCore/GUT/LongRunningの3テストジョブを自動実行（`.github/workflows/tests.yml`）
 
 ## ⚠️ 既知の問題
 
@@ -307,9 +309,20 @@ linked_docs:
 4. ✅ **AsyncCommand_Execute_UpdatesStateテストの修正** - **修正済み**
    - IsExecutingの状態変化を適切に確認するようにテストを修正
 
-### 中優先度
-1. **無効化されたテストの有効化**
-   - テストの修正と再有効化
+5. ✅ **無効化されたテストの有効化** - **完了**
+   - `Compile Remove`で除外されていた14ファイルを個別に検証し、ビルド対象に復元
+   - 復元時に見つかった実装側の不整合（`PlayerStateViewModel.HandleStateChange`と`PlayerMovementViewModel.HandleDash`が状態表示更新を呼び忘れていた）を修正
+   - 本当にGodot依存があった`Player/Input`配下3ファイルは、`TestBase`未継承によりネイティブAPI呼び出しでテストホストがクラッシュしていたことが原因と判明。`TestBase`継承を追加して解消
+
+### 中優先度（設計判断が必要、[Ignore]で保留中）
+1. **`GameEventBus.Publish`が subscriber の例外を分離しない**
+   - `ExceptionPropagation_EventBus_HandlesGracefully`が[Ignore]。subscriber内の例外がPublish()の外まで伝播する。例外を分離すべきかどうかは設計判断が必要
+2. **`CommonMovementModel`のVelocity/VerticalVelocity分離とJump後の接地判定**
+   - `Jump_SetsVerticalVelocity`と`Update_FromJump_ReturnsGrounded`が[Ignore]。`Jump()`は`VerticalVelocity`（別フィールド）を変更するが`Velocity.Y`は変更しない。また重力の固定加算により接地判定のしきい値(0.01)をまたいで復帰できない場合がある
+3. **GodotMockのテスト環境固定値と手動InputState設定の競合**
+   - `InputModel_Move_UpdatesMovementModel`、`ProcessInput_Move_PublishesMovementEvent`、`ProcessInput_Buttons_PublishEvents`が[Ignore]。`UpdateInput()`内の`InputState.Update()`が`GodotMock`のテスト環境固定値（常にゼロ/false）で手動設定した入力を上書きしてしまう
+4. **`EventCommunication_Integration`の期待値ミスマッチ**
+   - `UpdateMovement()`を無入力で呼んでも`Velocity`が変化しないため、`MovementVelocityChangedEvent`が発火しない。テストが何を検証すべきかの見直しが必要
 
 ### 低優先度
 1. **未使用変数の削除**
@@ -323,15 +336,15 @@ linked_docs:
 
 ### プレイヤーシステム
 - **進捗**: 100% ✅
-- **残タスク**: テストの有効化（オプション）
+- **残タスク**: なし
 
 ### 共通システム
 - **進捗**: 100% ✅
 - **残タスク**: なし
 
 ### テスト
-- **進捗**: 100% ✅
-- **残タスク**: 無効化テストの有効化（オプション）
+- **進捗**: 100% ✅（実行対象は全て成功）
+- **残タスク**: `[Ignore]`にした7件について設計判断を行い、対応後に有効化（中優先度参照）
 
 ## 🎯 次のステップ
 
@@ -340,13 +353,14 @@ linked_docs:
 2. ✅ Resource/State ViewModelのイベント発行問題を修正 - **完了**
 3. ✅ Null参照警告の修正 - **完了**
 4. ✅ AsyncCommand_Execute_UpdatesStateテストの修正 - **完了**
+5. ✅ 無効化されたテストの有効化（Compile Remove精査・復元） - **完了**
 
 **すべての高優先度タスクが完了しました！** 🎉
 
 ### 短期目標
-1. 無効化されたテストの有効化と修正
-2. テストカバレッジの向上
-3. ドキュメントの更新
+1. `[Ignore]`にした7件の設計判断・対応
+2. GUTテストのCI実行を実機（Godotバイナリのある環境）で検証
+3. テストカバレッジの向上（`coverlet.collector`導入済み、閾値監視は未設定）
 
 ### 長期目標
 1. パフォーマンス最適化
@@ -362,4 +376,5 @@ linked_docs:
 | 2025-01-27 | 1.0.0 | 初版作成 |
 | 2025-01-27 | 1.1.0 | GameEventBus、Resource/State ViewModel、Null参照警告を修正。テスト成功率98.9%に向上 |
 | 2025-01-27 | 1.2.0 | AsyncCommand_Execute_UpdatesStateテストを修正。全テスト成功（88/88、成功率100%）達成 🎉 |
+| 2026-07-17 | 1.3.0 | `Compile Remove`で除外されていた14ファイルを精査・復元（159件中152成功/7件[Ignore]/0失敗）。`PlayerStateViewModel.HandleStateChange`・`PlayerMovementViewModel.HandleDash`の状態反映漏れを修正。`.github/workflows/tests.yml`でCI導入、`coverlet.collector`でカバレッジ計測を追加 |
 
