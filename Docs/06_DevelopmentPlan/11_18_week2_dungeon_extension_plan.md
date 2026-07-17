@@ -1,8 +1,8 @@
 ---
 title: Week 2: ダンジョン生成システム機能拡張実装計画
-version: 0.1.0
-status: draft
-updated: 2025-06-20
+version: 0.2.0
+status: in-progress
+updated: 2026-07-17
 tags:
     - Implementation
     - Plan
@@ -193,5 +193,6 @@ Week 1で構築したダンジョン生成基盤を拡張し、ゲームプレ�
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2.0      | 2026-07-17 | Phase 1-4 実装完了を反映<br>- Gimmicks（GimmickPlacementModel/GimmickActivator/HiddenPassageGimmick/LockedDoorGimmick）、Navigation（NavigationMesh/NavigationNode/PathFinder/NavigationManager）、TileMap（TileType/TileTemplate/TileSetManager/RoomTileGenerator/TileMapManager/TileRenderer）、ViewModels+Events（DungeonViewModel/RoomViewModel/DungeonEvents）を実装<br>- `dotnet test` 196件全pass<br>- テストは計画書記載の `Tests/Systems/Dungeon/` ではなく `Tests/Core/Dungeon/{Gimmicks,Navigation,TileMap,ViewModels}` に配置（Week 1からの既存規約に統一）<br>- 未実施: GUTテスト（TileMapManager/TileRendererはGodotノード依存のため薄いラッパーに留め、ロジックはNUnitでカバーする方針としGDScript側のGUTテストは見送り）、実際の`.tres`タイルセット資産の作成（プレースホルダーのアトラス座標マッピングのみ）、テストカバレッジ計測、パフォーマンス/メモリ計測、API仕様書等の別ドキュメント作成 |
 | 0.1.0      | 2025-06-20 | 初版作成<br>- Week 2機能拡張実装計画<br>- ギミック・ナビゲーション・タイルマップ・ViewModel統合<br>- 7日間の日別実装スケジュール<br>- テスト戦略とリスク管理 |
 
