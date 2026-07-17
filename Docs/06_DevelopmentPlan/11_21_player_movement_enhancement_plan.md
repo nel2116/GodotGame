@@ -1,8 +1,8 @@
 ---
 title: プレイヤー移動システム強化実装計画
-version: 0.1.0
-status: draft
-updated: 2025-06-20
+version: 0.2.0
+status: in-progress
+updated: 2026-07-17
 tags:
     - Implementation
     - Plan
@@ -131,9 +131,9 @@ Scripts/Systems/Player/State/
 ```
 
 **完了条件**:
-- [ ] フレーム単位の状態管理が正常に動作
-- [ ] アクションの開始・終了が正確に制御される
-- [ ] 状態遷移が適切に処理される
+- [x] フレーム単位の状態管理が正常に動作（`FrameStateManager`/`ActionFrameData`実装済み、`FrameStateManagerTests`でカバー）
+- [x] アクションの開始・終了が正確に制御される（`StartAction`/`Tick`による`ActionStartedEvent`/`ActionEndedEvent`発行）
+- [x] 状態遷移が適切に処理される
 
 ### 2.2 Phase 2: 基本的なキャンセルシステム実装
 
@@ -191,9 +191,9 @@ Scripts/Systems/Player/Combat/
 ```
 
 **完了条件**:
-- [ ] キャンセルルールが正常に動作
-- [ ] アクション間の遷移がスムーズに実行される
-- [ ] 優先度に基づく処理が正しく動作
+- [x] キャンセルルールが正常に動作（`CancelRuleManager`/`CancelRule`実装済み、`CancelRuleManagerTests`でカバー）
+- [x] アクション間の遷移がスムーズに実行される（`ActionExecutionManager.TryCancel`）
+- [x] 優先度に基づく処理が正しく動作
 
 ### 2.3 Phase 3: 入力バッファリング基盤構築
 
@@ -254,9 +254,9 @@ Scripts/Systems/Player/Input/
 ```
 
 **完了条件**:
-- [ ] 入力バッファリングが正常に動作
-- [ ] 先行入力が適切に処理される
-- [ ] 入力優先度が正しく適用される
+- [x] 入力バッファリングが正常に動作（`InputBuffer`/`InputRingBuffer`実装済み、`InputBufferTests`/`InputRingBufferTests`でカバー）
+- [x] 先行入力が適切に処理される
+- [x] 入力優先度が正しく適用される
 
 ## 中期改善（アルファ対応）
 
@@ -303,9 +303,9 @@ Scripts/Systems/Player/Combat/
 ```
 
 **完了条件**:
-- [ ] 企画仕様通りのアクションが実行される
-- [ ] フレーム単位の制御が正確に動作
-- [ ] 移動距離と空中制御が適切に処理される
+- [x] 企画仕様通りのアクションが実行される（実装上は`ActionSpecification`等の新規並行クラスは作らず、既存の`ActionFrameData`へ後方互換の形で無敵フレーム・移動距離・空中制御率・キャンセル可能先を追加。重複回避のため`CancelRule.AllowedActions`と責務を分離）
+- [x] フレーム単位の制御が正確に動作（`ActionFrameData.IsInvincible`、`ActionFrameDataTests`でカバー）
+- [x] 移動距離と空中制御が適切に処理される（データ保持のみ。実際の移動・空中制御ロジックへの適用はPhase4スコープ外）
 
 ### 3.2 Phase 5: 無敵時間システム実装
 
@@ -349,9 +349,9 @@ public class InvincibilityManager
 ```
 
 **完了条件**:
-- [ ] 無敵時間が正確に動作
-- [ ] ダメージ判定が適切に処理される
-- [ ] 無敵時間の開始・終了が正しく制御される
+- [x] 無敵時間が正確に動作（`InvincibilityManager.IsCurrentlyInvincible`が`FrameStateManager.CurrentAction`/`ActionFrameData.IsInvincible`に委譲する形で実装。`InvincibilityFrame`独自リストは持たない）
+- [x] ダメージ判定が適切に処理される（`PlayerCombatModel`にオプション依存として統合し、無敵中は`TakeDamage`を無効化。`InvincibilityManagerTests`でカバー）
+- [x] 無敵時間の開始・終了が正しく制御される（開始/終了専用イベントは追加せず、既存の`FrameAdvancedEvent`ベースで都度判定する設計とした）
 
 ### 3.3 Phase 6: パフォーマンス監視実装
 
@@ -397,9 +397,9 @@ public class PerformanceMonitor
 ```
 
 **完了条件**:
-- [ ] パフォーマンス監視が正常に動作
-- [ ] KPI要件が満たされている
-- [ ] 警告システムが適切に機能
+- [x] パフォーマンス監視が正常に動作（`Systems.Performance`配下に`FrameTimeTracker`/`InputLatencyMonitor`/`PerformanceMonitor`を実装。ロジックはGodot非依存とし、`PerformanceMonitorNode`を薄いGodot連携層として分離）
+- [x] KPI要件が満たされている（60FPS＝目標フレーム時間1/60秒、入力遅延0.10秒以下を閾値として実装。`PerformanceMonitorTests`でカバー）
+- [x] 警告システムが適切に機能（閾値超過時に`PerformanceWarningEvent`を`IGameEventBus`経由で発行。※実機・実プレイでのFPS/遅延計測による検証は未実施）
 
 ## 実装スケジュール
 
@@ -536,4 +536,5 @@ Tests/Systems/Player/Integration/
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2.0      | 2026-07-18 | Phase 1-6 実装完了を反映<br>- Phase 1-3（短期改善）: `FrameStateManager`/`ActionFrameData`/`CancelRuleManager`/`CancelRule`/`ActionExecutionManager`/`InputBuffer`/`InputRingBuffer`は実装済み・全テストpass<br>- Phase 4（詳細なアクション仕様）: `ActionSpecification`等の新規並行クラスは作らず、既存の`ActionFrameData`を後方互換の形で拡張（無敵フレーム区間・移動距離・空中制御率・キャンセル可能先）<br>- Phase 5（無敵時間システム）: `InvincibilityManager`を追加し、`PlayerCombatModel.TakeDamage`へオプション依存として統合（無敵中はダメージ無効化）。開始/終了専用イベントは追加せず既存イベントベースで判定<br>- Phase 6（パフォーマンス監視）: `Systems.Performance`配下に`FrameTimeTracker`/`InputLatencyMonitor`/`PerformanceMonitor`/`PerformanceWarningEvent`を追加。ロジックはGodot非依存、`PerformanceMonitorNode`で薄く連携<br>- `dotnet test Tests/Core/CoreTests.csproj` 108件全pass（既存88件+新規20件）、`dotnet build` 0警告0エラー（新規追加分。既存9件の警告は対象外ファイル由来のため未対応）<br>- 未実施: 実機・実プレイでのFPS/入力遅延の実測検証、API仕様書等の別ドキュメント作成、統合テスト・パフォーマンステストの専用スイート追加 |
 | 0.1.0      | 2025-06-20 | 初版作成 |

@@ -1,8 +1,8 @@
 ---
 title: 実装状況レポート
-version: 1.0.0
+version: 1.3.0
 status: active
-updated: 2025-01-27
+updated: 2026-07-18
 tags:
     - Implementation
     - Status
@@ -14,7 +14,7 @@ linked_docs:
 
 # 実装状況レポート
 
-> **更新日**: 2025-01-27
+> **更新日**: 2026-07-18
 > **プロジェクト**: GodotGame (Godot 4.x + C#)
 
 ## 📊 概要
@@ -23,10 +23,12 @@ linked_docs:
 
 ### テスト結果サマリー
 
-- **総テスト数**: 88
-- **成功**: 88
+- **総テスト数**: 108
+- **成功**: 108
 - **失敗**: 0
 - **成功率**: 100% ✅
+
+> Issue #98（プレイヤー移動システム企画仕様準拠強化）Phase 4-6実装により、88→108件に増加（`feat/player-movement-enhancement`ブランチ）。詳細は[[../06_DevelopmentPlan/11_21_player_movement_enhancement_plan|プレイヤー移動システム強化実装計画]]を参照。
 
 ## 🏗️ アーキテクチャ実装状況
 
@@ -82,7 +84,7 @@ linked_docs:
 - ✅ 接地判定
 
 #### 戦闘システム (Combat)
-- ✅ `PlayerCombatModel` - 完全実装
+- ✅ `PlayerCombatModel` - 完全実装（`InvincibilityManager`をオプション依存として統合、無敵中は`TakeDamage`を無効化）
 - ✅ `PlayerCombatViewModel` - 完全実装
 - ✅ `PlayerCombatViewModelNode` - 完全実装
 - ✅ `PlayerCombatView` - 完全実装
@@ -90,6 +92,8 @@ linked_docs:
 - ✅ `CancelRuleManager` - 完全実装
 - ✅ `CancelRule` - 完全実装
 - ✅ `ActionExecutionManager` - 完全実装
+- ✅ `InvincibilityManager` - 完全実装（Issue #98 Phase 5、`FrameStateManager.CurrentAction`/`ActionFrameData.IsInvincible`に委譲）
+- ✅ `ActionFrameData` - 拡張（Issue #98 Phase 4、無敵フレーム区間・移動距離・空中制御率・キャンセル可能先リストを後方互換で追加）
 
 #### アニメーションシステム (Animation)
 - ✅ `PlayerAnimationModel` - 完全実装
@@ -179,6 +183,17 @@ linked_docs:
 - ✅ `StateEvents` - 完全実装
 - ✅ `AnimationEvents` - 完全実装
 
+## ⚡ パフォーマンスシステム (Performance)
+
+Issue #98 Phase 6にて新規追加（`Systems.Performance`名前空間）。
+
+### ✅ 実装済みシステム
+- ✅ `FrameTimeTracker` - 完全実装（フレーム時間の記録・平均値算出。Godot非依存）
+- ✅ `InputLatencyMonitor` - 完全実装（入力受信〜処理完了の遅延計測。Godot非依存）
+- ✅ `PerformanceMonitor` - 完全実装（60FPS維持・入力遅延0.10秒以下のKPI閾値チェック、`PerformanceWarningEvent`発行）
+- ✅ `PerformanceWarningEvent` - 完全実装
+- ✅ `PerformanceMonitorNode` - 完全実装（Godotの`_Process`/`Engine`APIとの薄い橋渡し。Godotノード依存のためNUnitテスト対象外）
+
 ## 🧪 テスト実装状況
 
 ### ✅ 実装済みテスト
@@ -199,6 +214,8 @@ linked_docs:
 - ✅ `PlayerMovementViewModelTests` - 実装済み（Compile Remove）
 - ✅ `PlayerCombatViewModelTests` - 実装済み（Compile Remove）
 - ✅ `CancelRuleManagerTests` - 完全実装
+- ✅ `ActionFrameDataTests` - 完全実装（Issue #98 Phase 4: 無敵フレーム判定・移動距離・空中制御率・キャンセル可能先）
+- ✅ `InvincibilityManagerTests` - 完全実装（Issue #98 Phase 5: 無敵中のダメージ無効化を検証）
 - ✅ `PlayerAnimationModelTests` - 実装済み（Compile Remove）
 - ✅ `PlayerAnimationViewModelTests` - 実装済み（Compile Remove）
 - ✅ `PlayerStateViewModelTests` - 実装済み（Compile Remove）
@@ -225,11 +242,14 @@ linked_docs:
 #### パフォーマンステスト
 - ✅ `LongRunningTests` - 実装済み（Compile Remove）
 - ✅ `LongRunning_Stability` - 成功（期待値を調整して修正済み）
+- ✅ `FrameTimeTrackerTests` - 完全実装（Issue #98 Phase 6）
+- ✅ `InputLatencyMonitorTests` - 完全実装（Issue #98 Phase 6）
+- ✅ `PerformanceMonitorTests` - 完全実装（Issue #98 Phase 6、KPI閾値超過時の警告イベント発行を検証）
 
 ### ⚠️ テストの問題点
 
 #### テストの状態
-- ✅ すべてのテストが成功（88/88）
+- ✅ すべてのテストが成功（108/108、うちIssue #98 Phase 4-6分が新規20件）
 - ✅ AsyncCommand_Execute_UpdatesStateテストを修正完了
 
 ## 📝 コンパイル警告
@@ -329,6 +349,10 @@ linked_docs:
 - **進捗**: 100% ✅
 - **残タスク**: なし
 
+### パフォーマンスシステム（Issue #98 Phase 6）
+- **進捗**: 100% ✅（ロジック実装・単体テストの範囲）
+- **残タスク**: 実機・実プレイでのFPS/入力遅延の実測検証（KPI閾値判定ロジック自体はテスト済みだが、実測データでの動作確認は未実施）
+
 ### テスト
 - **進捗**: 100% ✅
 - **残タスク**: 無効化テストの有効化（オプション）
@@ -362,4 +386,5 @@ linked_docs:
 | 2025-01-27 | 1.0.0 | 初版作成 |
 | 2025-01-27 | 1.1.0 | GameEventBus、Resource/State ViewModel、Null参照警告を修正。テスト成功率98.9%に向上 |
 | 2025-01-27 | 1.2.0 | AsyncCommand_Execute_UpdatesStateテストを修正。全テスト成功（88/88、成功率100%）達成 🎉 |
+| 2026-07-18 | 1.3.0 | Issue #98 Phase 4-6実装を反映（`feat/player-movement-enhancement`ブランチ）。<br>`ActionFrameData`拡張（無敵フレーム・移動距離・空中制御率・キャンセル可能先）、`InvincibilityManager`追加・`PlayerCombatModel`統合、`Systems.Performance`（`FrameTimeTracker`/`InputLatencyMonitor`/`PerformanceMonitor`/`PerformanceWarningEvent`/`PerformanceMonitorNode`）追加。全テスト成功（108/108）達成 |
 
