@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Input
 {
-    public class InputMovementIntegrationTests
+    public class InputMovementIntegrationTests : TestBase
     {
         private T GetPrivateField<T>(object obj, string fieldName)
         {
@@ -19,6 +19,7 @@ namespace Tests.Core.Player.Input
         }
 
         [Test]
+        [Ignore("PlayerInputModel.UpdateInput() calls InputState.Update() first, which overwrites any manually-set MovementInput with GodotMock.GetVector(...)'s fixed test-mode value (always Vector2.Zero). So the movement set via state.SetMovementInput(...) never survives to reach ProcessInput(). This test documents a real GodotMock-vs-manual-input-state design conflict discovered while re-enabling this long-excluded file; needs a decision on how input tests should inject simulated input.")]
         public async Task InputModel_Move_UpdatesMovementModel()
         {
             var bus = new GameEventBus();

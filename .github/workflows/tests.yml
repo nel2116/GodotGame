@@ -1,0 +1,70 @@
+name: "tests"
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+    workflow_dispatch:
+
+env:
+    GODOT_VERSION: 4.4.1
+
+jobs:
+    core-tests:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+            - name: Restore dependencies
+              run: dotnet restore Tests/Core/CoreTests.csproj
+            - name: Build
+              run: dotnet build Tests/Core/CoreTests.csproj --no-restore
+            - name: Run Core tests (excluding long-running stability tests)
+              run: >
+                  dotnet test Tests/Core/CoreTests.csproj --no-build --verbosity normal
+                  --filter "TestCategory!=LongRunning"
+                  --collect:"XPlat Code Coverage"
+            - name: Upload test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: core-test-results
+                  path: Tests/Core/TestResults/
+
+    gut-tests:
+        runs-on: ubuntu-22.04
+        container:
+            image: barichello/godot-ci:4.4.1
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  lfs: true
+            - name: Run GUT tests (headless)
+              run: >
+                  godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
+
+    long-running-tests:
+        # 数十秒〜分単位のstabilityテスト。PRのゲートにはせず、手動実行専用にする
+        if: github.event_name == 'workflow_dispatch'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+            - name: Restore dependencies
+              run: dotnet restore Tests/Core/CoreTests.csproj
+            - name: Build
+              run: dotnet build Tests/Core/CoreTests.csproj --no-restore
+            - name: Run long-running stability tests
+              run: >
+                  dotnet test Tests/Core/CoreTests.csproj --no-build --verbosity normal
+                  --filter "TestCategory=LongRunning"

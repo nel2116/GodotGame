@@ -62,6 +62,7 @@ namespace Systems.Player.Movement
         public void HandleDash()
         {
             _model.Dash();
+            UpdateMovementState();
         }
 
         private void UpdateMovementState()

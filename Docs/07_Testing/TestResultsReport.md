@@ -250,10 +250,21 @@ bus.GetEventStream<ResourceCacheChangedEvent>().Subscribe(e => receivedEvent = e
     - 継続的テスト実行の確立
     - テスト結果の自動分析
 
+## 2026-07-17 追記: 除外テストの復元とCI導入
+
+`Tests/Core/CoreTests.csproj`の`Compile Remove`で長期間ビルド対象外になっていたテストファイル（Player/Animation, Combat, State, Progression, Movement, Input, ErrorHandling等）を精査した。
+
+-   実際にGodot依存があったのは`Player/Input`配下の3ファイルのみ。原因は`TestBase`を継承していなかったため`GodotMock.SetTestEnvironment(true)`が呼ばれず、`InputState.Update()`が実際の`Godot.Input`ネイティブAPIを呼んでテストホストをクラッシュさせていたこと。`TestBase`継承を追加して解消した。
+-   除外期間中に実装側が変更され、テストが実装とズレていた例を複数発見（`CommonMovementModel`のVelocity/VerticalVelocity分離、`PlayerStateViewModel.HandleStateChange`と`PlayerMovementViewModel.HandleDash`の状態反映漏れ、`GameEventBus`のログ出力無効化など）。実装側の不整合は修正し、設計判断が必要なものは`[Ignore]`に理由を明記して残した。
+-   `Performance/LongRunningTests.cs`（数十秒〜分単位のstabilityテスト）は`Compile Remove`ではなく`[Category("LongRunning")]`に変更し、コンパイルは通しつつ通常実行から除外するようにした。
+-   `.github/workflows/tests.yml`を追加し、`dotnet test`（コア）・GUT・LongRunningの3ジョブをCIに接続した（従来は`Godot_CI.yml`がexportのみでテストは一切実行していなかった）。
+-   `coverlet.collector`を追加しカバレッジ計測を有効化した。
+
 ## 変更履歴
 
 | バージョン | 更新日     | 変更内容                                  |
 | ---------- | ---------- | ----------------------------------------- |
+| 1.1.0      | 2026-07-17 | 除外テストの復元、CI導入、カバレッジ計測追加を記録 |
 | 1.0.0      | 2025-06-29 | 初版作成、Core テスト結果と修正内容を記録 |
 
 ---

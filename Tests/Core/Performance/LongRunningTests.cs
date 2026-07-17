@@ -19,7 +19,10 @@ namespace Tests.Core.Performance
 {
     /// <summary>
     /// 長時間実行時の安定性テスト
+    /// 実行時間が長く(数十秒～)、テストホストのメモリ状況次第でクラッシュすることも確認されているため、
+    /// 通常のdotnet test実行からは除外する（dotnet test --filter "TestCategory=LongRunning" で個別実行）
     /// </summary>
+    [Category("LongRunning")]
     public class LongRunningTests : TestBase
     {
         private GameEventBus? _eventBus;

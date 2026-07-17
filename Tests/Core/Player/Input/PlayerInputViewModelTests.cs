@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Core.Player.Input
 {
-    public class PlayerInputViewModelTests
+    public class PlayerInputViewModelTests : TestBase
     {
         [Test]
         public void Initialize_DefaultState_IsEnabled()
