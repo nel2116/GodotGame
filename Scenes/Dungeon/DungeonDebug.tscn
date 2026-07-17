@@ -7,8 +7,28 @@ script = ExtResource("1")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 
+[node name="PathLine" type="Line2D" parent="."]
+width = 2.0
+default_color = Color(1, 1, 0, 1)
+
 [node name="DebugUI" type="CanvasLayer" parent="."]
 
-[node name="DebugLabel" type="Control" parent="DebugUI"]
+[node name="RootPanel" type="VBoxContainer" parent="DebugUI"]
 layout_mode = 3
 anchors_preset = 0
+offset_left = 16.0
+offset_top = 16.0
+
+[node name="RoomInfoLabel" type="Label" parent="DebugUI/RootPanel"]
+layout_mode = 2
+text = "現在の部屋: -"
+
+[node name="ResultLabel" type="Label" parent="DebugUI/RootPanel"]
+layout_mode = 2
+text = "-"
+
+[node name="RoomButtonsContainer" type="HBoxContainer" parent="DebugUI/RootPanel"]
+layout_mode = 2
+
+[node name="GimmickButtonsContainer" type="VBoxContainer" parent="DebugUI/RootPanel"]
+layout_mode = 2

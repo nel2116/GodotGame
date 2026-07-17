@@ -104,6 +104,18 @@ namespace Systems.Dungeon.TileMap
                 return TileType.Wall;
             }
 
+            return GetDoorTileType(door);
+        }
+
+        /// <summary>
+        /// 扉データの種類・施錠状態からタイル種別を判定する
+        /// 隠し通路発動・鍵扉解錠等で <see cref="RoomData"/> 側の状態のみが変化した際に、
+        /// 部屋全体を再生成せずタイルマップ上の該当セルのみを個別更新する用途にも使用する
+        /// </summary>
+        /// <param name="door">判定対象の扉データ</param>
+        /// <returns>扉の種類・施錠状態に応じたタイル種別</returns>
+        public static TileType GetDoorTileType(DoorData door)
+        {
             if (door.Type == DoorType.Secret)
             {
                 return TileType.SecretWall;
