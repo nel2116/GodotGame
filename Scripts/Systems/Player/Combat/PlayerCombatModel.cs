@@ -13,6 +13,7 @@ namespace Systems.Player.Combat
     public class PlayerCombatModel : PlayerSystemBase
     {
         private readonly Dictionary<string, CombatData> _actions = new();
+        private readonly InvincibilityManager? _invincibility_manager;
         private float _attack_power;
         private float _defense_power;
         private float _max_health;
@@ -24,7 +25,10 @@ namespace Systems.Player.Combat
         public float MaxHealth => _max_health;
         public float CurrentHealth => _current_health;
 
-        public PlayerCombatModel(IGameEventBus bus) : base(bus) { }
+        public PlayerCombatModel(IGameEventBus bus, InvincibilityManager? invincibilityManager = null) : base(bus)
+        {
+            _invincibility_manager = invincibilityManager;
+        }
 
         public override void Initialize()
         {
@@ -77,6 +81,11 @@ namespace Systems.Player.Combat
         {
             try
             {
+                if (_invincibility_manager != null && _invincibility_manager.IsCurrentlyInvincible())
+                {
+                    return;
+                }
+
                 var actual = MathF.Max(0, damage - _defense_power);
                 _current_health = MathF.Max(0, _current_health - actual);
                 EventBus.Publish(new DamageTakenEvent(actual));
