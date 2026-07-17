@@ -18,7 +18,7 @@ namespace Systems.Player.Combat
         }
 
         /// <summary>
-        /// ルールを初期化する
+        /// ルールを初期化する（企画仕様のキャンセル&入力バッファ表に準拠）
         /// </summary>
         public void InitializeDefaultRules()
         {
@@ -26,7 +26,19 @@ namespace Systems.Player.Combat
                 "Attack_L1",
                 14,
                 20,
-                new[] { "Dodge", "Attack_L2" },
+                new[] { "Dodge", "ChargeAttack" },
+                1));
+            _rules.Add(new CancelRule(
+                "Attack_L2",
+                16,
+                22,
+                new[] { "Dodge", "ChargeAttack" },
+                1));
+            _rules.Add(new CancelRule(
+                "ChargeAttack",
+                30,
+                40,
+                new[] { "Dodge" },
                 1));
             _rules.Add(new CancelRule(
                 "Dodge",
@@ -34,6 +46,12 @@ namespace Systems.Player.Combat
                 26,
                 new[] { "Attack_L1", "ChargeAttack" },
                 1));
+            _rules.Add(new CancelRule(
+                "Jump",
+                3,
+                30,
+                new[] { "Dodge" },
+                0));
         }
 
         /// <summary>

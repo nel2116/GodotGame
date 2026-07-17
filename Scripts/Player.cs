@@ -8,6 +8,7 @@ using Systems.Player.State;
 using Systems.Player.Progression;
 using Systems.Player.Config;
 using Systems.Player.Debug;
+using Systems.Performance;
 using Core.Utilities;
 
 public partial class Player : CharacterBody3D
@@ -20,6 +21,7 @@ public partial class Player : CharacterBody3D
 	private PlayerStateViewModel _state_vm = default!;
 	private PlayerProgressionViewModel _progression_vm = default!;
 	private PlayerDebugger _debugger = default!;
+	private PerformanceMonitor _performance_monitor = default!;
 
 	// 初期化処理で各サブシステムを生成する
 	public override void _Ready()
@@ -72,6 +74,8 @@ public partial class Player : CharacterBody3D
 		var progression_model = new PlayerProgressionModel();
 		_progression_vm = new PlayerProgressionViewModel(progression_model, _bus);
 		_progression_vm.Initialize();
+
+		_performance_monitor = new PerformanceMonitor(_bus);
 	}
 
 	private void InitializeDebugger()
@@ -84,6 +88,9 @@ public partial class Player : CharacterBody3D
 	// 毎フレーム各サブシステムを更新する
 	public override void _PhysicsProcess(double delta)
 	{
+		// パフォーマンス監視（60FPS維持KPI）
+		_performance_monitor.RecordFrame((float)delta);
+
 		// 入力の更新
 		_input_vm.UpdateInput();
 		
