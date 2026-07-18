@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Events;
+using Core.Reactive;
 using Godot;
 using Systems.Dungeon.Data;
 using Systems.Dungeon.Events;
@@ -62,7 +63,7 @@ namespace Systems.Dungeon.Views
         private readonly RoomTileGenerator _roomTileGenerator = new();
         private readonly TileSetManager _tileSetManager = new();
         private readonly TileMapManager _tileMapManager = new();
-        private readonly List<IDisposable> _eventSubscriptions = new();
+        private readonly CompositeDisposable _eventSubscriptions = new();
 
         /// <summary>
         /// ノード初期化
@@ -100,13 +101,20 @@ namespace Systems.Dungeon.Views
         /// <summary>
         /// レベル生成を行い、完了後に全部屋をタイルマップへ反映する
         /// Godotの<see cref="_Ready"/>は同期メソッドのため、非同期処理はfire-and-forgetの
-        /// async voidヘルパーとして切り出す
+        /// async voidヘルパーとして切り出す。失敗時は GD.PrintErr でログ出力する
         /// </summary>
         private async void InitializeLevelAsync()
         {
-            await _viewModel.GenerateLevelAsync(DebugSeed);
-            RenderRooms();
-            RefreshRoomUi();
+            try
+            {
+                await _viewModel.GenerateLevelAsync(DebugSeed);
+                RenderRooms();
+                RefreshRoomUi();
+            }
+            catch (Exception e)
+            {
+                GD.PrintErr($"[DungeonView] レベル初期化に失敗しました: {e}");
+            }
         }
 
         /// <summary>
@@ -330,12 +338,7 @@ namespace Systems.Dungeon.Views
         /// </summary>
         public override void _ExitTree()
         {
-            foreach (var subscription in _eventSubscriptions)
-            {
-                subscription.Dispose();
-            }
-            _eventSubscriptions.Clear();
-
+            _eventSubscriptions.Dispose();
             _tileMapManager.Free();
             _viewModel.Dispose();
         }
