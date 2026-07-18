@@ -44,6 +44,28 @@ namespace Systems.Dungeon.Navigation
         }
 
         /// <summary>
+        /// 指定した部屋のみナビゲーションメッシュを部分再構築する
+        /// ギミック発動等で影響範囲（変化した部屋＋接続先部屋）が既知の場合、全体再構築（<see cref="BuildMesh"/>）の代わりに使用することで
+        /// 更新コストを変化した部屋数に比例させる
+        /// </summary>
+        /// <param name="positions">再構築対象の部屋位置の一覧</param>
+        /// <param name="rooms">部屋データの辞書（部屋位置がキー）</param>
+        /// <param name="roomTemplates">部屋テンプレートの辞書（部屋位置がキー）</param>
+        public void RebuildRooms(IEnumerable<Vector2I> positions, Dictionary<Vector2I, RoomData> rooms, IReadOnlyDictionary<Vector2I, RoomTemplate> roomTemplates)
+        {
+            foreach (var position in positions)
+            {
+                if (!rooms.TryGetValue(position, out var room))
+                {
+                    continue;
+                }
+
+                roomTemplates.TryGetValue(position, out var template);
+                navigationMesh.RebuildRoom(position, room, template);
+            }
+        }
+
+        /// <summary>
         /// 現在のナビゲーションメッシュ上で開始地点から目標地点までの経路を探索する
         /// </summary>
         /// <param name="start">開始地点のワールドタイル座標</param>

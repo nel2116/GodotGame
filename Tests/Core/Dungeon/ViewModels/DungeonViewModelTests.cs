@@ -9,7 +9,9 @@ using Systems.Dungeon.Events;
 using Systems.Dungeon.Gimmicks;
 using Systems.Dungeon.Models;
 using Systems.Dungeon.Navigation;
+using Systems.Dungeon.Optimization;
 using Systems.Dungeon.ViewModels;
+using Tests.Core.Dungeon.Optimization;
 
 namespace Tests.Core.Dungeon.ViewModels
 {
@@ -25,11 +27,17 @@ namespace Tests.Core.Dungeon.ViewModels
         /// </summary>
         private static DungeonViewModel CreateViewModel(GameEventBus bus)
         {
+            var navigationManager = new NavigationManager();
+            var coordinator = new DungeonOptimizationCoordinator(
+                new RoomVisibilityManager(), new RoomLifecycleManager(), navigationManager);
+
             return new DungeonViewModel(
                 new LevelGenerationModel(0),
                 new GimmickPlacementModel(new Random(0)),
                 new GimmickActivator(),
-                new NavigationManager(),
+                navigationManager,
+                coordinator,
+                new FakeRoomTileRenderer(),
                 bus);
         }
 
@@ -67,19 +75,48 @@ namespace Tests.Core.Dungeon.ViewModels
             return new Dictionary<Vector2I, RoomData> { [RoomAPosition] = roomA, [RoomBPosition] = roomB };
         }
 
+        /// <summary>
+        /// コンストラクタのnullチェックテスト用に、正常な最適化ファサードを1つ生成する
+        /// </summary>
+        private static DungeonOptimizationCoordinator CreateCoordinator()
+        {
+            return new DungeonOptimizationCoordinator(
+                new RoomVisibilityManager(), new RoomLifecycleManager(), new NavigationManager());
+        }
+
         [Test]
         public void Constructor_NullLevelGenerationModel_ThrowsArgumentNullException()
         {
             var bus = new GameEventBus();
             Assert.Throws<ArgumentNullException>(() => _ = new DungeonViewModel(
-                null!, new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(), bus));
+                null!, new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(),
+                CreateCoordinator(), new FakeRoomTileRenderer(), bus));
+        }
+
+        [Test]
+        public void Constructor_NullOptimizationCoordinator_ThrowsArgumentNullException()
+        {
+            var bus = new GameEventBus();
+            Assert.Throws<ArgumentNullException>(() => _ = new DungeonViewModel(
+                new LevelGenerationModel(0), new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(),
+                null!, new FakeRoomTileRenderer(), bus));
+        }
+
+        [Test]
+        public void Constructor_NullRoomTileRenderer_ThrowsArgumentNullException()
+        {
+            var bus = new GameEventBus();
+            Assert.Throws<ArgumentNullException>(() => _ = new DungeonViewModel(
+                new LevelGenerationModel(0), new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(),
+                CreateCoordinator(), null!, bus));
         }
 
         [Test]
         public void Constructor_NullEventBus_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => _ = new DungeonViewModel(
-                new LevelGenerationModel(0), new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(), null!));
+                new LevelGenerationModel(0), new GimmickPlacementModel(new Random(0)), new GimmickActivator(), new NavigationManager(),
+                CreateCoordinator(), new FakeRoomTileRenderer(), null!));
         }
 
         [Test]
@@ -97,6 +134,22 @@ namespace Tests.Core.Dungeon.ViewModels
             Assert.That(viewModel.Rooms.Value.ContainsKey(Vector2I.Zero), Is.True);
             Assert.That(received, Is.Not.Null);
             Assert.That(received!.RoomCount, Is.EqualTo(viewModel.Rooms.Value.Count));
+        }
+
+        [Test]
+        public async Task GenerateLevelAsync_PublishesRoomsVisibilityChangedEventForInitialActiveRooms()
+        {
+            var bus = new GameEventBus();
+            var viewModel = CreateViewModel(bus);
+            RoomsVisibilityChangedEvent? received = null;
+            bus.GetEventStream<RoomsVisibilityChangedEvent>().Subscribe(e => received = e);
+
+            await viewModel.GenerateLevelAsync(42);
+
+            // 全部屋を即時読み込みするのではなく、開始部屋周辺のアクティブな部屋集合のみが1回のイベントで読み込まれること
+            Assert.That(received, Is.Not.Null);
+            Assert.That(received!.LoadedRooms, Does.Contain(Vector2I.Zero));
+            Assert.IsEmpty(received.UnloadedRooms);
         }
 
         [Test]
@@ -221,6 +274,41 @@ namespace Tests.Core.Dungeon.ViewModels
             Assert.AreEqual(RoomAPosition, received!.RoomPosition);
             Assert.AreEqual(DoorAPosition, received!.GimmickPosition);
             Assert.IsTrue(viewModel.Rooms.Value[RoomAPosition].Doors[0].IsLocked);
+        }
+
+        [Test]
+        public void TryActivateHiddenPassage_ValidGimmick_NavigationBecomesWalkableAcrossDoor()
+        {
+            var bus = new GameEventBus();
+            var viewModel = CreateViewModel(bus);
+            viewModel.Rooms.Value = CreateRoomsWithHiddenPassage();
+
+            var start = RoomAPosition + new Vector2I(1, 1);
+            var goal = RoomBPosition + new Vector2I(1, 1);
+            Assert.IsEmpty(viewModel.FindPath(start, goal));
+
+            bool result = viewModel.TryActivateHiddenPassage(RoomAPosition, DoorAPosition);
+
+            // 発動元・接続先の2部屋のみの部分再構築（BuildMeshの全体再構築は行わない）でも経路が通ること
+            Assert.IsTrue(result);
+            Assert.IsNotEmpty(viewModel.FindPath(start, goal));
+        }
+
+        [Test]
+        public void TryActivateLockedDoor_HasKey_NavigationBecomesWalkableAcrossDoor()
+        {
+            var bus = new GameEventBus();
+            var viewModel = CreateViewModel(bus);
+            viewModel.Rooms.Value = CreateRoomsWithLockedDoor();
+
+            var start = RoomAPosition + new Vector2I(1, 1);
+            var goal = RoomBPosition + new Vector2I(1, 1);
+            Assert.IsEmpty(viewModel.FindPath(start, goal));
+
+            bool result = viewModel.TryActivateLockedDoor(RoomAPosition, DoorAPosition, hasKey: true);
+
+            Assert.IsTrue(result);
+            Assert.IsNotEmpty(viewModel.FindPath(start, goal));
         }
     }
 }

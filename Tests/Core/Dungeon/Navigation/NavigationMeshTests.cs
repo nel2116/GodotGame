@@ -126,5 +126,70 @@ namespace Tests.Core.Dungeon.Navigation
             Assert.IsTrue(neighbors.Contains(RoomAPosition + new Vector2I(1, 2)));
             CollectionAssert.DoesNotContain(neighbors, RoomAPosition + new Vector2I(2, 2));
         }
+
+        [Test]
+        public void RebuildRoom_AfterDoorUnlocked_ReflectsNewStateForThatRoomsDoor()
+        {
+            var (rooms, templates) = CreateConnectedRoomPair(DoorType.Locked, isLocked: true);
+            var mesh = new NavigationMesh();
+            mesh.Build(rooms, templates);
+            Assert.IsFalse(mesh.IsWalkable(DoorAPosition));
+
+            rooms[RoomAPosition].Doors[0].IsLocked = false;
+            mesh.RebuildRoom(RoomAPosition, rooms[RoomAPosition], templates[RoomAPosition]);
+
+            Assert.IsTrue(mesh.IsWalkable(DoorAPosition));
+        }
+
+        [Test]
+        public void RebuildRoom_DoesNotAffectOtherRoomsTiles()
+        {
+            var obstacle = new Vector2I(5, 5);
+            var (rooms, templates) = CreateConnectedRoomPair(DoorType.Normal, isLocked: false, obstaclesA: new List<Vector2I> { obstacle });
+            var mesh = new NavigationMesh();
+            mesh.Build(rooms, templates);
+
+            mesh.RebuildRoom(RoomAPosition, rooms[RoomAPosition], templates[RoomAPosition]);
+
+            // 部屋Bを再構築対象にしていないため、部屋Bの内部タイル・扉は変化しないこと
+            Assert.IsTrue(mesh.IsWalkable(RoomBPosition + new Vector2I(1, 1)));
+            Assert.IsTrue(mesh.IsWalkable(DoorBPosition));
+        }
+
+        [Test]
+        public void RebuildRoom_ProducesSameWalkabilityAsFullBuild()
+        {
+            var (rooms, templates) = CreateConnectedRoomPair(DoorType.Normal, isLocked: false);
+
+            var meshViaFullBuild = new NavigationMesh();
+            meshViaFullBuild.Build(rooms, templates);
+
+            var meshViaPartialRebuild = new NavigationMesh();
+            meshViaPartialRebuild.RebuildRoom(RoomAPosition, rooms[RoomAPosition], templates[RoomAPosition]);
+            meshViaPartialRebuild.RebuildRoom(RoomBPosition, rooms[RoomBPosition], templates[RoomBPosition]);
+
+            Assert.AreEqual(meshViaFullBuild.IsWalkable(RoomAPosition + new Vector2I(1, 1)), meshViaPartialRebuild.IsWalkable(RoomAPosition + new Vector2I(1, 1)));
+            Assert.AreEqual(meshViaFullBuild.IsWalkable(RoomAPosition + new Vector2I(0, 0)), meshViaPartialRebuild.IsWalkable(RoomAPosition + new Vector2I(0, 0)));
+            Assert.AreEqual(meshViaFullBuild.IsWalkable(DoorAPosition), meshViaPartialRebuild.IsWalkable(DoorAPosition));
+            Assert.AreEqual(meshViaFullBuild.IsWalkable(DoorBPosition), meshViaPartialRebuild.IsWalkable(DoorBPosition));
+        }
+
+        [Test]
+        public void RebuildRoom_RoomNotPreviouslyBuilt_AddsTilesWithoutError()
+        {
+            var (rooms, templates) = CreateConnectedRoomPair(DoorType.Normal, isLocked: false);
+            var mesh = new NavigationMesh();
+
+            Assert.DoesNotThrow(() => mesh.RebuildRoom(RoomAPosition, rooms[RoomAPosition], templates[RoomAPosition]));
+            Assert.IsTrue(mesh.IsWalkable(RoomAPosition + new Vector2I(1, 1)));
+        }
+
+        [Test]
+        public void RebuildRoom_NullRoom_ThrowsArgumentNullException()
+        {
+            var mesh = new NavigationMesh();
+
+            Assert.Throws<System.ArgumentNullException>(() => mesh.RebuildRoom(RoomAPosition, null!, null));
+        }
     }
 }

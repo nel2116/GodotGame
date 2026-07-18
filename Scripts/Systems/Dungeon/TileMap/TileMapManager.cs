@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Godot;
+using Systems.Dungeon.Data;
+using Systems.Dungeon.Utilities;
 
 namespace Systems.Dungeon.TileMap
 {
@@ -36,6 +38,23 @@ namespace Systems.Dungeon.TileMap
         {
             var template = tileSetManager.GetTemplate(type);
             layer.SetCell(worldPosition, template.SourceId, template.AtlasCoords);
+        }
+
+        /// <summary>
+        /// 部屋 1 つ分のタイルを <see cref="TileMapLayer"/> から消去する
+        /// 部屋がアクティブな部屋集合から外れた際（<see cref="Optimization.RoomLifecycleManager"/>）に呼び出す想定
+        /// </summary>
+        /// <param name="layer">消去対象のタイルマップレイヤー</param>
+        /// <param name="room">消去する部屋データ</param>
+        public void ClearRoomTiles(TileMapLayer layer, RoomData room)
+        {
+            for (int x = 0; x < DungeonConstants.ROOM_SIZE; x++)
+            {
+                for (int y = 0; y < DungeonConstants.ROOM_SIZE; y++)
+                {
+                    layer.SetCell(room.Position + new Vector2I(x, y), -1);
+                }
+            }
         }
     }
 }
