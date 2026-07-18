@@ -11,6 +11,7 @@ namespace Systems.Performance
         private readonly Queue<float> _samples = new();
         private readonly int _maxSamples;
         private double? _pendingInputTimestamp;
+        private bool _isFresh;
 
         /// <summary>
         /// 直近に計測された入力遅延（秒）
@@ -46,11 +47,23 @@ namespace Systems.Performance
             _pendingInputTimestamp = null;
 
             CurrentLatency = latency;
+            _isFresh = true;
             _samples.Enqueue(latency);
             if (_samples.Count > _maxSamples)
             {
                 _samples.Dequeue();
             }
+        }
+
+        /// <summary>
+        /// 直近の計測結果を取り出す。前回の TakeLatency() 呼び出し以降に新しい計測がない場合は null を返す。
+        /// KPI チェック側が「まだ確認していない新鮮なサンプル」だけを評価するために使用する
+        /// </summary>
+        public float? TakeLatency()
+        {
+            if (!_isFresh) return null;
+            _isFresh = false;
+            return CurrentLatency;
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Systems.Performance
 
         private void CheckFrameTimeKpi()
         {
-            var frameTime = _frameTimeTracker.CurrentFrameTime;
+            var frameTime = _frameTimeTracker.AverageFrameTime;
             if (frameTime > TargetFrameTime)
             {
                 _eventBus.Publish(new PerformanceWarningEvent("FrameTime", frameTime, TargetFrameTime));
@@ -51,10 +51,11 @@ namespace Systems.Performance
 
         private void CheckInputLatencyKpi()
         {
-            var latency = _inputLatencyMonitor.CurrentLatency;
-            if (latency > MaxInputLatency)
+            var latency = _inputLatencyMonitor.TakeLatency();
+            if (latency == null) return;
+            if (latency.Value > MaxInputLatency)
             {
-                _eventBus.Publish(new PerformanceWarningEvent("InputLatency", latency, MaxInputLatency));
+                _eventBus.Publish(new PerformanceWarningEvent("InputLatency", latency.Value, MaxInputLatency));
             }
         }
     }

@@ -3,7 +3,7 @@ using Systems.Player.State;
 
 namespace Tests.Core.Player.State
 {
-    public class ActionFrameDataTests
+    public class ActionFrameDataTests : TestBase
     {
         [Test]
         public void IsInvincible_ReturnsFalseWhenNotConfigured()

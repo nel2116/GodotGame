@@ -3,7 +3,7 @@ using Systems.Performance;
 
 namespace Tests.Core.Performance
 {
-    public class InputLatencyMonitorTests
+    public class InputLatencyMonitorTests : TestBase
     {
         [Test]
         public void RecordProcessed_ComputesLatencyFromRecordedInput()

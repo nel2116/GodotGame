@@ -4,7 +4,7 @@ using Core.Events;
 
 namespace Tests.Core.Performance
 {
-    public class PerformanceMonitorTests
+    public class PerformanceMonitorTests : TestBase
     {
         [Test]
         public void Update_PublishesWarning_WhenFrameTimeExceedsTarget()

@@ -3,7 +3,7 @@ using Systems.Performance;
 
 namespace Tests.Core.Performance
 {
-    public class FrameTimeTrackerTests
+    public class FrameTimeTrackerTests : TestBase
     {
         [Test]
         public void RecordFrameTime_UpdatesCurrentFrameTime()
