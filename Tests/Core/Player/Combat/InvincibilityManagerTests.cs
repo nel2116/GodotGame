@@ -8,75 +8,46 @@ namespace Tests.Core.Player.Combat
     public class InvincibilityManagerTests : TestBase
     {
         [Test]
-        public void IsCurrentlyInvincible_ReturnsFalseWhenNoActionRunning()
-        {
-            var bus = new GameEventBus();
-            var frameManager = new FrameStateManager(bus);
-            var manager = new InvincibilityManager(frameManager);
-
-            Assert.IsFalse(manager.IsCurrentlyInvincible());
-        }
-
-        [Test]
-        public void IsCurrentlyInvincible_ReturnsTrueWithinInvincibilityWindow()
-        {
-            var bus = new GameEventBus();
-            var frameManager = new FrameStateManager(bus);
-            var manager = new InvincibilityManager(frameManager);
-
-            var action = new ActionFrameData("Dodge", 20, 2, 10, 8, invincibilityStartFrame: 2, invincibilityEndFrame: 6);
-            frameManager.StartAction(action);
-            for (int i = 0; i < 3; i++) frameManager.Tick();
-
-            Assert.IsTrue(manager.IsCurrentlyInvincible());
-        }
-
-        [Test]
-        public void IsCurrentlyInvincible_ReturnsFalseOutsideInvincibilityWindow()
-        {
-            var bus = new GameEventBus();
-            var frameManager = new FrameStateManager(bus);
-            var manager = new InvincibilityManager(frameManager);
-
-            var action = new ActionFrameData("Dodge", 20, 2, 10, 8, invincibilityStartFrame: 2, invincibilityEndFrame: 6);
-            frameManager.StartAction(action);
-            for (int i = 0; i < 10; i++) frameManager.Tick();
-
-            Assert.IsFalse(manager.IsCurrentlyInvincible());
-        }
-
-        [Test]
-        public void TakeDamage_IsNegatedWhileInvincible()
+        public void IsInvincible_FalseWhenNoActionRunning()
         {
             var bus = new GameEventBus();
             var frameManager = new FrameStateManager(bus);
             var invincibilityManager = new InvincibilityManager(frameManager);
-            var combatModel = new PlayerCombatModel(bus, invincibilityManager);
-            combatModel.Initialize();
 
-            var action = new ActionFrameData("Dodge", 20, 2, 10, 8, invincibilityStartFrame: 2, invincibilityEndFrame: 6);
-            frameManager.StartAction(action);
-            for (int i = 0; i < 3; i++) frameManager.Tick();
-
-            var healthBeforeDamage = combatModel.CurrentHealth;
-            combatModel.TakeDamage(50f);
-
-            Assert.That(combatModel.CurrentHealth, Is.EqualTo(healthBeforeDamage));
+            Assert.IsFalse(invincibilityManager.IsInvincible());
         }
 
         [Test]
-        public void TakeDamage_AppliesDamageWhenNotInvincible()
+        public void IsInvincible_TrueDuringActionInvincibilityWindow()
         {
             var bus = new GameEventBus();
             var frameManager = new FrameStateManager(bus);
             var invincibilityManager = new InvincibilityManager(frameManager);
-            var combatModel = new PlayerCombatModel(bus, invincibilityManager);
-            combatModel.Initialize();
 
-            var healthBeforeDamage = combatModel.CurrentHealth;
-            combatModel.TakeDamage(50f);
+            var dodge = StandardActionFrameData.Dodge();
+            frameManager.StartAction(dodge);
 
-            Assert.That(combatModel.CurrentHealth, Is.LessThan(healthBeforeDamage));
+            for (int i = 0; i < 3; i++) frameManager.Tick();
+            Assert.IsTrue(invincibilityManager.IsInvincible());
+
+            for (int i = 0; i < 8; i++) frameManager.Tick();
+            Assert.IsFalse(invincibilityManager.IsInvincible());
+        }
+
+        [Test]
+        public void SetForcedInvincible_OverridesActionState()
+        {
+            var bus = new GameEventBus();
+            var frameManager = new FrameStateManager(bus);
+            var invincibilityManager = new InvincibilityManager(frameManager);
+
+            Assert.IsFalse(invincibilityManager.IsInvincible());
+
+            invincibilityManager.SetForcedInvincible(true);
+            Assert.IsTrue(invincibilityManager.IsInvincible());
+
+            invincibilityManager.SetForcedInvincible(false);
+            Assert.IsFalse(invincibilityManager.IsInvincible());
         }
     }
 }

@@ -81,8 +81,9 @@ namespace Systems.Player.Combat
         {
             try
             {
-                if (_invincibility_manager != null && _invincibility_manager.IsCurrentlyInvincible())
+                if (_invincibility_manager != null && _invincibility_manager.IsInvincible())
                 {
+                    EventBus.Publish(new DamageAvoidedEvent(damage));
                     return;
                 }
 

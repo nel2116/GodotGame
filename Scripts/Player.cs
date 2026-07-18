@@ -6,6 +6,7 @@ using Systems.Player.Animation;
 using Systems.Player.Combat;
 using Systems.Player.Config;
 using Systems.Player.Debug;
+using Systems.Performance;
 using Systems.Player.Input;
 using Systems.Player.Movement;
 using Systems.Player.Progression;
@@ -20,6 +21,7 @@ public partial class Player : CharacterBody3D
 	private PlayerAnimationViewModel _animationViewModel = default!;
 	private PlayerStateViewModel _stateViewModel = default!;
 	private PlayerProgressionViewModel _progressionViewModel = default!;
+	private PerformanceMonitor _performanceMonitor = default!;
 	private PlayerDebugger? _debugger;
 	private bool _hasInitialized;
 
@@ -82,6 +84,11 @@ public partial class Player : CharacterBody3D
 			() => new PlayerProgressionModel(),
 			static (model, bus) => new PlayerProgressionViewModel(model, bus),
 			static viewModel => viewModel.Initialize());
+
+		_performanceMonitor = new PerformanceMonitor(
+			new FrameTimeTracker(),
+			new InputLatencyMonitor(),
+			_eventBus);
 	}
 
 	/// <summary>
@@ -103,6 +110,9 @@ public partial class Player : CharacterBody3D
 		{
 			return;
 		}
+
+		_performanceMonitor.FrameTimeTracker.RecordFrameTime((float)delta);
+		_performanceMonitor.Update();
 
 		UpdateInputSystem();
 		UpdateMovementSystem();

@@ -29,6 +29,18 @@ namespace Systems.Player.Events
     }
 
     /// <summary>
+    /// 無敵時間中にダメージが無効化されたイベント
+    /// </summary>
+    public class DamageAvoidedEvent : GameEvent
+    {
+        public float Damage { get; }
+        public DamageAvoidedEvent(float damage)
+        {
+            Damage = damage;
+        }
+    }
+
+    /// <summary>
     /// 回復適用イベント
     /// </summary>
     public class HealAppliedEvent : GameEvent
