@@ -10,17 +10,17 @@ tags:
     - MVVM
     - Reactive
 linked_docs:
-    - "[[10_CoreDocs/00_index|コアドキュメントインデックス]]"
-    - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[30_APIReference/CoreSystemAPI|コアシステムAPI]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
+    - "[[00_Index/moc|コアドキュメントインデックス]]"
+    - "[[mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[CoreSystemAPI|コアシステムAPI]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[04_event_bus|イベントバス実装詳細]]"
+    - "[[02_animation_system|アニメーションシステム詳細設計]]"
+    - "[[05_sound_system|サウンドシステム詳細設計]]"
+    - "[[06_ui_system|UIシステム詳細設計]]"
+    - "[[10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # 開発ガイドライン
@@ -136,7 +136,7 @@ func _on_death_state_changed(is_dead: bool) -> void:
 
 ### 命名規則
 
-命名規則については、[共通ガイドライン](../10_CoreDocs/00_common_guidelines.md#命名規則)を参照してください。
+命名規則については、[共通ガイドライン](../08_DocRules/00_common_guidelines.md#命名規則)を参照してください。
 
 ### コード構造
 

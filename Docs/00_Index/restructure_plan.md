@@ -2,6 +2,19 @@
 
 > **🎯 目的**: MOCシステム構築後のドキュメント統合・移動・命名修正の実行計画
 
+## ✅ 実行結果（2026-07-16 完了）
+
+本計画は 2026-07-16 に以下の内容で実行完了しました。採用したルールは [[01_documentation_structure|ドキュメント構造ルール]] を参照。
+
+1. **重複統合**: `02_GameSystem/01_SkillSystem/` を `02_GameSystem/Skills/` に統合（同一内容の重複を削除）
+2. **03_Technical 統合**: `03_Technical/12_03_detailed_design/` ツリーを `03_Architecture/`（Design / Components / Systems / Optimization / Utilities）へ移動し、番号重複（03 が2つ）を解消。テスト戦略は `07_Testing/testing_strategy.md` へ移動
+3. **空スタブ削除**: 中身のない frontmatter のみのファイル 11 個（ルート直下、Art/ Combat/ Player/ data/ Weekly/ FileManagement/）とその親フォルダを削除。未作成ドキュメントは各 MOC の「作成予定」セクションで管理
+4. **index/moc 統一**: 各カテゴリのハブを `moc.md` に統一。ボイラープレートの `index.md` / `00_index.md` を削除（実コンテンツを持つ `07_Testing/index.md` は `testing_plan.md` に改名して保持、`02_systems` 配下の index は `common_systems_overview.md` / `player_system_overview.md` に改名）
+5. **リンク更新**: 旧パス（`12_03_detailed_design/`、`12_Architecture/`、`10_CoreDocs/`、`11_PlanDocs/`、`14_TechDocs/`、`15_ImplementationSpecs/`、`40_Tutorials/`）へのリンクを実在ファイルへの basename リンクに一括更新
+6. **ルート整理**: 古い `SUMMARY.md` / `00_index.md` / `tree.txt` を削除（`README.md` と `00_Index/moc.md` に一本化）
+
+**計画からの変更点**: 計画では Combat/ Player/ 等のファイルを 02_GameSystem 配下へ移動予定だったが、実体が空スタブだったため削除し、MOC の「作成予定」リストで管理する方針に変更。
+
 ## 📊 現在の状況
 
 ### ✅ 完了済み
@@ -176,6 +189,7 @@
 |------|----------|
 | 2025-07-04 | 再構成計画書作成 |
 | 2025-07-04 | MOCシステム構築完了 |
+| 2026-07-16 | 再構成実行完了（実行結果セクション参照） |
 
 ---
 

@@ -41,8 +41,8 @@
 
 ### 🎯 開発開始
 - [[06_DevelopmentPlan/MVP/mvp_definition|MVP定義]]
-- [[03_Architecture/Environment/godot_environment|Godot環境設定]]
-- [[07_Testing/Automation/test_automation|テスト自動化]]
+- [[99_Reference/GettingStarted|Godot環境設定・はじめに]]
+- [[07_Testing/testing_plan|テスト計画・実装ガイドライン]]
 
 ### 📖 ガイド
 - [[99_Reference/GettingStarted|はじめに]]
@@ -54,21 +54,13 @@
 - [[99_Reference/AI_Agent_TestWorkflow|AIエージェントテストワークフロー]]
 - [[99_Reference/DevWorkflows|共通開発ワークフロー]]
 
-## 📊 ドキュメント統計
-
-- **総ファイル数**: 123個
-- **カテゴリ数**: 8個
-- **タグ数**: 45個
-- **内部リンク数**: 204個
-
----
-
 ## 🔄 更新履歴
 
 | 日付 | 更新内容 |
 |------|----------|
 | 2025-07-04 | MOCシステム対応 |
 | 2025-07-04 | ナビゲーション構造整理 |
+| 2026-07-16 | ドキュメント再構成（03_Technical を 03_Architecture に統合、重複・空スタブ削除、index/moc 統一） |
 
 ---
 

@@ -9,17 +9,17 @@ tags:
     - Core
     - Project
 linked_docs:
-    - "[[11_PlanDocs/11_01_project_plan|プロジェクト計画書]]"
-    - "[[12_Architecture/12_01_mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[11_PlanDocs/00_index|計画ドキュメント]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/07_animation_system|アニメーションシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/08_sound_system|サウンドシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/09_ui_system|UIシステム詳細設計]]"
-    - "[[12_Architecture/12_03_detailed_design/02_systems/10_network_system|ネットワークシステム詳細設計]]"
+    - "[[11_01_project_plan|プロジェクト計画書]]"
+    - "[[mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
+    - "[[06_DevelopmentPlan/moc|計画ドキュメント]]"
+    - "[[01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[04_event_bus|イベントバス実装詳細]]"
+    - "[[02_animation_system|アニメーションシステム詳細設計]]"
+    - "[[05_sound_system|サウンドシステム詳細設計]]"
+    - "[[06_ui_system|UIシステム詳細設計]]"
+    - "[[10_network_system|ネットワークシステム詳細設計]]"
 ---
 
 # 技術アーキテクチャ設計書

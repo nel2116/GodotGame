@@ -8,7 +8,7 @@ tags:
     - Document
     - Core
 linked_docs:
-    - "[[index|開発計画・ロードマップ]]"
+    - "[[06_DevelopmentPlan/moc|開発計画・ロードマップ]]"
     - "[[11_01_project_plan|プロジェクト計画書]]"
     - "[[11_02_design_pillars|デザインピラー]]"
     - "[[11_04_kpi_metrics|KPI定義]]"

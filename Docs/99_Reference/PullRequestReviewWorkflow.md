@@ -19,7 +19,7 @@ AI エージェントがプロジェクトのルール・ガイドラインに�
 
 ## 前提
 
--   プロジェクトのコーディング規約・開発ガイドライン・PR 手順書（Docs/10_CoreDocs/DevelopmentGuidelines.md, Docs/99_Reference/PullRequestProcedure.md など）を参照可能であること
+-   プロジェクトのコーディング規約・開発ガイドライン・PR 手順書（Docs/08_DocRules/DevelopmentGuidelines.md, Docs/99_Reference/PullRequestProcedure.md など）を参照可能であること
 -   GitHub CLI（gh）が利用可能であること
 -   レビュー対象 PR の番号または URL が分かっていること
 
@@ -38,7 +38,7 @@ AI エージェントがプロジェクトのルール・ガイドラインに�
 
 ### 3. ルール・ガイドラインとの照合
 
-3.1. コーディング規約や開発ガイドライン（例: Docs/10_CoreDocs/DevelopmentGuidelines.md）と照合し、命名規則・構造・テスト方針等の遵守状況を確認する。
+3.1. コーディング規約や開発ガイドライン（例: Docs/08_DocRules/DevelopmentGuidelines.md）と照合し、命名規則・構造・テスト方針等の遵守状況を確認する。
 3.2. PR 手順書（Docs/99_Reference/PullRequestProcedure.md）やプロジェクトルール（Docs/99_Reference/ProjectRules.md）も参照し、手続き・記載内容の不備がないか確認する。
 
 ### 4. レビューコメントの作成
@@ -64,7 +64,7 @@ AI エージェントがプロジェクトのルール・ガイドラインに�
 
 ## 参考ドキュメント
 
--   Docs/10_CoreDocs/DevelopmentGuidelines.md
+-   Docs/08_DocRules/DevelopmentGuidelines.md
 -   Docs/99_Reference/PullRequestProcedure.md
 -   Docs/99_Reference/ProjectRules.md
 -   Docs/99_Reference/DocumentManagementRules.md

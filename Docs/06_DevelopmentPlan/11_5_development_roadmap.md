@@ -11,7 +11,7 @@ tags:
 linked_docs:
     - "[[11_01_project_plan|プロジェクト計画書]]"
     - "[[11_02_design_pillars|デザインピラー]]"
-    - "[[11_03_mvp_definition|MVP]]"
+    - "[[mvp_definition|MVP]]"
     - "[[11_04_kpi_metrics|KPI]]"
 ---
 

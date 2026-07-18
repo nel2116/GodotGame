@@ -8,15 +8,19 @@ using Core.Utilities;
 namespace Core.Events
 {
 	/// <summary>
-	/// ゲームイベントを発行・購読するバス
+	/// ゲームイベントを発行・購読するバス。
+	/// シングルトンパターンで実装され、マルチスレッド環境でも安全に動作する。
 	/// </summary>
 	public class GameEventBus : IGameEventBus, IDisposable
 	{
+		private const int MaxEventQueueSize = 1000;
+
 		private static GameEventBus? _instance;
 		private static readonly object _instanceLock = new();
 
 		/// <summary>
-		/// シングルトンインスタンスを取得
+		/// シングルトンインスタンスを取得する。
+		/// 初回アクセス時に遅延初期化される。
 		/// </summary>
 		public static GameEventBus Instance
 		{
@@ -34,47 +38,43 @@ namespace Core.Events
 		}
 
 		private readonly ConcurrentDictionary<Type, ISubject<GameEvent>> _subjects = new();
-		private readonly object _dispose_lock = new();
+		private readonly object _disposeLock = new();
 		// マルチスレッド環境での可視性を保証するため volatile を使用
 		private volatile bool _disposed;
-		private readonly int _maxEventQueueSize = 1000; // イベントキューサイズの上限
 
 		/// <summary>
-		/// インスタンスを生成するコンストラクタ
+		/// インスタンスを生成するコンストラクタ。
 		/// </summary>
-		public GameEventBus() { _disposed = false; }
+		public GameEventBus()
+		{
+			_disposed = false;
+		}
 
 		/// <summary>
-		/// イベントを発行
+		/// イベントを発行する。
+		/// 破棄済みのバスへの発行や null イベントは無視される。
 		/// </summary>
+		/// <typeparam name="T">イベントの型</typeparam>
+		/// <param name="evt">発行するイベント</param>
 		public void Publish<T>(T evt) where T : GameEvent
 		{
 			if (_disposed)
 			{
-				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-				// GodotMock.PrintErr("Attempted to publish event to disposed GameEventBus");
 				return;
 			}
 
 			if (evt == null)
 			{
-				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-				// GodotMock.PrintErr("Attempted to publish null event");
 				return;
 			}
 
 			try
 			{
 				var subject = GetOrCreateSubject(typeof(T));
-				if (subject is ISubject<GameEvent> typedSubject)
-				{
-					typedSubject.OnNext(evt);
-				}
+				subject.OnNext(evt);
 			}
 			catch (Exception ex)
 			{
-				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-				// GodotMock.PrintErr($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
 				if (!GodotMock.IsTestEnvironment())
 				{
 					Console.Error.WriteLine($"Error publishing event of type {typeof(T).Name}: {ex.Message}");
@@ -84,28 +84,25 @@ namespace Core.Events
 		}
 
 		/// <summary>
-		/// 指定型のイベントストリームを取得
+		/// 指定型のイベントストリームを取得する。
+		/// ReplaySubject を使用しているため、購読前に発行されたイベントも取得できる。
 		/// </summary>
+		/// <typeparam name="T">イベントの型</typeparam>
+		/// <returns>イベントストリーム。破棄済みの場合は空のストリームを返す。</returns>
 		public IObservable<T> GetEventStream<T>() where T : GameEvent
 		{
 			if (_disposed)
 			{
-				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-				// GodotMock.PrintErr("Attempted to get event stream from disposed GameEventBus");
 				return Observable.Empty<T>();
 			}
 
 			try
 			{
-				// ReplaySubjectを使用しているため、購読前に発行されたイベントも取得できる
-				// Bufferを削除して即座に通知されるようにする（テスト環境では即座に、本番環境では必要に応じてバッファリングを追加可能）
 				return GetOrCreateSubject(typeof(T))
 					.OfType<T>();
 			}
 			catch (Exception ex)
 			{
-				// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-				// GodotMock.PrintErr($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
 				if (!GodotMock.IsTestEnvironment())
 				{
 					Console.Error.WriteLine($"Error getting event stream for type {typeof(T).Name}: {ex.Message}");
@@ -114,17 +111,24 @@ namespace Core.Events
 			}
 		}
 
+		/// <summary>
+		/// 指定型の Subject を取得または作成する。
+		/// スレッドセーフな Subject を返す。
+		/// </summary>
+		/// <param name="type">イベントの型</param>
+		/// <returns>スレッドセーフな Subject</returns>
 		private ISubject<GameEvent> GetOrCreateSubject(Type type)
 		{
 			return _subjects.GetOrAdd(type, _ =>
 			{
-				var subject = new ReplaySubject<GameEvent>(_maxEventQueueSize);
-				return Subject.Synchronize(subject);
+				var replaySubject = new ReplaySubject<GameEvent>(MaxEventQueueSize);
+				return Subject.Synchronize(replaySubject);
 			});
 		}
 
 		/// <summary>
-		/// バスが保持するリソースを解放する（テスト用）
+		/// バスが保持するリソースを解放する（テスト用）。
+		/// アプリ本体からは呼び出さないこと。
 		/// </summary>
 		public void Dispose()
 		{
@@ -133,16 +137,17 @@ namespace Core.Events
 		}
 
 		/// <summary>
-		/// IDisposableの明示的実装（アプリ本体からは何もしない）
+		/// IDisposable の明示的実装。
+		/// アプリ本体からは何もしない（テスト用の Dispose() メソッドを使用すること）。
 		/// </summary>
 		void IDisposable.Dispose()
 		{
-			// アプリ本体からはDisposeできないようにする
-			// 必要なら警告ログを出してもよい
+			// アプリ本体からは Dispose できないようにする
 		}
 
 		/// <summary>
-		/// リソース解放処理本体
+		/// リソース解放処理本体。
+		/// すべての Subject を完了させ、リソースを解放する。
 		/// </summary>
 		/// <param name="disposing">マネージドリソースを解放する場合 true</param>
 		protected virtual void Dispose(bool disposing)
@@ -152,52 +157,59 @@ namespace Core.Events
 				return;
 			}
 
-			if (disposing)
+			if (!disposing)
 			{
-				lock (_dispose_lock)
-				{
-					if (_disposed)
-					{
-						return;
-					}
+				return;
+			}
 
-					try
+			lock (_disposeLock)
+			{
+				if (_disposed)
+				{
+					return;
+				}
+
+				try
+				{
+					DisposeAllSubjects();
+					_subjects.Clear();
+				}
+				catch (Exception ex)
+				{
+					if (!GodotMock.IsTestEnvironment())
 					{
-						foreach (var subject in _subjects.Values)
-						{
-							try
-							{
-								subject.OnCompleted();
-								if (subject is IDisposable disposable)
-								{
-									disposable.Dispose();
-								}
-							}
-							catch (Exception ex)
-							{
-								// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-								// GodotMock.PrintErr($"Error disposing subject: {ex.Message}");
-								if (!GodotMock.IsTestEnvironment())
-								{
-									Console.Error.WriteLine($"Error disposing subject: {ex.Message}");
-								}
-							}
-						}
-						_subjects.Clear();
+						Console.Error.WriteLine($"Error during GameEventBus disposal: {ex.Message}");
 					}
-					catch (Exception ex)
+				}
+				finally
+				{
+					_disposed = true;
+					_instance = null;
+				}
+			}
+		}
+
+		/// <summary>
+		/// すべての Subject を完了させ、リソースを解放する。
+		/// 個別の Subject の解放に失敗しても処理を継続する。
+		/// </summary>
+		private void DisposeAllSubjects()
+		{
+			foreach (var subject in _subjects.Values)
+			{
+				try
+				{
+					subject.OnCompleted();
+					if (subject is IDisposable disposable)
 					{
-						// テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-						// GodotMock.PrintErr($"Error during GameEventBus disposal: {ex.Message}");
-						if (!GodotMock.IsTestEnvironment())
-						{
-							Console.Error.WriteLine($"Error during GameEventBus disposal: {ex.Message}");
-						}
+						disposable.Dispose();
 					}
-					finally
+				}
+				catch (Exception ex)
+				{
+					if (!GodotMock.IsTestEnvironment())
 					{
-						_disposed = true;
-						_instance = null;
+						Console.Error.WriteLine($"Error disposing subject: {ex.Message}");
 					}
 				}
 			}

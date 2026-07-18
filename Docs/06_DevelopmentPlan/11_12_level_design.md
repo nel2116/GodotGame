@@ -9,7 +9,7 @@ tags:
     - Development
 linked_docs:
     - "[[11_10_prototype_guidelines|プロトタイプ制作要素まとめ]]"
-    - "[[00_index|計画ドキュメント]]"
+    - "[[06_DevelopmentPlan/moc|計画ドキュメント]]"
 ---
 
 # レベル生成詳細

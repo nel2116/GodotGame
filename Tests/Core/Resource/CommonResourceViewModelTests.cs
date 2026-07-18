@@ -15,7 +15,7 @@ namespace Tests.Core.Resource
             var bus = new GameEventBus();
             var model = new CommonResourceModel();
             var vm = new CommonResourceViewModel(model, bus);
-            ResourceCacheChangedEvent receivedEvent = null;
+            ResourceCacheChangedEvent? receivedEvent = null;
             // 購読をInitialize()の前に設定（ReplaySubjectにより過去のイベントも取得可能）
             bus.GetEventStream<ResourceCacheChangedEvent>().Subscribe(e => receivedEvent = e);
 

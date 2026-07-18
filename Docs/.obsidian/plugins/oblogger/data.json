@@ -21,7 +21,10 @@
       "templatesFolderVisible": false,
       "excludedFolders": [],
       "isPinned": false,
-      "groupType": "dailies"
+      "groupType": "dailies",
+      "openFolders": [
+        "/"
+      ]
     },
     {
       "groupName": "",
@@ -34,7 +37,10 @@
       "excludedFolders": [],
       "isPinned": false,
       "groupType": "files",
-      "openFolders": []
+      "openFolders": [
+        "/",
+        "//text"
+      ]
     },
     {
       "groupName": "",
@@ -46,7 +52,10 @@
       "templatesFolderVisible": true,
       "excludedFolders": [],
       "isPinned": false,
-      "groupType": "recents"
+      "groupType": "recents",
+      "openFolders": [
+        "/"
+      ]
     },
     {
       "groupName": "",

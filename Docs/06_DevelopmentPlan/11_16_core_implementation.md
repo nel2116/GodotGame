@@ -9,14 +9,14 @@ tags:
     - Core
 linked_docs:
     - "[[11_5_development_roadmap|開発ロードマップ]]"
-    - "[[15_ImplementationSpecs/15.1_InputManagementSpec.md|入力管理実装仕様]]"
-    - "[[15_ImplementationSpecs/15.1_ReactiveSystemImpl.md|リアクティブシステム実装仕様]]"
-    - "[[15_ImplementationSpecs/15.2_StateManagementImpl.md|状態管理実装仕様]]"
+    - "[[05_input_system|入力システム詳細設計]]"
+    - "[[ReactiveSystem|リアクティブシステム実装仕様]]"
+    - "[[StateSystem|状態管理実装仕様]]"
     - "[[99_Reference/AI_Agent_ImplementationWorkflow.md|AIエージェント実装ワークフロー]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/02_viewmodel_base|ViewModelBase実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/01_reactive_property|ReactiveProperty実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/03_composite_disposable|CompositeDisposable実装詳細]]"
-    - "[[12_Architecture/12_03_detailed_design/01_core_components/04_event_bus|イベントバス実装詳細]]"
+    - "[[02_viewmodel_base|ViewModelBase実装詳細]]"
+    - "[[01_reactive_property|ReactiveProperty実装詳細]]"
+    - "[[03_composite_disposable|CompositeDisposable実装詳細]]"
+    - "[[04_event_bus|イベントバス実装詳細]]"
 ---
 
 # コアシステム実装計画

@@ -1,4 +1,4 @@
-# 🎮 GodotGame プロジェクト概要
+w# 🎮 GodotGame プロジェクト概要
 
 > **🎯 プロジェクト**: GodotGame - MVVM/Rxアーキテクチャを採用したアクションRPG
 

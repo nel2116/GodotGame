@@ -318,7 +318,8 @@ namespace Tests.Core.Events
         public async Task Publish_NullEvent_HandleGracefully()
         {
             var bus = new GameEventBus();
-            Assert.DoesNotThrow(() => bus.Publish<DummyEvent>(null));
+            DummyEvent? nullEvent = null;
+            Assert.DoesNotThrow(() => bus.Publish(nullEvent!));
             await Task.Delay(10); // イベント処理の遅延を考慮
         }
     }
