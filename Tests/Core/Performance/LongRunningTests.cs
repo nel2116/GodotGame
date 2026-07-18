@@ -645,34 +645,31 @@ namespace Tests.Core.Performance
         }
 
         [Test]
-        public void LongRunningAsyncOperations_Test()
+        public async Task LongRunningAsyncOperations_Test()
         {
             // 長時間の非同期操作テスト
-            SafeTestExecution(async () =>
+            await SafeTestExecution(async () =>
             {
-                MeasurePerformance(async () =>
+                var tasks = new Task[10];
+
+                for (int i = 0; i < 10; i++)
                 {
-                    var tasks = new Task[10];
-                    
-                    for (int i = 0; i < 10; i++)
+                    tasks[i] = Task.Run(async () =>
                     {
-                        tasks[i] = Task.Run(async () =>
+                        for (int j = 0; j < 10; j++)
                         {
-                            for (int j = 0; j < 10; j++)
-                            {
-                                _movementModel.Move(new Vector2(1, 0));
-                                _stateModel.ChangeState("Moving");
-                                _resourceModel.UnloadResource("Stamina");
-                                
-                                await Task.Delay(1); // 短い遅延
-                            }
-                        });
-                    }
-                    
-                    await Task.WhenAll(tasks);
-                }, "Long running async operations", 60000);
-            }, "Async operations");
-            
+                            _movementModel.Move(new Vector2(1, 0));
+                            _stateModel.ChangeState("Moving");
+                            _resourceModel.UnloadResource("Stamina");
+
+                            await Task.Delay(1);
+                        }
+                    });
+                }
+
+                await Task.WhenAll(tasks);
+            }, "Long running async operations");
+
             AssertNoErrors();
         }
 

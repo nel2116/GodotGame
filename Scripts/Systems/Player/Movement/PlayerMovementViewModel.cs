@@ -54,6 +54,7 @@ namespace Systems.Player.Movement
         public void HandleJump()
         {
             _model.Jump();
+            UpdateMovementState();
         }
 
         /// <summary>

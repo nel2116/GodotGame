@@ -411,13 +411,13 @@ namespace Tests.Core.ErrorHandling
         }
 
         [Test]
-        public void ConcurrentAccess_ErrorHandling()
+        public async Task ConcurrentAccess_ErrorHandling()
         {
             // 並行アクセスでのエラーハンドリング
-            SafeTestExecution(async () =>
+            await SafeTestExecution(async () =>
             {
                 var tasks = new Task[10];
-                
+
                 for (int i = 0; i < 10; i++)
                 {
                     tasks[i] = Task.Run(() =>
@@ -427,9 +427,9 @@ namespace Tests.Core.ErrorHandling
                         _resourceModel.UnloadResource("Stamina");
                     });
                 }
-                
+
                 await Task.WhenAll(tasks);
-                
+
                 AssertNoErrors();
             }, "Concurrent access");
         }

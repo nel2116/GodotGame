@@ -258,10 +258,10 @@ namespace Tests.Core.Player
         }
 
         [Test]
-        public void AsyncOperations_Integration()
+        public async Task AsyncOperations_Integration()
         {
             // 非同期操作の統合テスト
-            SafeTestExecution(async () =>
+            await SafeTestExecution(async () =>
             {
                 var task = Task.Run(() =>
                 {
@@ -275,10 +275,10 @@ namespace Tests.Core.Player
                         _progressionVm.Update();
                     }
                 });
-                
+
                 await task;
             }, "Async operations test");
-            
+
             AssertNoErrors();
         }
     }

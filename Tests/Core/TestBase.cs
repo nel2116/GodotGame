@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Core.Utilities;
 using System;
+using System.Threading.Tasks;
 
 namespace Tests.Core
 {
@@ -214,6 +215,22 @@ namespace Tests.Core
             try
             {
                 testAction();
+            }
+            catch (Exception ex)
+            {
+                TestLogger.Error($"Test execution failed: {testName} - {ex.Message}", "TestBase");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 安全なテスト実行（非同期版）。async lambda を渡すと async void に昇格してしまう問題を防ぐ
+        /// </summary>
+        protected async Task SafeTestExecution(Func<Task> testAction, string testName = "")
+        {
+            try
+            {
+                await testAction();
             }
             catch (Exception ex)
             {

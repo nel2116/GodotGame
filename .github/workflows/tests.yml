@@ -48,6 +48,12 @@ jobs:
             - name: Run GUT tests (headless)
               run: >
                   godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
+            - name: Upload GUT test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: gut-test-results
+                  path: Scripts/Tests/
 
     long-running-tests:
         # 数十秒〜分単位のstabilityテスト。PRのゲートにはせず、手動実行専用にする

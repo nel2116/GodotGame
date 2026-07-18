@@ -68,7 +68,6 @@ namespace Systems.Player.State
                 current.Exit();
                 _current_state = newState;
                 _states[_current_state].Enter();
-                EventBus.Publish(new StateChangedEvent(_current_state));
             }
             catch (Exception ex)
             {
