@@ -44,6 +44,7 @@ namespace Systems.Player.State
         public void HandleStateChange(string newState)
         {
             _model.ChangeState(newState);
+            UpdateStateDisplay();
         }
 
         private void UpdateStateDisplay()

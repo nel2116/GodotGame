@@ -107,80 +107,34 @@ godot --headless --script addons/gut/gut_cmdln.gd --test-script Tests/Integratio
 
 ## CI/CD 連携
 
-### 1. GitHub Actions 設定（更新版）
+### 1. GitHub Actions 設定（`.github/workflows/tests.yml`で実装済み）
 
-```yaml
-name: Test
-
-on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
-
-jobs:
-    core-test:
-        runs-on: windows-latest
-        steps:
-            - uses: actions/checkout@v3
-            - name: Setup .NET
-              uses: actions/setup-dotnet@v3
-              with:
-                  dotnet-version: 8.0.x
-            - name: Restore dependencies
-              run: dotnet restore
-            - name: Build
-              run: dotnet build --no-restore
-            - name: Core Tests
-              run: dotnet test Tests/Core/CoreTests.csproj --no-build --verbosity normal
-            - name: Upload test results
-              uses: actions/upload-artifact@v3
-              with:
-                  name: core-test-results
-                  path: Tests/Core/TestResults/
-
-    gut-test:
-        runs-on: windows-latest
-        needs: core-test
-        steps:
-            - uses: actions/checkout@v3
-            - name: Setup Godot
-              uses: actions/setup-dotnet@v3
-              with:
-                  dotnet-version: 8.0.x
-            - name: Download Godot
-              run: |
-                  curl -L -o godot.zip https://github.com/godotengine/godot/releases/download/4.2.2-stable/Godot_v4.2.2-stable_win64.exe.zip
-                  Expand-Archive godot.zip -DestinationPath godot
-            - name: GUT Tests
-              run: ./godot/Godot_v4.2.2-stable_win64.exe --headless --script addons/gut/gut_cmdln.gd
-```
+-   **core-tests**: `ubuntu-latest`上で`dotnet test Tests/Core/CoreTests.csproj --filter "TestCategory!=LongRunning" --collect:"XPlat Code Coverage"`を実行。push/pull_requestで自動実行され、PRのステータスチェックになる。
+-   **gut-tests**: `barichello/godot-ci:4.4.1`コンテナ上でGUTテストをheadless実行。
+-   **long-running-tests**: `Performance/LongRunningTests.cs`（`[Category("LongRunning")]`）の数十秒〜分単位のstabilityテストを実行。実行時間とホストクラッシュのリスクがあるため、`workflow_dispatch`による手動実行専用（PRのゲートにはしない）。
 
 ### 2. テストレポート
 
--   **Core テスト結果**: `Tests/Core/TestResults/`ディレクトリに出力
+-   **Core テスト結果**: `Tests/Core/TestResults/`ディレクトリに出力し、`core-test-results`アーティファクトとしてアップロード
+-   **カバレッジレポート**: `coverlet.collector`により`Tests/Core/TestResults/<guid>/coverage.cobertura.xml`に出力（`dotnet test --collect:"XPlat Code Coverage"`）
 -   **GUT テスト結果**: `res://Scripts/Tests/test-results_*.xml`に出力
--   **カバレッジレポート**: `coverage/`ディレクトリに出力
 
-### 3. 自動デプロイ
-
--   テスト成功時のみデプロイを実行
--   Core テストと GUT テストの両方が成功した場合のみデプロイ
--   デプロイ先は環境変数で指定
-
-## 最新テスト結果（2025-06-29）
+## 最新テスト結果（2026-07-17）
 
 ### Core テスト実行結果
 
 ```bash
-# 実行結果サマリー
-テスト概要: 合計: 88, 失敗数: 0, 成功数: 88, スキップ済み数: 0, 期間: 2.5 秒
+dotnet test Tests/Core/CoreTests.csproj --filter "TestCategory!=LongRunning"
+# テスト概要: 合計: 159, 失敗数: 0, 成功数: 152, スキップ済み数: 7, 期間: 2 秒
 ```
+
+長期間`.csproj`の`Compile Remove`でビルド対象外になっていた多数のテストファイルを精査し、Godot依存の有無を再確認したうえでビルド対象に復元した。復元時に見つかった実装とのズレ（7件）は`[Ignore]`で理由を明記して残している。詳細は[[TestResultsReport|テスト結果レポート]]を参照。
 
 ### 実行時の注意事項
 
--   **イベントバッファリング**: GameEventBus の 16ms バッファリングにより、テストで 20ms の遅延が必要
+-   **イベント発行**: `GameEventBus.Publish`は同期発行（バッファリングなし）。過去の16msバッファリング実装は既に削除されているため、`Thread.Sleep`による待機は基本的に不要
 -   **Godot 依存テスト**: `Tests/Integration_Godot/`配下は GUT で実行、Core テストとは分離
+-   **長時間テスト**: `Performance/LongRunningTests.cs`は`[Category("LongRunning")]`が付与され、通常の`dotnet test`実行から除外される（`--filter "TestCategory=LongRunning"`で個別実行）
 -   **警告**: CS8785（Godot 関連）、CS8625/CS8600（null 非許容型）は動作に影響なし
 
 ### 推奨実行手順
@@ -197,14 +151,18 @@ jobs:
 
 -   **テストが失敗する場合**
 
-    -   イベントバッファリング遅延の確認（Thread.Sleep(20)が必要）
     -   EventBus・ViewModel の明示的インスタンス生成確認
     -   型名・using ディレクティブの確認
+    -   `GameEventBus.Publish`は同期発行（バッファリングなし）のため、`Thread.Sleep`は基本的に不要。非同期イベント処理を待つ場合は`await Task.Delay(10)`程度で十分
 
 -   **コンパイルエラー**
     -   .NET SDK 8.0 の確認
     -   依存関係の復元確認
     -   プロジェクトファイルの確認
+
+-   **`dotnet test`のプロセスがクラッシュする（"Test host process crashed"）**
+    -   `InputState.Update()`は`GodotMock.GetVector`/`GodotMock.IsActionPressed`経由で入力を取得するが、`GodotMock.IsTestEnvironment()`が`false`のままだと実際の`Godot.Input`ネイティブAPIを呼び出し、Godotエンジン外ではネイティブクラッシュする
+    -   `PlayerInputModel.UpdateInput()`（内部で`InputState.Update()`を呼ぶ）を経由するテストクラスは、必ず`TestBase`を継承すること（`[SetUp]`で`GodotMock.SetTestEnvironment(true)`が呼ばれる）
 
 ### 2. GUT テストの問題
 

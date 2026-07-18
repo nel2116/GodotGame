@@ -65,7 +65,8 @@ namespace Tests.Core.Player.Progression
             await Task.Delay(10);
 
             Assert.IsNotNull(exp);
-            Assert.AreEqual(150, exp!.Experience);
+            // レベルアップ時にCurrentExpは次レベルの必要経験値分を消費するため、150 - 100 = 50が正しい
+            Assert.AreEqual(50, exp!.Experience);
             Assert.IsNotNull(level);
             Assert.AreEqual(2, level!.Level);
         }
