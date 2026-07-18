@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Core.Events;
 using Core.Reactive;
@@ -10,6 +11,7 @@ using Systems.Dungeon.Events;
 using Systems.Dungeon.Gimmicks;
 using Systems.Dungeon.Models;
 using Systems.Dungeon.Navigation;
+using Systems.Dungeon.Optimization;
 
 namespace Systems.Dungeon.ViewModels
 {
@@ -25,6 +27,8 @@ namespace Systems.Dungeon.ViewModels
         private readonly GimmickPlacementModel _gimmickPlacementModel;
         private readonly GimmickActivator _gimmickActivator;
         private readonly NavigationManager _navigationManager;
+        private readonly DungeonOptimizationCoordinator _optimizationCoordinator;
+        private readonly IRoomTileRenderer _roomTileRenderer;
 
         /// <summary>
         /// 生成済みの部屋データ（部屋位置がキー）
@@ -44,19 +48,25 @@ namespace Systems.Dungeon.ViewModels
         /// <param name="gimmickPlacementModel">ギミック配置モデル</param>
         /// <param name="gimmickActivator">ギミック発動管理</param>
         /// <param name="navigationManager">ナビゲーション管理</param>
+        /// <param name="optimizationCoordinator">部屋可視性・部分ナビゲーション更新を束ねる最適化ファサード</param>
+        /// <param name="roomTileRenderer">部屋タイル描画器</param>
         /// <param name="eventBus">イベントバス</param>
-        /// <exception cref="ArgumentNullException">levelGenerationModel・gimmickPlacementModel・gimmickActivator・navigationManager のいずれかが null の場合</exception>
+        /// <exception cref="ArgumentNullException">levelGenerationModel・gimmickPlacementModel・gimmickActivator・navigationManager・optimizationCoordinator・roomTileRenderer のいずれかが null の場合</exception>
         public DungeonViewModel(
             LevelGenerationModel levelGenerationModel,
             GimmickPlacementModel gimmickPlacementModel,
             GimmickActivator gimmickActivator,
             NavigationManager navigationManager,
+            DungeonOptimizationCoordinator optimizationCoordinator,
+            IRoomTileRenderer roomTileRenderer,
             IGameEventBus eventBus) : base(eventBus)
         {
             _levelGenerationModel = levelGenerationModel ?? throw new ArgumentNullException(nameof(levelGenerationModel));
             _gimmickPlacementModel = gimmickPlacementModel ?? throw new ArgumentNullException(nameof(gimmickPlacementModel));
             _gimmickActivator = gimmickActivator ?? throw new ArgumentNullException(nameof(gimmickActivator));
             _navigationManager = navigationManager ?? throw new ArgumentNullException(nameof(navigationManager));
+            _optimizationCoordinator = optimizationCoordinator ?? throw new ArgumentNullException(nameof(optimizationCoordinator));
+            _roomTileRenderer = roomTileRenderer ?? throw new ArgumentNullException(nameof(roomTileRenderer));
 
             Rooms = new ReactiveProperty<Dictionary<Vector2I, RoomData>>(new Dictionary<Vector2I, RoomData>()).AddTo(Disposables);
             CurrentRoomPosition = new ReactiveProperty<Vector2I>(Vector2I.Zero).AddTo(Disposables);
@@ -82,6 +92,8 @@ namespace Systems.Dungeon.ViewModels
                 CurrentRoomPosition.Value = Vector2I.Zero;
 
                 EventBus.Publish(new LevelGeneratedEvent(rooms.Count));
+
+                PublishVisibilitySync(Vector2I.Zero);
             });
         }
 
@@ -111,6 +123,7 @@ namespace Systems.Dungeon.ViewModels
 
             CurrentRoomPosition.Value = roomPosition;
             EventBus.Publish(new RoomEnteredEvent(roomPosition, room.Type));
+            PublishVisibilitySync(roomPosition);
             return true;
         }
 
@@ -126,7 +139,7 @@ namespace Systems.Dungeon.ViewModels
         {
             if (_gimmickActivator.TryActivateHiddenPassage(Rooms.Value, roomPosition, gimmickPosition))
             {
-                _navigationManager.BuildMesh(Rooms.Value, _levelGenerationModel.RoomTemplates);
+                RebuildNavigationForDoor(roomPosition, gimmickPosition);
                 NotifyRoomsChanged();
                 EventBus.Publish(new HiddenPassageRevealedEvent(roomPosition, gimmickPosition));
                 return true;
@@ -149,7 +162,7 @@ namespace Systems.Dungeon.ViewModels
         {
             if (_gimmickActivator.TryActivateLockedDoor(Rooms.Value, roomPosition, gimmickPosition, hasKey))
             {
-                _navigationManager.BuildMesh(Rooms.Value, _levelGenerationModel.RoomTemplates);
+                RebuildNavigationForDoor(roomPosition, gimmickPosition);
                 NotifyRoomsChanged();
                 EventBus.Publish(new LockedDoorUnlockedEvent(roomPosition, gimmickPosition));
                 return true;
@@ -157,6 +170,36 @@ namespace Systems.Dungeon.ViewModels
 
             EventBus.Publish(new GimmickActivationFailedEvent(roomPosition, gimmickPosition, GimmickType.LockedDoor));
             return false;
+        }
+
+        /// <summary>
+        /// 現在部屋を基準にアクティブな部屋集合を再計算し、部屋タイルの読み込み/解放を同期したうえで、
+        /// 差分があれば <see cref="RoomsVisibilityChangedEvent"/> を1回発行する
+        /// </summary>
+        /// <param name="roomPosition">アクティブ集合の算出基準とする部屋の位置</param>
+        private void PublishVisibilitySync(Vector2I roomPosition)
+        {
+            var result = _optimizationCoordinator.OnRoomEntered(roomPosition, Rooms.Value, _levelGenerationModel.RoomTemplates, _roomTileRenderer);
+            if (result.Loaded.Count > 0 || result.Unloaded.Count > 0)
+            {
+                EventBus.Publish(new RoomsVisibilityChangedEvent(result.Loaded, result.Unloaded));
+            }
+        }
+
+        /// <summary>
+        /// ギミック発動により状態が変化した扉の接続先部屋を求め、発動元・接続先の 2 部屋のみナビゲーションメッシュを部分再構築する
+        /// </summary>
+        /// <param name="roomPosition">ギミックが属していた部屋の位置</param>
+        /// <param name="doorPosition">状態が変化した扉の位置（ギミック位置と同一）</param>
+        private void RebuildNavigationForDoor(Vector2I roomPosition, Vector2I doorPosition)
+        {
+            var door = Rooms.Value[roomPosition].Doors.FirstOrDefault(d => d.Position == doorPosition);
+            if (door == null)
+            {
+                return;
+            }
+
+            _optimizationCoordinator.OnDoorStateChanged(roomPosition, door.ConnectedRoomPosition, Rooms.Value, _levelGenerationModel.RoomTemplates);
         }
 
         /// <summary>

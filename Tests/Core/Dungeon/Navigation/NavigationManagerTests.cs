@@ -93,5 +93,39 @@ namespace Tests.Core.Dungeon.Navigation
             Assert.AreEqual(start, pathAfterUnlock[0]);
             Assert.AreEqual(goal, pathAfterUnlock[^1]);
         }
+
+        [Test]
+        public void RebuildRooms_AfterLockedDoorGimmickActivated_PathBecomesAvailableWithoutFullRebuild()
+        {
+            var (rooms, templates) = CreateRoomsWithLockedDoor();
+            var manager = new NavigationManager();
+            manager.BuildMesh(rooms, templates);
+
+            var start = RoomAPosition + new Vector2I(1, 1);
+            var goal = RoomBPosition + new Vector2I(1, 1);
+            Assert.IsEmpty(manager.FindPath(start, goal));
+
+            var activator = new GimmickActivator();
+            bool activated = activator.TryActivateLockedDoor(rooms, RoomAPosition, DoorAPosition, hasKey: true);
+            Assert.IsTrue(activated);
+
+            // 全体再構築（BuildMesh）ではなく、影響を受けた 2 部屋のみの部分再構築で経路が通ること
+            manager.RebuildRooms(new[] { RoomAPosition, RoomBPosition }, rooms, templates);
+            var pathAfterUnlock = manager.FindPath(start, goal);
+
+            Assert.IsNotEmpty(pathAfterUnlock);
+            Assert.AreEqual(start, pathAfterUnlock[0]);
+            Assert.AreEqual(goal, pathAfterUnlock[^1]);
+        }
+
+        [Test]
+        public void RebuildRooms_UnknownPosition_IsSkippedWithoutError()
+        {
+            var (rooms, templates) = CreateRoomsWithLockedDoor();
+            var manager = new NavigationManager();
+            manager.BuildMesh(rooms, templates);
+
+            Assert.DoesNotThrow(() => manager.RebuildRooms(new[] { new Vector2I(999, 999) }, rooms, templates));
+        }
     }
 }

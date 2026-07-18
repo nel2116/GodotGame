@@ -20,9 +20,16 @@ namespace Systems.Dungeon.Navigation
         private readonly HashSet<Vector2I> walkableTiles = new();
 
         /// <summary>
+        /// 部屋位置ごとに、その部屋が寄与した通行可能タイルの集合
+        /// <see cref="RebuildRoom"/> で対象部屋の寄与分のみを差し替えられるようにするための内訳
+        /// </summary>
+        private readonly Dictionary<Vector2I, HashSet<Vector2I>> tilesByRoom = new();
+
+        /// <summary>
         /// 通行可能集合を構築する
         /// 呼び出しのたびに集合をクリアしてから再構築するため、扉の状態変化後（ギミック発動後）に
         /// 再呼び出しすることでメッシュを最新の状態に更新できる
+        /// 部屋単位の更新のみで済む場合は、全体再構築の代わりに <see cref="RebuildRoom"/> を使用できる
         /// </summary>
         /// <param name="rooms">部屋データの辞書（部屋位置がキー）</param>
         /// <param name="roomTemplates">部屋テンプレートの辞書（部屋位置がキー、障害物のローカル座標を保持）</param>
@@ -40,13 +47,43 @@ namespace Systems.Dungeon.Navigation
             }
 
             walkableTiles.Clear();
+            tilesByRoom.Clear();
 
             foreach (var (position, room) in rooms)
             {
                 roomTemplates.TryGetValue(position, out var template);
-                AddRoomFloor(room, template);
-                AddWalkableDoors(room);
+                var roomTiles = CollectRoomTiles(room, template);
+                tilesByRoom[position] = roomTiles;
+                walkableTiles.UnionWith(roomTiles);
             }
+        }
+
+        /// <summary>
+        /// 単一の部屋について、通行可能集合への寄与分のみを再計算する
+        /// 扉の状態変化（ギミック発動）等、影響範囲が既知の場合に、全体再構築（<see cref="Build"/>）の代わりに使用することで
+        /// 更新コストを変化した部屋数に比例させる（O(全部屋) ではなく O(変化した部屋数)）
+        /// 各部屋は自室が保持する扉（<see cref="DoorData"/>）のみを寄与させるため、
+        /// 接続先部屋のタイルには影響せず、部屋単位で独立して安全に再構築できる
+        /// </summary>
+        /// <param name="roomPosition">再構築対象の部屋の位置</param>
+        /// <param name="room">再構築対象の部屋データ</param>
+        /// <param name="template">再構築対象の部屋テンプレート（見つからない場合は null）</param>
+        /// <exception cref="ArgumentNullException">room が null の場合</exception>
+        public void RebuildRoom(Vector2I roomPosition, RoomData room, RoomTemplate? template)
+        {
+            if (room == null)
+            {
+                throw new ArgumentNullException(nameof(room));
+            }
+
+            if (tilesByRoom.TryGetValue(roomPosition, out var previousTiles))
+            {
+                walkableTiles.ExceptWith(previousTiles);
+            }
+
+            var roomTiles = CollectRoomTiles(room, template);
+            tilesByRoom[roomPosition] = roomTiles;
+            walkableTiles.UnionWith(roomTiles);
         }
 
         /// <summary>
@@ -85,12 +122,27 @@ namespace Systems.Dungeon.Navigation
         };
 
         /// <summary>
-        /// 部屋内部の床領域（障害物を除く）をワールド座標に変換して通行可能集合へ追加する
-        /// テンプレートが見つからない場合は障害物なしとして内部領域全体を追加する
+        /// 部屋 1 つ分の通行可能タイル（内部の床領域＋通行可能な扉）をワールド座標で収集する
         /// </summary>
         /// <param name="room">対象の部屋データ</param>
         /// <param name="template">対象の部屋テンプレート（見つからない場合は null）</param>
-        private void AddRoomFloor(RoomData room, RoomTemplate? template)
+        /// <returns>その部屋が寄与する通行可能タイル座標の集合</returns>
+        private static HashSet<Vector2I> CollectRoomTiles(RoomData room, RoomTemplate? template)
+        {
+            var tiles = new HashSet<Vector2I>();
+            AddRoomFloor(tiles, room, template);
+            AddWalkableDoors(tiles, room);
+            return tiles;
+        }
+
+        /// <summary>
+        /// 部屋内部の床領域（障害物を除く）をワールド座標に変換して通行可能集合へ追加する
+        /// テンプレートが見つからない場合は障害物なしとして内部領域全体を追加する
+        /// </summary>
+        /// <param name="tiles">追加先の通行可能タイル集合</param>
+        /// <param name="room">対象の部屋データ</param>
+        /// <param name="template">対象の部屋テンプレート（見つからない場合は null）</param>
+        private static void AddRoomFloor(HashSet<Vector2I> tiles, RoomData room, RoomTemplate? template)
         {
             var obstacles = template?.ObstaclePositions;
 
@@ -104,7 +156,7 @@ namespace Systems.Dungeon.Navigation
                         continue;
                     }
 
-                    walkableTiles.Add(room.Position + local);
+                    tiles.Add(room.Position + local);
                 }
             }
         }
@@ -113,14 +165,15 @@ namespace Systems.Dungeon.Navigation
         /// 通行可能な状態（<see cref="DoorType.Secret"/> ではなく、かつ施錠されていない）の扉のみを
         /// 通行可能集合へ追加する
         /// </summary>
+        /// <param name="tiles">追加先の通行可能タイル集合</param>
         /// <param name="room">対象の部屋データ</param>
-        private void AddWalkableDoors(RoomData room)
+        private static void AddWalkableDoors(HashSet<Vector2I> tiles, RoomData room)
         {
             foreach (var door in room.Doors)
             {
                 if (door.Type != DoorType.Secret && !door.IsLocked)
                 {
-                    walkableTiles.Add(door.Position);
+                    tiles.Add(door.Position);
                 }
             }
         }

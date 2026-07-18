@@ -9,6 +9,7 @@ using Systems.Dungeon.Events;
 using Systems.Dungeon.Gimmicks;
 using Systems.Dungeon.Models;
 using Systems.Dungeon.Navigation;
+using Systems.Dungeon.Optimization;
 using Systems.Dungeon.TileMap;
 using Systems.Dungeon.Utilities;
 using Systems.Dungeon.ViewModels;
@@ -85,11 +86,18 @@ namespace Systems.Dungeon.Views
             var gimmickActivator = new GimmickActivator();
             var navigationManager = new NavigationManager();
 
+            var roomTileRenderer = new RoomTileRenderer(_tileMapLayer, _roomTileGenerator, _tileMapManager, _tileSetManager);
+            var visibilityManager = new RoomVisibilityManager();
+            var lifecycleManager = new RoomLifecycleManager();
+            var optimizationCoordinator = new DungeonOptimizationCoordinator(visibilityManager, lifecycleManager, navigationManager);
+
             _viewModel = new DungeonViewModel(
                 _levelGenerationModel,
                 gimmickPlacementModel,
                 gimmickActivator,
                 navigationManager,
+                optimizationCoordinator,
+                roomTileRenderer,
                 eventBus);
 
             SubscribeDebugLogs(eventBus);
@@ -99,7 +107,9 @@ namespace Systems.Dungeon.Views
         }
 
         /// <summary>
-        /// レベル生成を行い、完了後に全部屋をタイルマップへ反映する
+        /// レベル生成を行う
+        /// タイルマップへの反映は <see cref="DungeonViewModel"/> 内で開始部屋周辺のアクティブな部屋集合のみに対して行われる
+        /// （全部屋の即時描画は行わない）
         /// Godotの<see cref="_Ready"/>は同期メソッドのため、非同期処理はfire-and-forgetの
         /// async voidヘルパーとして切り出す。失敗時は GD.PrintErr でログ出力する
         /// </summary>
@@ -108,29 +118,11 @@ namespace Systems.Dungeon.Views
             try
             {
                 await _viewModel.GenerateLevelAsync(DebugSeed);
-                RenderRooms();
                 RefreshRoomUi();
             }
             catch (Exception e)
             {
                 GD.PrintErr($"[DungeonView] レベル初期化に失敗しました: {e}");
-            }
-        }
-
-        /// <summary>
-        /// 生成済みの全部屋をタイルマップへ反映する
-        /// </summary>
-        private void RenderRooms()
-        {
-            foreach (var (position, room) in _viewModel.Rooms.Value)
-            {
-                if (!_levelGenerationModel.RoomTemplates.TryGetValue(position, out var template))
-                {
-                    continue;
-                }
-
-                var tiles = _roomTileGenerator.GenerateTiles(room, template);
-                _tileMapManager.ApplyTiles(_tileMapLayer, tiles, _tileSetManager);
             }
         }
 
@@ -150,6 +142,8 @@ namespace Systems.Dungeon.Views
                 .Subscribe(e => GD.Print($"[Dungeon] LockedDoorUnlocked: Room={e.RoomPosition} Gimmick={e.GimmickPosition}")));
             _eventSubscriptions.Add(eventBus.GetEventStream<GimmickActivationFailedEvent>()
                 .Subscribe(e => GD.Print($"[Dungeon] GimmickActivationFailed: Room={e.RoomPosition} Gimmick={e.GimmickPosition} Type={e.GimmickType}")));
+            _eventSubscriptions.Add(eventBus.GetEventStream<RoomsVisibilityChangedEvent>()
+                .Subscribe(e => GD.Print($"[Dungeon] RoomsVisibilityChanged: Loaded=[{string.Join(", ", e.LoadedRooms)}] Unloaded=[{string.Join(", ", e.UnloadedRooms)}]")));
         }
 
         /// <summary>

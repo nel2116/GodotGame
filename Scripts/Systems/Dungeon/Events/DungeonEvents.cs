@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Core.Events;
 using Godot;
 using Systems.Dungeon.Data;
@@ -141,6 +142,35 @@ namespace Systems.Dungeon.Events
             RoomPosition = roomPosition;
             GimmickPosition = gimmickPosition;
             GimmickType = gimmickType;
+        }
+    }
+
+    /// <summary>
+    /// 部屋可視性変更イベント
+    /// 部屋入室・レベル生成に伴う部屋の読み込み（タイルマップへの反映）・解放（消去）が行われた際に、
+    /// 1回の入室/生成につき 1 回まとめて発行される（<see cref="Optimization.RoomLifecycleManager"/> 参照）
+    /// </summary>
+    public class RoomsVisibilityChangedEvent : GameEvent
+    {
+        /// <summary>
+        /// 今回新たにタイルマップへ反映された部屋位置の一覧
+        /// </summary>
+        public IReadOnlyList<Vector2I> LoadedRooms { get; }
+
+        /// <summary>
+        /// 今回新たにタイルマップから消去された部屋位置の一覧
+        /// </summary>
+        public IReadOnlyList<Vector2I> UnloadedRooms { get; }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="loadedRooms">今回新たに読み込まれた部屋位置の一覧</param>
+        /// <param name="unloadedRooms">今回新たに解放された部屋位置の一覧</param>
+        public RoomsVisibilityChangedEvent(IReadOnlyList<Vector2I> loadedRooms, IReadOnlyList<Vector2I> unloadedRooms)
+        {
+            LoadedRooms = loadedRooms;
+            UnloadedRooms = unloadedRooms;
         }
     }
 }
