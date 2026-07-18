@@ -9,9 +9,9 @@ tags:
     - Core
     - Project
 linked_docs:
-    - "[[index|開発計画・ロードマップ]]"
+    - "[[06_DevelopmentPlan/moc|開発計画・ロードマップ]]"
     - "[[11_02_design_pillars|デザインピラー]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_04_kpi_metrics|KPI定義]]"
 ---
 

@@ -1,8 +1,8 @@
 ---
 title: Week 1: ダンジョン生成システム基盤実装計画
-version: 0.1.0
-status: draft
-updated: 2025-06-20
+version: 0.2.0
+status: in-progress
+updated: 2026-07-17
 tags:
     - Implementation
     - Plan
@@ -11,10 +11,10 @@ tags:
     - Foundation
     - DevelopmentPlan
 linked_docs:
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_12_level_design|レベル生成詳細]]"
     - "[[11_16_core_implementation|コアシステム実装計画]]"
-    - "[[12_03_detailed_design/02_systems/03_level_generation|レベル生成システム実装詳細]]"
+    - "[[03_level_generation|レベル生成システム実装詳細]]"
 ---
 
 # Week 1: ダンジョン生成システム基盤実装計画
@@ -148,9 +148,9 @@ Scripts/Systems/Dungeon/Data/
    ```
 
 **完了条件**:
-- [ ] 全データクラスの実装完了
-- [ ] 基本的なプロパティの定義
-- [ ] 列挙型の定義完了
+- [x] 全データクラスの実装完了
+- [x] 基本的なプロパティの定義
+- [x] 列挙型の定義完了
 
 #### Day 2: インターフェースとユーティリティ
 
@@ -211,9 +211,9 @@ Scripts/Systems/Dungeon/
    ```
 
 **完了条件**:
-- [ ] 全インターフェースの定義完了
-- [ ] ユーティリティクラスの実装完了
-- [ ] 定数の定義完了
+- [x] 全インターフェースの定義完了
+- [x] ユーティリティクラスの実装完了
+- [x] 定数の定義完了
 
 ### 3.2 Day 3-4: レベル生成モデル
 
@@ -260,9 +260,9 @@ Scripts/Systems/Dungeon/Models/
    ```
 
 **完了条件**:
-- [ ] 基本生成ロジックの実装完了
-- [ ] 部屋位置生成の実装完了
-- [ ] 部屋タイプ割り当ての実装完了
+- [x] 基本生成ロジックの実装完了
+- [x] 部屋位置生成の実装完了
+- [x] 部屋タイプ割り当ての実装完了
 
 #### Day 4: 部屋レイアウト生成
 
@@ -304,12 +304,12 @@ Scripts/Systems/Dungeon/Models/
    - キャッシュの活用
 
 **完了条件**:
-- [ ] 部屋レイアウト生成の実装完了
-   - [ ] 壁の生成
-   - [ ] 床の生成
-   - [ ] 障害物の生成
-- [ ] 部屋テンプレートの実装完了
-- [ ] 最適化の実装完了
+- [x] 部屋レイアウト生成の実装完了
+   - [x] 壁の生成（外周を暗黙的な壁として扱う簡易実装）
+   - [x] 床の生成（内部領域を床として扱う簡易実装）
+   - [x] 障害物の生成
+- [x] 部屋テンプレートの実装完了
+- [ ] 最適化の実装完了（Week 1 スコープでは未着手。Week 2 以降でパフォーマンス計測後に判断）
 
 ### 3.3 Day 5: 部屋接続ロジック
 
@@ -363,10 +363,10 @@ Scripts/Systems/Dungeon/Models/
    ```
 
 **完了条件**:
-- [ ] 部屋接続ロジックの実装完了
-- [ ] 最小全域木アルゴリズムの実装完了
-- [ ] 接続検証システムの実装完了
-- [ ] パス探索の実装完了
+- [x] 部屋接続ロジックの実装完了
+- [x] 最小全域木アルゴリズムの実装完了
+- [x] 接続検証システムの実装完了
+- [x] パス探索の実装完了
 
 ### 3.4 Day 6-7: テストと統合
 
@@ -423,9 +423,9 @@ Tests/Systems/Dungeon/
    ```
 
 **完了条件**:
-- [ ] 全クラスの単体テスト実装完了
-- [ ] テストカバレッジ80%以上達成
-- [ ] エラーハンドリングのテスト完了
+- [x] 全クラスの単体テスト実装完了
+- [ ] テストカバレッジ80%以上達成（カバレッジ計測ツールは未実行。139件のテストで主要ロジック・性質ベーステストは網羅）
+- [x] エラーハンドリングのテスト完了（異常系: 空Dictionary、部屋1個、null Random 等）
 
 #### Day 7: 統合テストとドキュメント
 
@@ -465,9 +465,9 @@ Tests/Systems/Dungeon/Integration/
    - トラブルシューティングガイド
 
 **完了条件**:
-- [ ] 統合テストの実装完了
-- [ ] パフォーマンステストの実装完了
-- [ ] ドキュメントの更新完了
+- [x] 統合テストの実装完了（LevelGenerationModelTests に統合シナリオを含む。専用の Integration/ ディレクトリは未作成）
+- [ ] パフォーマンステストの実装完了（未着手。Week 2 以降、TileMap/ViewModel 統合時に計測予定）
+- [x] ドキュメントの更新完了（本計画書のチェックリスト更新のみ。API仕様書等の別ドキュメントは未作成）
 
 ## 4. 技術仕様
 
@@ -519,59 +519,58 @@ Utility Layer (Week 1)
 ### 5.1 必須成果物
 
 #### 5.1.1 ソースコード
-- [ ] `Scripts/Systems/Dungeon/Data/` ディレクトリ
-  - [ ] `RoomData.cs`
-  - [ ] `DoorData.cs`
-  - [ ] `GimmickData.cs`
-  - [ ] `Enums/DungeonEnums.cs`
+- [x] `Scripts/Systems/Dungeon/Data/` ディレクトリ
+  - [x] `RoomData.cs`
+  - [x] `DoorData.cs`
+  - [x] `GimmickData.cs`
+  - [x] `Enums/DungeonEnums.cs`
 
-- [ ] `Scripts/Systems/Dungeon/Interfaces/` ディレクトリ
-  - [ ] `ILevelGenerator.cs`
-  - [ ] `IRoomConnector.cs`
+- [x] `Scripts/Systems/Dungeon/Interfaces/` ディレクトリ
+  - [x] `ILevelGenerator.cs`
+  - [x] `IRoomConnector.cs`
 
-- [ ] `Scripts/Systems/Dungeon/Utilities/` ディレクトリ
-  - [ ] `DungeonConstants.cs`
-  - [ ] `DungeonUtils.cs`
+- [x] `Scripts/Systems/Dungeon/Utilities/` ディレクトリ
+  - [x] `DungeonConstants.cs`
+  - [x] `DungeonUtils.cs`
 
-- [ ] `Scripts/Systems/Dungeon/Models/` ディレクトリ
-  - [ ] `LevelGenerationModel.cs`
-  - [ ] `RoomConnectionModel.cs`
-  - [ ] `RoomLayoutGenerator.cs`
-  - [ ] `ConnectionPathFinder.cs`
-  - [ ] `RoomTemplate.cs`
+- [x] `Scripts/Systems/Dungeon/Models/` ディレクトリ
+  - [x] `LevelGenerationModel.cs`
+  - [x] `RoomConnectionModel.cs`
+  - [x] `RoomLayoutGenerator.cs`
+  - [x] `ConnectionPathFinder.cs`
+  - [x] `RoomTemplate.cs`
 
 #### 5.1.2 テストコード
-- [ ] `Tests/Systems/Dungeon/Models/` ディレクトリ
-  - [ ] `LevelGenerationModelTests.cs`
-  - [ ] `RoomConnectionModelTests.cs`
 
-- [ ] `Tests/Systems/Dungeon/Data/` ディレクトリ
-  - [ ] `RoomDataTests.cs`
+> **注記**: 実際の配置は `Tests/Systems/Dungeon/` ではなく `Tests/Core/Dungeon/`（既存の CoreTests.csproj 配下の規約に統一）。
 
-- [ ] `Tests/Systems/Dungeon/Utilities/` ディレクトリ
-  - [ ] `DungeonUtilsTests.cs`
-
-- [ ] `Tests/Systems/Dungeon/Integration/` ディレクトリ
-  - [ ] `LevelGenerationIntegrationTests.cs`
+- [x] `Tests/Core/Dungeon/` ディレクトリ
+  - [x] `LevelGenerationModelTests.cs`
+  - [x] `RoomConnectionModelTests.cs`
+  - [x] `RoomDataTests.cs`
+  - [x] `DungeonUtilsTests.cs`
+  - [x] `RoomLayoutGeneratorTests.cs`
+  - [x] `ConnectionPathFinderTests.cs`
+- [ ] 専用の `Integration/` ディレクトリ分割（統合シナリオは `LevelGenerationModelTests.cs` に含む形で代替）
 
 #### 5.1.3 ドキュメント
-- [ ] API仕様書
-- [ ] 使用例
-- [ ] トラブルシューティングガイド
+- [ ] API仕様書（未作成。各クラスの XML ドキュメントコメントで代替）
+- [ ] 使用例（未作成）
+- [ ] トラブルシューティングガイド（未作成）
 
 ### 5.2 品質基準
 
 #### 5.2.1 機能要件
-- [ ] 8部屋の生成が正常に動作
-- [ ] 全部屋が接続されている
-- [ ] 開始部屋からボス部屋への経路が存在
-- [ ] 部屋タイプが適切に割り当てられている
+- [x] 8部屋の生成が正常に動作
+- [x] 全部屋が接続されている
+- [x] 開始部屋からボス部屋への経路が存在
+- [x] 部屋タイプが適切に割り当てられている
 
 #### 5.2.2 非機能要件
-- [ ] パフォーマンス要件を満たす
-- [ ] メモリ使用量が制限内
-- [ ] エラーハンドリングが適切
-- [ ] ログ出力が適切
+- [ ] パフォーマンス要件を満たす（計測未実施）
+- [ ] メモリ使用量が制限内（計測未実施）
+- [x] エラーハンドリングが適切
+- [ ] ログ出力が適切（Logger 未統合。Week 2 以降で検討）
 
 ## 6. テスト戦略
 
@@ -744,5 +743,6 @@ Utility Layer (Week 1)
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2.0      | 2026-07-17 | Day 1-6 実装完了を反映<br>- Data/Interfaces/Utilities/Models 全クラス実装、`dotnet test` 139件全pass<br>- テストは `Tests/Systems/Dungeon/` ではなく `Tests/Core/Dungeon/` に配置（既存規約に統一）<br>- 未実施: テストカバレッジ計測、パフォーマンス/メモリ計測、API仕様書等の別ドキュメント作成、専用Integrationディレクトリ分割 |
 | 0.1.0      | 2025-06-20 | 初版作成<br>- Week 1基盤実装計画<br>- データ構造・モデル・インターフェース・ユーティリティ層の実装<br>- 7日間の日別実装スケジュール<br>- テスト戦略とリスク管理 |
 

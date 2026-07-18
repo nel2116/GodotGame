@@ -8,9 +8,9 @@ tags:
     - Advanced
     - Features
 linked_docs:
-    - "[[40_Tutorials/00_index]]"
-    - "[[40_Tutorials/BasicFeatures]]"
-    - "[[30_APIReference/CoreSystemAPI]]"
+    - "[[99_Reference/moc|リファレンス]]"
+    - "[[BasicFeatures|基本機能]]"
+    - "[[CoreSystemAPI]]"
 ---
 
 # 応用機能
@@ -385,7 +385,7 @@ linked_docs:
 
 ### メモリ管理
 
-メモリ管理に関する詳細なガイドラインは、[共通ガイドライン](../10_CoreDocs/00_common_guidelines.md#メモリ管理)を参照してください。
+メモリ管理に関する詳細なガイドラインは、[共通ガイドライン](../08_DocRules/00_common_guidelines.md#メモリ管理)を参照してください。
 
 ### レンダリング最適化
 

@@ -180,7 +180,7 @@ func test_emit_and_subscribe() -> void:
 
 ---
 
-> 参考: Docs/07_Testing/TestingEnvironment.md, Docs/03_Technical/12_03_detailed_design/04_testing/01_testing_strategy.md
+> 参考: Docs/07_Testing/TestingEnvironment.md, Docs/07_Testing/testing_strategy.md
 
 ## テストケースの説明
 

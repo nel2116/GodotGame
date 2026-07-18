@@ -4,63 +4,47 @@
 
 ## 📋 スキルシステム概要
 
+このセクションでは、ゲーム内のスキルシステムに関する設計と実装の詳細を管理します。
+
 ### 🎯 基本概念
-- [[skill_mechanics|スキルメカニクス]]
-  - スキルの基本動作、効果、仕組み
-- [[skill_data|スキルデータ仕様]]
-  - スキルデータの構造と定義
+- [[13_1_skill_data|スキルデータ仕様書]]
+  - スキルデータの構造と各フィールドの定義
+- [[11_13_skill_mechanics|スキルシステム詳細]]
+  - スキルメカニクスの設計（開発計画側）
 
-### 📊 スキルデータ
+### 📊 スキルデータファイル
+- `SkilData.csv` - スキル情報のマスターデータ（本フォルダ内）
+- `SkilData.*.translation` - Godot が CSV から自動生成する翻訳リソース（16個）
 
-#### 🗂️ データファイル
-- [[data/SkilData.csv|スキルデータCSV]]
-  - スキル情報のCSVファイル
-- [[data/SkilData.csv.import|スキルデータインポート設定]]
-  - Godotインポート設定
+## 🎨 設計方針
 
-#### 🏷️ 翻訳ファイル
-- [[data/SkilData.skill.translation|スキル名翻訳]]
-- [[data/SkilData.description.translation|スキル説明翻訳]]
-- [[data/SkilData.tags.translation|スキルタグ翻訳]]
-- [[data/SkilData.tier.translation|スキル階層翻訳]]
-- [[data/SkilData.branch.translation|スキルブランチ翻訳]]
+1. データ駆動型の設計
+2. 拡張性を考慮した構造
+3. パフォーマンスを考慮した実装
 
-#### ⚙️ スキルパラメータ
-- [[data/SkilData.base.translation|基本値翻訳]]
-- [[data/SkilData.scaling.translation|スケーリング翻訳]]
-- [[data/SkilData.cost.translation|コスト翻訳]]
-- [[data/SkilData.cooldown.translation|クールダウン翻訳]]
-- [[data/SkilData.duration.translation|持続時間翻訳]]
-- [[data/SkilData.range.translation|射程翻訳]]
-- [[data/SkilData.hitbox.translation|ヒットボックス翻訳]]
+## ⚠️ 実装上の注意点
 
-#### 🎨 エフェクト・アニメーション
-- [[data/SkilData.active.translation|アクティブ状態翻訳]]
-- [[data/SkilData.sfx.translation|音響効果翻訳]]
-- [[data/SkilData.vfx.translation|視覚効果翻訳]]
-- [[data/SkilData.unlock.translation|アンロック条件翻訳]]
+1. スキルデータの整合性チェック
+2. バランス調整のしやすさ
+3. デバッグのしやすさ
 
 ## 🔗 関連リンク
 
 ### 🎮 ゲームシステム
-- [[../moc|ゲームシステム]]
-- [[../Combat/combat_system|戦闘システム]]
-- [[../Player/progression_system|プレイヤー進行システム]]
+- [[02_GameSystem/moc|ゲームシステム]]
 
 ### 🧱 技術実装
-- [[../../03_Architecture/moc|技術設計・アーキテクチャ]]
-- [[../../03_Architecture/Systems/combat_system|戦闘システム設計]]
+- [[03_Architecture/moc|技術設計・アーキテクチャ]]
+- [[02_skill_system|スキルシステム詳細設計]]
+- [[04_combat_system|共通戦闘システム設計]]
 
 ### 📅 開発計画
-- [[../../06_DevelopmentPlan/moc|開発計画・ロードマップ]]
-- [[../../06_DevelopmentPlan/Implementation/skill_mechanics|スキルメカニクス実装計画]]
+- [[06_DevelopmentPlan/moc|開発計画・ロードマップ]]
+- [[11_15_balance_testing|バランス調整・テスト]]
 
----
-
-## 📊 スキルシステム統計
-- **スキルデータファイル**: 1個
-- **翻訳ファイル**: 16個
-- **ドキュメント**: 2個
+## 🚧 作成予定ドキュメント
+- スキルツリー設計
+- スキルバランス調整ガイド
 
 ---
 
@@ -68,19 +52,4 @@
 | 日付 | 更新内容 |
 |------|----------|
 | 2025-07-04 | スキルシステムMOC作成 |
-| 2025-07-04 | スキル関連フォルダ統合 |
-
----
-
-## 📋 既存ドキュメント
-
-### ✅ 作成済みドキュメント
-- [[13_1_skill_data|スキルデータ仕様]]
-- [[index|スキルシステム概要]]
-
-### 🚧 作成予定ドキュメント
-- スキルメカニクス詳細
-- スキルツリー設計
-- スキルバランス調整
-
-> **💡 ヒント**: 各セクションのドキュメントを作成して、詳細なスキルシステム設計を展開できます。
+| 2026-07-16 | 実在ファイルに合わせてリンク修正、index.md の設計方針を統合 |

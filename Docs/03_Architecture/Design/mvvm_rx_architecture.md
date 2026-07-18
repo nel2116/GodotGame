@@ -9,11 +9,11 @@ tags:
     - MVVM
     - Reactive
 linked_docs:
-    - "[[index|技術実装・アーキテクチャ]]"
-    - "[[12_02_basic_design|基本設計]]"
-    - "[[12_03_detailed_design|詳細設計]]"
-    - "[[12_04_system_integration|システム統合]]"
-    - "[[12_05_common_utilities|共通ユーティリティ]]"
+    - "[[03_Architecture/moc|技術設計・アーキテクチャ]]"
+    - "[[basic_design|基本設計]]"
+    - "[[detailed_design|詳細設計]]"
+    - "[[system_integration|システム統合]]"
+    - "[[common_utilities|共通ユーティリティ]]"
 ---
 
 # MVVM+RX アーキテクチャ

@@ -16,7 +16,7 @@ namespace Tests.Core.State
             var model = new CommonStateModel();
             var vm = new CommonStateViewModel(model, bus);
             vm.Initialize();
-            StateChangedEvent receivedEvent = null;
+            StateChangedEvent? receivedEvent = null;
             bus.GetEventStream<StateChangedEvent>().Subscribe(e => receivedEvent = e);
 
             // 実行 - 有効な状態遷移を実行（Idle -> Walk）
@@ -25,7 +25,7 @@ namespace Tests.Core.State
 
             // 検証
             Assert.That(receivedEvent, Is.Not.Null);
-            Assert.That(receivedEvent.State, Is.EqualTo("Walk"));
+            Assert.That(receivedEvent!.State, Is.EqualTo("Walk"));
         }
 
         [Test]

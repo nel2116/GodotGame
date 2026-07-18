@@ -1,8 +1,8 @@
 ---
 title: Week 3: ダンジョン生成システム統合・テスト実装計画
-version: 0.1.0
-status: draft
-updated: 2025-06-20
+version: 0.2.0
+status: in-progress
+updated: 2026-07-17
 tags:
     - Implementation
     - Plan
@@ -14,9 +14,9 @@ tags:
 linked_docs:
     - "[[11_17_week1_dungeon_foundation_plan|Week 1: 基盤実装計画]]"
     - "[[11_18_week2_dungeon_extension_plan|Week 2: 機能拡張計画]]"
-    - "[[11_03_mvp_definition|MVP定義]]"
+    - "[[mvp_definition|MVP定義]]"
     - "[[11_12_level_design|レベル生成詳細]]"
-    - "[[12_03_detailed_design/02_systems/03_level_generation|レベル生成システム実装詳細]]"
+    - "[[03_level_generation|レベル生成システム実装詳細]]"
 ---
 
 # Week 3: ダンジョン生成システム統合・テスト実装計画
@@ -61,19 +61,19 @@ Week 1・2で実装した各コンポーネントを統合し、UI/UX・自動�
 ## 3. 日別実装計画
 
 ### Day 1: システム統合準備
-- 各システムのAPI・インターフェース確認
-- 統合用ブランチ作成・マージ戦略決定
-- 統合テスト用シーン/エントリーポイント作成
+- [x] 各システムのAPI・インターフェース確認
+- [x] 統合用ブランチ作成・マージ戦略決定（`feat/week3-dungeon-integration`ブランチ、専用worktreeで作業）
+- [x] 統合テスト用シーン/エントリーポイント作成（`Scenes/Dungeon/DungeonDebug.tscn`）
 
 ### Day 2: コア統合実装
-- DungeonViewModelを中心としたシステム連携
-- イベント伝播の動作確認
-- デバッグUI（部屋情報・ギミック状態・経路表示等）の仮実装
+- [x] DungeonViewModelを中心としたシステム連携（`Scripts/Systems/Dungeon/Views/DungeonView.cs`で構築・初期化）
+- [x] イベント伝播の動作確認（`LevelGeneratedEvent`等のデバッグログ出力で確認）
+- [x] デバッグUI（部屋情報・ギミック状態・経路表示等）の仮実装（Day 3で本実装へ発展）
 
 ### Day 3: UI/UX統合
-- 最低限のUI（部屋遷移、ギミック発動、経路表示など）の実装
-- プレイヤー操作とダンジョン状態の連動
-- UIイベントとViewModelのバインディング
+- [x] 最低限のUI（部屋遷移、ギミック発動、経路表示など）の実装
+- [x] プレイヤー操作とダンジョン状態の連動（ボタン押下 → ViewModel呼び出し → イベント発行 → UI更新）
+- [x] UIイベントとViewModelのバインディング（`RoomEnteredEvent`/`HiddenPassageRevealedEvent`/`LockedDoorUnlockedEvent`/`GimmickActivationFailedEvent`の購読でラベル・ボタン・タイル表示を更新）
 
 ### Day 4: 単体テスト拡充
 - 各システムのテストケース追加・修正
@@ -160,5 +160,6 @@ Week 1・2で実装した各コンポーネントを統合し、UI/UX・自動�
 
 | バージョン | 更新日     | 変更内容 |
 | ---------- | ---------- | -------- |
+| 0.2.0      | 2026-07-17 | Day 1-3 実装完了を反映<br>- Day 1-2（Phase A）: `Scenes/Dungeon/DungeonDebug.tscn`・`Scripts/Systems/Dungeon/Views/DungeonView.cs`を追加し、`DungeonViewModel`によるレベル生成・タイルマップ反映・イベントログ出力までを統合<br>- Day 3（Phase B）: 部屋遷移（隣接部屋への遷移ボタン）・ギミック発動（隠し通路/鍵扉、鍵所持は簡易的に常にtrue扱い）・経路表示（`FindPath`結果を`Line2D`で描画）の最低限のデバッグUIを`DungeonView`に追加。`RoomEnteredEvent`/`HiddenPassageRevealedEvent`/`LockedDoorUnlockedEvent`/`GimmickActivationFailedEvent`購読によるUI更新も実装<br>- `RoomTileGenerator.GetDoorTileType`を公開化し、ギミック発動後の扉タイル再描画に対応<br>- `dotnet test Tests/Core/CoreTests.csproj` 201件全pass（うちダンジョン関連113件）、`dotnet build` 0警告0エラー<br>- 未実施: Day 4-7（単体テスト拡充・統合テスト自動化・CI/CD・パフォーマンス最適化・ドキュメント整備）、テストカバレッジ計測、実際の`.tres`タイルセット資産の作成 |
 | 0.1.0      | 2025-06-20 | 初版作成<br>- Week 3統合・テスト実装計画<br>- 7日間の日別実装スケジュール<br>- システム統合とUI/UX統合の詳細<br>- テスト戦略とリスク管理 |
 

@@ -10,10 +10,10 @@ tags:
     - Architecture
     - Reference
 linked_docs:
-    - "[[11_PlanDocs/11_5_development_roadmap.md]]"
-    - "[[11_PlanDocs/11_3_mvp.md]]"
-    - "[[15_ImplementationSpecs/00_index.md]]"
-    - "[[14_TechDocs/00_index.md]]"
+    - "[[11_5_development_roadmap]]"
+    - "[[mvp_definition]]"
+    - "[[03_Architecture/moc|技術設計]]"
+    - "[[03_Architecture/moc|技術設計]]"
     - "[[DocumentManagementRules.md]]"
     - "[[CommitMessageRules.md]]"
 ---
@@ -33,14 +33,14 @@ linked_docs:
 # 詳細
 
 1. **環境セットアップ**
-    - [[14_TechDocs/14.3_GodotEnvironment.md|Godot環境設定]]に従って必要なソフトウェアを準備します。
+    - [[GettingStarted|Godot環境設定]]に従って必要なソフトウェアを準備します。
     - `sudo apt-get update` を実行してから `sudo apt-get install -y dotnet-sdk-8.0` で `.NET SDK` 8.0 以上を導入し、その後 `setup_godot_cli.sh` を実行して C# 対応の Godot CLI をインストールします。インストール後に `godot --headless --path . --build-solutions --quit` を実行してソリューションをビルドします。
-    - テスト自動化のために[[14_TechDocs/14.11_TestAutomation.md|テスト自動化システム]]の手順も確認します。
+    - テスト自動化のために[[TestExecutionGuide|テスト実行ガイド]]の手順も確認します。
 2. **コアシステム実装**
-    - [[15_ImplementationSpecs/15.1_InputManagementSpec.md|入力管理]]、[[15_ImplementationSpecs/15.1_ReactiveSystemImpl.md|リアクティブシステム]]、[[15_ImplementationSpecs/15.2_StateManagementImpl.md|状態管理]]を最優先で実装します。
+    - [[05_input_system|入力管理]]、[[ReactiveSystem|リアクティブシステム]]、[[StateSystem|状態管理]]を最優先で実装します。
     - インターフェース設計と単体テストを整備し、各コンポーネントが疎結合で連携できるようにします。
 3. **MVPスプリント計画の実行**
-    - [[11_PlanDocs/11_3_mvp.md|MVP定義]]に記載された4週サイクルに従い、以下を順に実装します。
+    - [[mvp_definition|MVP定義]]に記載された4週サイクルに従い、以下を順に実装します。
         1. プレイヤー操作と基本敵1種
         2. 残りの敵種とスキルツリー基幹ノード
         3. ボスと条件解放スキル
@@ -48,10 +48,10 @@ linked_docs:
     - 各スプリントの目的はプレイアブルな最小機能を早期に確認することであり、テストが全て成功した時点を完了条件とします。
     - 進捗は [[DevWorkflows.md|共通開発ワークフロー]] に沿って Issue と PR を運用し、次のサイクルへ進みます。
 4. **戦闘・セーブロードシステム**
-    - [[15_ImplementationSpecs/15.4_CombatSystemSpec.md|戦闘システム]]と[[15_ImplementationSpecs/15.6_SaveLoadSpec.md|セーブ・ロード]]を実装し、ゲームループを完成させます。
+    - [[04_combat_system|戦闘システム]]と[[06_save_load_system|セーブ・ロード]]を実装し、ゲームループを完成させます。
     - 自動テストを用いて戦闘フローとデータ保存の整合性を検証します。
 5. **拡張とポリッシュ**
-    - プレイヤー成長、フィードバック、パフォーマンス最適化など、[[15_ImplementationSpecs/00_index.md|実装仕様書一覧]]の後半項目を順次反映します。
+    - プレイヤー成長、フィードバック、パフォーマンス最適化など、[[03_Architecture/moc|技術設計一覧]]の後半項目を順次反映します。
 6. **コミットとプルリクエスト**
     - [[PullRequestProcedure.md|プルリクエスト手順]]に従い、作業ブランチの作成からレビュー依頼までを行います。
     - コード変更は [[GodotTestCommand.md|共通テストコマンド]] でテスト後にコミットします。

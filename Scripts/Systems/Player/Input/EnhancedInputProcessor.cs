@@ -1,71 +1,46 @@
-using Systems.Player.Events;
 using Core.Events;
 using Godot;
 
 namespace Systems.Player.Input
 {
     /// <summary>
-    /// 拡張された入力処理システム
+    /// 入力バッファリングを備えた入力モデル。
     /// </summary>
-    public class EnhancedInputProcessor
+    public class EnhancedInputProcessor : PlayerInputModel
     {
-        private readonly InputState _state = new();
-        private readonly InputBuffer _buffer;
-        private readonly IGameEventBus _event_bus;
+        private readonly InputBuffer _buffer = new();
+        private Vector2 _pendingBufferedMovement = Vector2.Zero;
 
-        public EnhancedInputProcessor(IGameEventBus bus)
+        public EnhancedInputProcessor(IGameEventBus bus) : base(bus)
         {
-            _event_bus = bus;
-            _buffer = new InputBuffer();
         }
 
-        /// <summary>
-        /// 入力を更新して処理する
-        /// </summary>
-        public void Update()
+        protected override void ProcessInput()
         {
-            _state.Update();
-            if (_state.ButtonStates.TryGetValue("Dash", out var dash) && dash)
+            _buffer.CollectInputState(CurrentState);
+            _pendingBufferedMovement = _buffer.GetMovement();
+
+            var bufferedAction = _buffer.PopAction();
+            if (bufferedAction != null)
             {
-                _buffer.BufferAction("Dash");
+                ExecuteAction(bufferedAction);
             }
-            if (_state.ButtonStates.TryGetValue("Jump", out var jump) && jump)
+            else
             {
-                _buffer.BufferAction("Jump");
+                ExecuteDefaultActions();
             }
-            if (_state.ButtonStates.TryGetValue("Attack", out var atk) && atk)
+        }
+
+        protected override void HandleMoveAction()
+        {
+            if (_pendingBufferedMovement != Vector2.Zero)
             {
-                _buffer.BufferAction("Attack");
-            }
-            if (_state.MovementInput != Vector2.Zero)
-            {
-                _buffer.BufferMovement(_state.MovementInput);
+                PublishMovementEvent(_pendingBufferedMovement);
+                _pendingBufferedMovement = Vector2.Zero;
+                return;
             }
 
-            var action = _buffer.PopAction();
-            if (action != null)
-            {
-                switch (action)
-                {
-                    case "Dash":
-                        _event_bus.Publish(new DashInputEvent());
-                        break;
-                    case "Jump":
-                        _event_bus.Publish(new JumpInputEvent());
-                        break;
-                    case "Attack":
-                        _event_bus.Publish(new AttackInputEvent());
-                        break;
-                }
-            }
-
-            var move = _buffer.GetMovement();
-            if (move != Vector2.Zero)
-            {
-                _event_bus.Publish(new MovementInputEvent(move.Normalized()));
-            }
-
-            _event_bus.Publish(new InputStateChangedEvent(_state));
+            base.HandleMoveAction();
         }
     }
 }

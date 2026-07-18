@@ -1,28 +1,25 @@
-using Godot;
 using Systems.Player.Input;
 using Systems.Player.Movement;
-using Core.Utilities;
 
 namespace Systems.Player.Debug
 {
     /// <summary>
-    /// プレイヤーデバッガー
+    /// プレイヤー用の簡易デバッグユーティリティ。
     /// </summary>
     public class PlayerDebugger
     {
-        private readonly PlayerInputViewModel _input_vm;
-        private readonly PlayerMovementViewModel _movement_vm;
+        private readonly PlayerInputViewModel _inputViewModel;
+        private readonly PlayerMovementViewModel _movementViewModel;
         private bool _isEnabled;
 
-        public PlayerDebugger(PlayerInputViewModel input_vm, PlayerMovementViewModel movement_vm)
+        public PlayerDebugger(PlayerInputViewModel inputViewModel, PlayerMovementViewModel movementViewModel)
         {
-            _input_vm = input_vm;
-            _movement_vm = movement_vm;
-            _isEnabled = false;
+            _inputViewModel = inputViewModel;
+            _movementViewModel = movementViewModel;
         }
 
         /// <summary>
-        /// デバッグモードを設定
+        /// デバッグ出力の有効無効を設定する。
         /// </summary>
         public void SetEnabled(bool enabled)
         {
@@ -30,26 +27,33 @@ namespace Systems.Player.Debug
         }
 
         /// <summary>
-        /// デバッグ情報を出力
+        /// 入力と移動の状態を出力する。
         /// </summary>
         public void PrintDebugInfo()
         {
-            if (!_isEnabled) return;
+            if (!_isEnabled)
+            {
+                return;
+            }
 
-            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-            // GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
-            // GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
-            // GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
-            // GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
+            LogPlayerState();
         }
 
+        /// <summary>
+        /// 実際のログ出力処理（必要時にコメントを外して使用）。
+        /// </summary>
         public void LogPlayerState()
         {
-            // テスト環境ではログ出力を無効化（パフォーマンス向上のため）
-            // GodotMock.Print($"Input State: {_input_vm.CurrentState.Value.MovementInput}");
-            // GodotMock.Print($"Velocity 2D: {_movement_vm.Velocity.Value}");
-            // GodotMock.Print($"Is Grounded: {_movement_vm.IsGrounded.Value}");
-            // GodotMock.Print($"Final Velocity 3D: {_movement_vm.Model.VerticalVelocity}");
+            if (!_isEnabled)
+            {
+                return;
+            }
+
+            // 高頻度なログはパフォーマンスを下げるため、必要なときだけコメントを外す。
+            // GD.Print($"Input State: {_inputViewModel.CurrentState.Value.MovementInput}");
+            // GD.Print($"Velocity 2D: {_movementViewModel.Velocity.Value}");
+            // GD.Print($"Is Grounded: {_movementViewModel.IsGrounded.Value}");
+            // GD.Print($"Final Velocity 3D: {_movementViewModel.Model.VerticalVelocity}");
         }
     }
-} 
+}
