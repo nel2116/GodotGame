@@ -3,40 +3,46 @@ using Systems.Performance;
 
 namespace Tests.Core.Performance
 {
-    public class FrameTimeTrackerTests
+    public class FrameTimeTrackerTests : TestBase
     {
         [Test]
-        public void IsWithinBudget_TrueWhenFasterThanTarget()
+        public void RecordFrameTime_UpdatesCurrentFrameTime()
         {
-            var tracker = new FrameTimeTracker(60f);
-            tracker.RecordFrame(0.010f);
+            var tracker = new FrameTimeTracker();
+            tracker.RecordFrameTime(0.016f);
+            Assert.That(tracker.CurrentFrameTime, Is.EqualTo(0.016f));
 
-            Assert.IsTrue(tracker.IsWithinBudget());
+            tracker.RecordFrameTime(0.02f);
+            Assert.That(tracker.CurrentFrameTime, Is.EqualTo(0.02f));
         }
 
         [Test]
-        public void IsWithinBudget_FalseWhenSlowerThanTarget()
+        public void AverageFrameTime_ReturnsZeroWhenNoSamples()
         {
-            var tracker = new FrameTimeTracker(60f);
-            tracker.RecordFrame(0.020f);
-
-            Assert.IsFalse(tracker.IsWithinBudget());
+            var tracker = new FrameTimeTracker();
+            Assert.That(tracker.AverageFrameTime, Is.EqualTo(0f));
         }
 
         [Test]
-        public void CurrentFps_ComputedFromFrameTime()
+        public void AverageFrameTime_ComputesAverageOfSamples()
         {
-            var tracker = new FrameTimeTracker(60f);
-            tracker.RecordFrame(0.020f);
+            var tracker = new FrameTimeTracker();
+            tracker.RecordFrameTime(0.01f);
+            tracker.RecordFrameTime(0.02f);
+            tracker.RecordFrameTime(0.03f);
 
-            Assert.That(tracker.CurrentFps, Is.EqualTo(50f).Within(0.01f));
+            Assert.That(tracker.AverageFrameTime, Is.EqualTo(0.02f).Within(0.0001f));
         }
 
         [Test]
-        public void TargetFrameTime_MatchesTargetFps()
+        public void AverageFrameTime_DropsOldestSampleBeyondCapacity()
         {
-            var tracker = new FrameTimeTracker(60f);
-            Assert.That(tracker.TargetFrameTime, Is.EqualTo(1f / 60f).Within(0.0001f));
+            var tracker = new FrameTimeTracker(maxSamples: 2);
+            tracker.RecordFrameTime(0.01f);
+            tracker.RecordFrameTime(0.02f);
+            tracker.RecordFrameTime(0.03f);
+
+            Assert.That(tracker.AverageFrameTime, Is.EqualTo(0.025f).Within(0.0001f));
         }
     }
 }

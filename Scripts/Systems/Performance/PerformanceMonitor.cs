@@ -3,58 +3,59 @@ using Core.Events;
 namespace Systems.Performance
 {
     /// <summary>
-    /// フレーム時間と入力遅延のKPIを監視し、超過時に警告イベントを発行するクラス
+    /// フレーム時間・入力遅延のKPI監視を行うクラス
     /// </summary>
     public class PerformanceMonitor
     {
-        private const float MAX_INPUT_LATENCY = 0.10f;
+        /// <summary>
+        /// 企画仕様: 60FPS維持のための目標フレーム時間（秒）
+        /// </summary>
+        public const float TargetFrameTime = 1f / 60f;
 
-        private readonly IGameEventBus _event_bus;
+        /// <summary>
+        /// 企画仕様: 入力遅延の上限（秒）
+        /// </summary>
+        public const float MaxInputLatency = 0.10f;
 
-        public FrameTimeTracker FrameTimeTracker { get; }
-        public InputLatencyMonitor InputLatencyMonitor { get; }
+        private readonly FrameTimeTracker _frameTimeTracker;
+        private readonly InputLatencyMonitor _inputLatencyMonitor;
+        private readonly IGameEventBus _eventBus;
 
-        public PerformanceMonitor(
-            IGameEventBus eventBus,
-            FrameTimeTracker? frameTimeTracker = null,
-            InputLatencyMonitor? inputLatencyMonitor = null)
+        public FrameTimeTracker FrameTimeTracker => _frameTimeTracker;
+        public InputLatencyMonitor InputLatencyMonitor => _inputLatencyMonitor;
+
+        public PerformanceMonitor(FrameTimeTracker frameTimeTracker, InputLatencyMonitor inputLatencyMonitor, IGameEventBus eventBus)
         {
-            _event_bus = eventBus;
-            FrameTimeTracker = frameTimeTracker ?? new FrameTimeTracker();
-            InputLatencyMonitor = inputLatencyMonitor ?? new InputLatencyMonitor();
+            _frameTimeTracker = frameTimeTracker;
+            _inputLatencyMonitor = inputLatencyMonitor;
+            _eventBus = eventBus;
         }
 
         /// <summary>
-        /// フレーム時間を記録し、60FPS維持のKPIを確認する
+        /// KPIチェックを行い、閾値超過時に警告イベントを発行する
         /// </summary>
-        public void RecordFrame(float deltaSeconds)
+        public void Update()
         {
-            FrameTimeTracker.RecordFrame(deltaSeconds);
-            if (!FrameTimeTracker.IsWithinBudget())
+            CheckFrameTimeKpi();
+            CheckInputLatencyKpi();
+        }
+
+        private void CheckFrameTimeKpi()
+        {
+            var frameTime = _frameTimeTracker.AverageFrameTime;
+            if (frameTime > TargetFrameTime)
             {
-                _event_bus.Publish(new PerformanceWarningEvent(
-                    "FrameTime", FrameTimeTracker.CurrentFrameTime, FrameTimeTracker.TargetFrameTime));
+                _eventBus.Publish(new PerformanceWarningEvent("FrameTime", frameTime, TargetFrameTime));
             }
         }
 
-        /// <summary>
-        /// 入力受付を記録する
-        /// </summary>
-        public void RecordInputReceived()
+        private void CheckInputLatencyKpi()
         {
-            InputLatencyMonitor.RecordInputReceived();
-        }
-
-        /// <summary>
-        /// 入力処理完了を記録し、入力遅延0.10s以下のKPIを確認する
-        /// </summary>
-        public void RecordInputProcessed()
-        {
-            InputLatencyMonitor.RecordInputProcessed();
-            if (!InputLatencyMonitor.IsWithinBudget(MAX_INPUT_LATENCY))
+            var latency = _inputLatencyMonitor.TakeLatency();
+            if (latency == null) return;
+            if (latency.Value > MaxInputLatency)
             {
-                _event_bus.Publish(new PerformanceWarningEvent(
-                    "InputLatency", InputLatencyMonitor.CurrentLatency, MAX_INPUT_LATENCY));
+                _eventBus.Publish(new PerformanceWarningEvent("InputLatency", latency.Value, MaxInputLatency));
             }
         }
     }

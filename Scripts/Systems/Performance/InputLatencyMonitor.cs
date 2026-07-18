@@ -1,49 +1,69 @@
-using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Systems.Performance
 {
     /// <summary>
-    /// 入力受付から処理完了までの遅延を計測するクラス
+    /// 入力から処理までの遅延を計測するクラス
     /// </summary>
     public class InputLatencyMonitor
     {
-        private readonly Func<DateTime> _now;
-        private DateTime? _inputTimestamp;
+        private readonly Queue<float> _samples = new();
+        private readonly int _maxSamples;
+        private double? _pendingInputTimestamp;
+        private bool _isFresh;
 
         /// <summary>
         /// 直近に計測された入力遅延（秒）
         /// </summary>
         public float CurrentLatency { get; private set; }
 
-        public InputLatencyMonitor(Func<DateTime>? nowProvider = null)
+        /// <summary>
+        /// 記録済みサンプルの平均入力遅延（秒）
+        /// </summary>
+        public float AverageLatency => _samples.Count > 0 ? _samples.Average() : 0f;
+
+        public InputLatencyMonitor(int maxSamples = 60)
         {
-            _now = nowProvider ?? (() => DateTime.UtcNow);
+            _maxSamples = maxSamples;
         }
 
         /// <summary>
-        /// 入力受付時刻を記録する
+        /// 入力受信時刻を記録する
         /// </summary>
-        public void RecordInputReceived()
+        public void RecordInput(double timestampSeconds)
         {
-            _inputTimestamp = _now();
+            _pendingInputTimestamp = timestampSeconds;
         }
 
         /// <summary>
-        /// 入力の処理完了を記録し、遅延を確定する
+        /// 入力処理完了時刻を記録し、遅延を確定する
         /// </summary>
-        public void RecordInputProcessed()
+        public void RecordProcessed(double timestampSeconds)
         {
-            if (_inputTimestamp == null) return;
-            CurrentLatency = (float)(_now() - _inputTimestamp.Value).TotalSeconds;
-            _inputTimestamp = null;
+            if (_pendingInputTimestamp == null) return;
+
+            var latency = (float)(timestampSeconds - _pendingInputTimestamp.Value);
+            _pendingInputTimestamp = null;
+
+            CurrentLatency = latency;
+            _isFresh = true;
+            _samples.Enqueue(latency);
+            if (_samples.Count > _maxSamples)
+            {
+                _samples.Dequeue();
+            }
         }
 
         /// <summary>
-        /// 許容遅延以内か判定する（企画仕様: ≤ 0.10s）
+        /// 直近の計測結果を取り出す。前回の TakeLatency() 呼び出し以降に新しい計測がない場合は null を返す。
+        /// KPI チェック側が「まだ確認していない新鮮なサンプル」だけを評価するために使用する
         /// </summary>
-        public bool IsWithinBudget(float maxLatencySeconds = 0.10f)
+        public float? TakeLatency()
         {
-            return CurrentLatency <= maxLatencySeconds;
+            if (!_isFresh) return null;
+            _isFresh = false;
+            return CurrentLatency;
         }
     }
 }

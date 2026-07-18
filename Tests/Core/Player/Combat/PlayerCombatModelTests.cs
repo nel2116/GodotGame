@@ -6,7 +6,7 @@ using Core.Events;
 
 namespace Tests.Core.Player.Combat
 {
-    public class PlayerCombatModelTests
+    public class PlayerCombatModelTests : TestBase
     {
         [Test]
         public void TakeDamage_WithoutInvincibilityManager_AppliesDamage()

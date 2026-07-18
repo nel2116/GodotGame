@@ -14,7 +14,7 @@ linked_docs:
     - "[[11_17_week1_dungeon_foundation_plan|Week 1: 基盤実装計画]]"
     - "[[11_18_week2_dungeon_extension_plan|Week 2: 機能拡張計画]]"
     - "[[11_19_week3_dungeon_integration_test_plan|Week 3: 統合・テスト計画]]"
-    - "[[12_03_detailed_design/03_optimization/01_performance_optimization|パフォーマンス最適化詳細]]"
+    - "[[01_performance_optimization|パフォーマンス最適化詳細]]"
 ---
 
 # メモリ最適化・更新最適化実装計画

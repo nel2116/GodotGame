@@ -8,9 +8,9 @@ tags:
     - Basic
     - Features
 linked_docs:
-    - "[[40_Tutorials/00_index]]"
-    - "[[40_Tutorials/GettingStarted]]"
-    - "[[30_APIReference/GameplayAPI]]"
+    - "[[99_Reference/moc|リファレンス]]"
+    - "[[GettingStarted|はじめに]]"
+    - "[[GameplayAPI]]"
 ---
 
 # 基本機能

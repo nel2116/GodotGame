@@ -1,44 +1,42 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Systems.Performance
 {
     /// <summary>
-    /// フレーム時間を記録し、目標FPSに対する予算超過を判定するクラス
+    /// フレーム時間を記録し、現在値・平均値を提供するクラス
     /// </summary>
     public class FrameTimeTracker
     {
-        /// <summary>
-        /// 目標フレーム時間（秒）
-        /// </summary>
-        public float TargetFrameTime { get; }
+        private readonly Queue<float> _samples = new();
+        private readonly int _maxSamples;
 
         /// <summary>
-        /// 直近のフレーム時間（秒）
+        /// 直近に記録されたフレーム時間（秒）
         /// </summary>
         public float CurrentFrameTime { get; private set; }
 
         /// <summary>
-        /// 直近のフレーム時間から算出したFPS
+        /// 記録済みサンプルの平均フレーム時間（秒）
         /// </summary>
-        public float CurrentFps => CurrentFrameTime > 0f ? 1f / CurrentFrameTime : 0f;
+        public float AverageFrameTime => _samples.Count > 0 ? _samples.Average() : 0f;
 
-        public FrameTimeTracker(float targetFps = 60f)
+        public FrameTimeTracker(int maxSamples = 60)
         {
-            TargetFrameTime = 1f / targetFps;
+            _maxSamples = maxSamples;
         }
 
         /// <summary>
         /// フレーム時間を記録する
         /// </summary>
-        public void RecordFrame(float deltaSeconds)
+        public void RecordFrameTime(float deltaSeconds)
         {
             CurrentFrameTime = deltaSeconds;
-        }
-
-        /// <summary>
-        /// 目標フレーム時間内に収まっているか判定する
-        /// </summary>
-        public bool IsWithinBudget()
-        {
-            return CurrentFrameTime <= TargetFrameTime;
+            _samples.Enqueue(deltaSeconds);
+            if (_samples.Count > _maxSamples)
+            {
+                _samples.Dequeue();
+            }
         }
     }
 }

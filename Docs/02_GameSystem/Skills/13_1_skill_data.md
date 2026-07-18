@@ -9,7 +9,7 @@ tags:
     - Specification
     - Core
 linked_docs:
-    - "[[index|スキルシステム]]"
+    - "[[02_GameSystem/Skills/moc|スキルシステム]]"
 ---
 
 # スキルデータ仕様書

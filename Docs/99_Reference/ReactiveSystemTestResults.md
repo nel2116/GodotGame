@@ -13,8 +13,8 @@ tags:
 linked_docs:
     - "[[ReactiveSystem]]"
     - "[[01_reactive_property]]"
-    - "[[02_composite_disposable]]"
-    - "[[03_event_bus]]"
+    - "[[03_composite_disposable]]"
+    - "[[04_event_bus]]"
 ---
 
 # Reactive System テスト結果

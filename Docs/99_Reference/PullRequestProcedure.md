@@ -38,7 +38,7 @@ linked_docs:
 
 -   Git および GitHub CLI (`gh`) のインストールと認証が済んでいること。
 -   リモートリポジトリをクローン済みで、最新状態に同期されていること。
--   関連 Issue が作成済みであること（原則）。
+-   **関連 Issue が作成済みであること（必須）**。Issue が存在しない変更に着手する場合は、先に Issue を作成してから作業を始めること。
 
 ## 手順
 
@@ -66,6 +66,8 @@ git push -u origin feature/<機能名>
 ```
 
 ### 4. プルリクエスト作成
+
+**関連 Issue 番号の記載は必須。** PR 本文に `Closes #42` のような自動クローズ用キーワード、または `Refs #42` を必ず含めること。関連 Issue が無い PR は原則としてマージしない。
 
 ```bash
 gh pr create --title "feat: ログインフォームのUI追加 #42" --body-file .pr_body.md --base develop

@@ -10,9 +10,9 @@ tags:
     - Reactive
 linked_docs:
     - "[[mvvm_rx_architecture|MVVM+RXアーキテクチャ]]"
-    - "[[12_02_basic_design|MVVM+RX基本設計書]]"
-    - "[[12_04_system_integration|システム間連携]]"
-    - "[[12_05_common_utilities|共通ユーティリティ]]"
+    - "[[basic_design|MVVM+RX基本設計書]]"
+    - "[[system_integration|システム間連携]]"
+    - "[[common_utilities|共通ユーティリティ]]"
 ---
 
 # MVVM+RX 詳細設計書

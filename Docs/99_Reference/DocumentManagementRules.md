@@ -259,17 +259,26 @@ func example_function() -> void:
 
 ```
 Docs/
-├── 10_CoreDocs/        # コアドキュメント
-├── 20_UserGuides/      # ユーザーガイド
-├── 30_APIReference/    # APIリファレンス
-├── 40_Tutorials/       # チュートリアル
-└── 99_Reference/       # 参照資料
+├── 00_Index/           # トップレベルMOC・再構成計画
+├── 01_WorldConcept/    # 世界観・コンセプト
+├── 02_GameSystem/      # ゲームシステム設計（Skills/ など）
+├── 03_Architecture/    # 技術設計（Design/Components/Systems/Integration/Optimization/Utilities）
+├── 04_UIUX/            # UI/UX設計
+├── 05_MetaElements/    # メタ要素・リプレイ性
+├── 06_DevelopmentPlan/ # 開発計画（MVP/ など）
+├── 07_Testing/         # テスト・品質保証
+├── 08_DocRules/        # ドキュメント管理ルール
+├── 99_Reference/       # 参照資料・ワークフロー
+└── __templates/        # frontmatter テンプレート
 ```
+
+詳細は [[01_documentation_structure|ドキュメント構造ルール]] を参照してください。
 
 ### 7.2 ファイル命名規則
 
--   プレフィックス: カテゴリ番号（例: 10\_）
 -   名前: スネークケース（例: core_system）
+-   ファイル名（basename）は vault 全体で一意にする（Obsidian のリンク解決のため）
+-   各フォルダのナビゲーションハブは `moc.md` に統一（`index.md` は使用しない）
 -   拡張子: .md
 
 ## 8. 変更履歴

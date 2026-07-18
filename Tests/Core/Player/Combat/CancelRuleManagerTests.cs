@@ -5,7 +5,7 @@ using Core.Events;
 
 namespace Tests.Core.Player.Combat
 {
-    public class CancelRuleManagerTests
+    public class CancelRuleManagerTests : TestBase
     {
         [Test]
         public void CanCancel_ReturnsTrueWhenRuleMatches()

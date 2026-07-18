@@ -5,79 +5,79 @@
 ## 🎯 プロジェクト計画
 
 ### 📋 基本計画
-- [[Project/project_plan|プロジェクト計画書]]
+- [[11_01_project_plan|プロジェクト計画書]]
   - プロジェクト全体の概要と目標
-- [[Project/design_pillars|デザインピラー]]
+- [[11_02_design_pillars|デザインピラー]]
   - ゲームデザインの基本原則
-- [[Project/core_experience|コア体験]]
+- [[11_09_core_experience|コア体験]]
   - プレイヤーに提供する核となる体験
 
 ### 🎮 MVP・機能定義
 - [[MVP/mvp_definition|MVP定義]]
   - 最小実行可能製品の定義と範囲
-- [[MVP/feature_specifications|機能仕様]]
+- [[11_06_feature_specifications|機能仕様]]
   - 実装すべき機能の詳細仕様
-- [[MVP/core_gameplay_loop|コアゲームプレイループ]]
+- [[11_05_core_gameplay_loop|コアゲームプレイループ]]
   - 基本的なゲームループの設計
 
 ## 📊 指標・分析
 
 ### 📈 KPI・メトリクス
-- [[Metrics/kpi_metrics|KPI指標]]
+- [[11_04_kpi_metrics|KPI指標]]
   - プロジェクト成功の測定指標
-- [[Metrics/risk_analysis|リスク分析]]
+- [[11_08_risk_analysis|リスク分析]]
   - プロジェクトリスクの特定と対策
 
 ### 🎨 コンテンツ設計
-- [[Content/content_architecture|コンテンツアーキテクチャ]]
+- [[11_07_content_architecture|コンテンツアーキテクチャ]]
   - ゲームコンテンツの構造設計
 
 ## 🛠️ 実装計画
 
 ### 🎯 システム実装
-- [[Implementation/player_systems|プレイヤーシステム実装計画]]
+- [[11_11_player_systems|プレイヤーシステム実装計画]]
   - プレイヤー関連システムの実装スケジュール
-- [[Implementation/level_design|レベルデザイン実装計画]]
+- [[11_12_level_design|レベルデザイン実装計画]]
   - レベル生成とデザインの実装
-- [[Implementation/skill_mechanics|スキルメカニクス実装計画]]
+- [[11_13_skill_mechanics|スキルメカニクス実装計画]]
   - スキルシステムの実装詳細
-- [[Implementation/ui_metagame|UI・メタゲーム実装計画]]
+- [[11_14_ui_metagame|UI・メタゲーム実装計画]]
   - UIとメタ要素の実装
 
 ### 🧪 テスト・調整
-- [[Testing/balance_testing|バランステスト計画]]
+- [[11_15_balance_testing|バランステスト計画]]
   - ゲームバランスの調整とテスト
-- [[Testing/core_implementation|コア実装テスト計画]]
+- [[11_16_core_implementation|コア実装テスト計画]]
   - コアシステムの実装とテスト
 
 ## 📅 週次実装計画
 
 ### 🗓️ フェーズ別計画
-- [[Weekly/week1_dungeon_foundation|Week 1: ダンジョン基盤実装]]
+- [[11_17_week1_dungeon_foundation_plan|Week 1: ダンジョン基盤実装]]
   - 第1週の基盤実装計画
-- [[Weekly/week2_dungeon_extension|Week 2: ダンジョン機能拡張]]
+- [[11_18_week2_dungeon_extension_plan|Week 2: ダンジョン機能拡張]]
   - 第2週の機能拡張計画
-- [[Weekly/week3_dungeon_integration_test|Week 3: ダンジョン統合・テスト]]
+- [[11_19_week3_dungeon_integration_test_plan|Week 3: ダンジョン統合・テスト]]
   - 第3週の統合・テスト計画
 
 ### ⚡ 最適化・強化
-- [[Optimization/optimization_implementation|最適化実装計画]]
+- [[11_20_optimization_implementation_plan|最適化実装計画]]
   - パフォーマンス最適化の実装
-- [[Optimization/player_movement_enhancement|プレイヤー移動強化計画]]
+- [[11_21_player_movement_enhancement_plan|プレイヤー移動強化計画]]
   - 移動システムの強化
 
 ## 🏗️ 技術アーキテクチャ
 
 ### 📐 アーキテクチャ設計
-- [[Architecture/development_roadmap|開発ロードマップ]]
+- [[11_5_development_roadmap|開発ロードマップ]]
   - 技術的な開発の流れ
-- [[Architecture/technical_architecture|技術アーキテクチャ]]
+- [[11_5_technical_architecture|技術アーキテクチャ]]
   - 技術スタックとアーキテクチャ設計
 
 ## 📋 プロトタイプ・ガイドライン
 
 ### 🎨 プロトタイプ制作
-- [[Prototype/prototype_guidelines|プロトタイプガイドライン]]
+- [[11_10_prototype_guidelines|プロトタイプガイドライン]]
   - プロトタイプ制作の指針と要素
 
 ---
@@ -94,7 +94,7 @@
 
 ### ✅ テスト・品質
 - [[../07_Testing/moc|テスト・品質保証]]
-- [[../07_Testing/Automation/test_automation|テスト自動化]]
+- [[TestExecutionGuide|テスト自動化]]
 
 ### 📚 リファレンス
 - [[../99_Reference/AI_Agent_ImplementationWorkflow|AIエージェント実装ワークフロー]]

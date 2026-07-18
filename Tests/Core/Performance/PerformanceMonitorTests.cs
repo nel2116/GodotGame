@@ -4,74 +4,63 @@ using Core.Events;
 
 namespace Tests.Core.Performance
 {
-    public class PerformanceMonitorTests
+    public class PerformanceMonitorTests : TestBase
     {
         [Test]
-        public void RecordFrame_WithinBudget_DoesNotPublishWarning()
+        public void Update_PublishesWarning_WhenFrameTimeExceedsTarget()
         {
             var bus = new GameEventBus();
-            var monitor = new PerformanceMonitor(bus);
+            var frameTimeTracker = new FrameTimeTracker();
+            var inputLatencyMonitor = new InputLatencyMonitor();
+            var monitor = new PerformanceMonitor(frameTimeTracker, inputLatencyMonitor, bus);
 
             PerformanceWarningEvent? received = null;
-            bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e);
-
-            monitor.RecordFrame(0.010f);
-
-            Assert.IsNull(received);
-        }
-
-        [Test]
-        public void RecordFrame_ExceedsBudget_PublishesFrameTimeWarning()
-        {
-            var bus = new GameEventBus();
-            var monitor = new PerformanceMonitor(bus);
-
-            PerformanceWarningEvent? received = null;
-            bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e);
-
-            monitor.RecordFrame(0.030f);
+            using (bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e))
+            {
+                frameTimeTracker.RecordFrameTime(1f / 30f); // 30FPS相当、目標60FPSを超過
+                monitor.Update();
+            }
 
             Assert.IsNotNull(received);
             Assert.That(received!.MetricName, Is.EqualTo("FrameTime"));
         }
 
         [Test]
-        public void RecordInputProcessed_ExceedsBudget_PublishesInputLatencyWarning()
+        public void Update_DoesNotPublishWarning_WhenFrameTimeWithinTarget()
         {
-            var current = new System.DateTime(2026, 1, 1);
-            var frameTracker = new FrameTimeTracker();
-            var latencyMonitor = new InputLatencyMonitor(() => current);
             var bus = new GameEventBus();
-            var monitor = new PerformanceMonitor(bus, frameTracker, latencyMonitor);
+            var frameTimeTracker = new FrameTimeTracker();
+            var inputLatencyMonitor = new InputLatencyMonitor();
+            var monitor = new PerformanceMonitor(frameTimeTracker, inputLatencyMonitor, bus);
 
-            PerformanceWarningEvent? received = null;
-            bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e);
+            var receivedCount = 0;
+            using (bus.GetEventStream<PerformanceWarningEvent>().Subscribe(_ => receivedCount++))
+            {
+                frameTimeTracker.RecordFrameTime(1f / 60f);
+                monitor.Update();
+            }
 
-            monitor.RecordInputReceived();
-            current = current.AddSeconds(0.15);
-            monitor.RecordInputProcessed();
-
-            Assert.IsNotNull(received);
-            Assert.That(received!.MetricName, Is.EqualTo("InputLatency"));
+            Assert.That(receivedCount, Is.EqualTo(0));
         }
 
         [Test]
-        public void RecordInputProcessed_WithinBudget_DoesNotPublishWarning()
+        public void Update_PublishesWarning_WhenInputLatencyExceedsThreshold()
         {
-            var current = new System.DateTime(2026, 1, 1);
-            var frameTracker = new FrameTimeTracker();
-            var latencyMonitor = new InputLatencyMonitor(() => current);
             var bus = new GameEventBus();
-            var monitor = new PerformanceMonitor(bus, frameTracker, latencyMonitor);
+            var frameTimeTracker = new FrameTimeTracker();
+            var inputLatencyMonitor = new InputLatencyMonitor();
+            var monitor = new PerformanceMonitor(frameTimeTracker, inputLatencyMonitor, bus);
 
             PerformanceWarningEvent? received = null;
-            bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e);
+            using (bus.GetEventStream<PerformanceWarningEvent>().Subscribe(e => received = e))
+            {
+                inputLatencyMonitor.RecordInput(0.0);
+                inputLatencyMonitor.RecordProcessed(0.15); // 企画仕様の0.10秒を超過
+                monitor.Update();
+            }
 
-            monitor.RecordInputReceived();
-            current = current.AddSeconds(0.02);
-            monitor.RecordInputProcessed();
-
-            Assert.IsNull(received);
+            Assert.IsNotNull(received);
+            Assert.That(received!.MetricName, Is.EqualTo("InputLatency"));
         }
     }
 }

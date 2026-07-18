@@ -15,8 +15,12 @@ namespace Tests.Core
         {
             public TestViewModel(IGameEventBus eventBus) : base(eventBus) { }
 
-            public IDisposable PublicSubscribeToEvent<T>(Action<T> onNext = null) where T : GameEvent
+            public IDisposable PublicSubscribeToEvent<T>(Action<T>? onNext = null) where T : GameEvent
             {
+                if (onNext == null)
+                {
+                    onNext = _ => { };
+                }
                 return SubscribeToEvent(onNext);
             }
 
@@ -38,7 +42,7 @@ namespace Tests.Core
         {
             var eventBus = new GameEventBus();
             var viewModel = new TestViewModel(eventBus);
-            
+
             viewModel.PublicSubscribeToEvent<TestEvent>(_ => {});
             Assert.That(viewModel.DisposableCount, Is.GreaterThan(0));
         }

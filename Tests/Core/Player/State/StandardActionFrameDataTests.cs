@@ -6,7 +6,7 @@ namespace Tests.Core.Player.State
     /// <summary>
     /// 企画ドキュメント「プレイヤーアクション・フレーム表」との整合性を検証する
     /// </summary>
-    public class StandardActionFrameDataTests
+    public class StandardActionFrameDataTests : TestBase
     {
         [Test]
         public void AttackL1_MatchesSpecification()

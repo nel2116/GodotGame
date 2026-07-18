@@ -5,7 +5,7 @@ using Core.Events;
 
 namespace Tests.Core.Player.Combat
 {
-    public class InvincibilityManagerTests
+    public class InvincibilityManagerTests : TestBase
     {
         [Test]
         public void IsInvincible_FalseWhenNoActionRunning()

@@ -243,8 +243,9 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
 ### プルリクエスト
 
 1. **テンプレート使用**: `Docs/99_Reference/PRTemplate.md` をベースに記入
-2. **日本語説明**: 変更点、テスト方法、関連Issueを日本語で説明
-3. **関連ドキュメント**: 必要に応じてドキュメントも更新
+2. **関連Issue必須**: すべてのPRは対応するIssueを`Closes #N`（または`Refs #N`）でPR本文に明記する。対応するIssueが存在しない変更に着手する場合は、先にIssueを作成すること。関連Issueが無いPRは原則マージしない
+3. **日本語説明**: 変更点、テスト方法を日本語で説明
+4. **関連ドキュメント**: 必要に応じてドキュメントも更新
 
 詳細な手順は `Docs/99_Reference/PullRequestProcedure.md` を参照してください。
 

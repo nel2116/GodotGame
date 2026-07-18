@@ -8,9 +8,9 @@ tags:
     - GettingStarted
     - Guide
 linked_docs:
-    - "[[40_Tutorials/00_index]]"
-    - "[[40_Tutorials/BasicFeatures]]"
-    - "[[30_APIReference/CoreSystemAPI]]"
+    - "[[99_Reference/moc|リファレンス]]"
+    - "[[BasicFeatures|基本機能]]"
+    - "[[CoreSystemAPI]]"
 ---
 
 # はじめに
