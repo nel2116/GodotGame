@@ -21,7 +21,7 @@ namespace Systems.Player.State
             activeFrames: 4,
             recoveryFrames: 12,
             movementDistance: 0.3f,
-            cancelableTo: new[] { DodgeName, ChargeAttackName },
+            cancelableTo: new[] { DodgeName, AttackL2Name },
             priority: 1);
 
         /// <summary>

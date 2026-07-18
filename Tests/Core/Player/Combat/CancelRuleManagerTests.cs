@@ -36,7 +36,7 @@ namespace Tests.Core.Player.Combat
         }
 
         [Test]
-        public void CanCancel_AttackL1ToChargeAttack_MatchesSpecification()
+        public void CanCancel_AttackL1ToAttackL2_MatchesSpecification()
         {
             var bus = new GameEventBus();
             var frameManager = new FrameStateManager(bus);
@@ -46,7 +46,7 @@ namespace Tests.Core.Player.Combat
             var action = new ActionFrameData("Attack_L1", 20, 4, 4, 12);
             frameManager.StartAction(action);
             for (int i = 0; i < 14; i++) frameManager.Tick();
-            Assert.IsTrue(ruleManager.CanCancel("ChargeAttack"));
+            Assert.IsTrue(ruleManager.CanCancel("Attack_L2"));
         }
 
         [Test]

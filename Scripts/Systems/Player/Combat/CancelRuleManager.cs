@@ -26,7 +26,7 @@ namespace Systems.Player.Combat
                 "Attack_L1",
                 14,
                 20,
-                new[] { "Dodge", "ChargeAttack" },
+                new[] { "Dodge", "Attack_L2" },
                 1));
             _rules.Add(new CancelRule(
                 "Attack_L2",
